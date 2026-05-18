@@ -1,24 +1,21 @@
 {
-  "name": "Journey's End",
-  "short_name": "Journey",
-  "description": "모험가를 위한 마도서 및 퀘스트 맵",
-  "start_url": ".",
+  "name": "Adventure Life Assist",
+  "short_name": "AdvLife",
+  "start_url": "/AdventureLifeAssist/index.html",
+  "scope": "/AdventureLifeAssist/",
   "display": "standalone",
-  "background_color": "#FAF9F6",
-  "theme_color": "#88B2CC",
-  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/AdventureLifeAssist/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "/AdventureLifeAssist/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
