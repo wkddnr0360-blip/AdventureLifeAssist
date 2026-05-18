@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Journey's End - Master Edition</title>
+    
+    <!-- CSS Dependencies -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        /* ==========================================================================
+           1. CSS Variables & Base Reset
+           ========================================================================== */
+        :root { 
+            --bg: #FAF9F6; --primary: #88B2CC; --accent: #A8B69B; 
+            --gold: #C2A878; --text: #262626; --text-dim: #8E8E8E; --danger: #ED4956; 
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04); --shadow-md: 0 4px 15px rgba(136,178,204,0.15);
+            --shadow-lg: 0 10px 30px rgba(136,178,204,0.25);
+            --ig-blue: #0095F6; --ig-gray: #EFEFEF;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Pretendard', sans-serif; }
+        html, body { height: 100dvh; margin: 0; padding: 0; overflow: hidden; background: #000; color: var(--text); overscroll-behavior-y: none; }
+        .app-container { display: flex; flex-direction: column; height: 100%; max-width: 500px; margin: 0 auto; position: relative; background: var(--bg); overflow: hidden; }
+
+        /* ==========================================================================
+           2. Global Components (Header, Views)
+           ========================================================================== */
+        .header { 
+            padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; 
+            position: absolute; top: 0; width: 100%; z-index: 1000; pointer-events: none; 
+            background: linear-gradient(to bottom, rgba(250,249,246,1) 50%, rgba(250,249,246,0)); 
+        }
+        .header h1 { font-size: 19px; font-weight: 900; margin: 0; color: var(--primary); letter-spacing: -0.5px; pointer-events: auto;}
+        .header-controls { pointer-events: auto; display: flex; align-items: center; gap: 12px; }
+        .logical-date { font-size: 13px; color: var(--gold); font-weight: 800; }
+        .avatar-btn { 
+            width: 32px; height: 32px; border-radius: 50%; background: #fff; border: 2px solid var(--primary);
+            display: flex; justify-content: center; align-items: center; color: var(--primary);
+            cursor: pointer; box-shadow: var(--shadow-sm); overflow: hidden; background-size: cover; background-position: center;
+        }
+
+        .view-section { 
+            flex: 1; display: none; flex-direction: column; height: 100%; overflow-y: auto; overflow-x: hidden;
+            padding-top: 70px; padding-left: 20px; padding-right: 20px; padding-bottom: 120px; /* 고정 하단 여백 */
+        }
+        .view-section.active { display: flex; animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ==========================================================================
+           3. Quest Map (View 1)
+           ========================================================================== */
+        #viewQuest { padding: 0 !important; position: relative; overflow: hidden; }
+        #map-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; background: #e5e3df; }
+        #questMap { width: 100%; height: 100%; }
+        
+        .map-btn { 
+            position: absolute; right: 15px; z-index: 400; width: 42px; height: 42px; 
+            border-radius: 50%; background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); 
+            display: flex; justify-content: center; align-items: center; font-size: 18px; box-shadow: var(--shadow-md); cursor: pointer; 
+        }
+        .btn-locate { top: 75px; border: 1.5px solid var(--gold); color: var(--gold); }
+        .btn-cloak { top: 125px; border: 1.5px solid var(--accent); color: var(--accent); }
+        
+        .mystic-avatar { 
+            width: 50px; height: 50px; background-color: rgba(255,255,255,0.95); backdrop-filter: blur(4px);
+            border-radius: 50%; border: 3px solid var(--primary); box-shadow: 0 0 15px rgba(136,178,204,0.6); 
+            display: flex; justify-content: center; align-items: center; font-size: 26px; 
+            animation: floatBubble 3s ease-in-out infinite; transform-origin: center bottom; background-size: cover; background-position: center; transition: 0.3s;
+        }
+        @keyframes floatBubble { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        
+        .path-line-anim { animation: dash-move 30s linear infinite; }
+        @keyframes dash-move { to { stroke-dashoffset: -1000; } }
+        .path-marker { width: 32px; height: 32px; background: #fff; border: 2px solid var(--primary); border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; justify-content: center; align-items: center; box-shadow: var(--shadow-sm); cursor: pointer;}
+        .path-emoji { transform: rotate(45deg); font-size: 14px; margin: -2px 0 0 -2px; color: var(--primary); }
+        .path-seq { position: absolute; top: -6px; right: -6px; background: var(--primary); color: #fff; border-radius: 50%; width: 16px; height: 16px; font-size: 10px; font-weight: 900; display: flex; justify-content: center; align-items: center; transform: rotate(45deg); border: 2px solid #fff; }
+
+        .quest-bottom-panel { 
+            position: absolute; bottom: calc(85px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: 92%; max-width: 460px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); border-radius: 24px; padding: 25px 20px; 
+            box-shadow: var(--shadow-lg); border: 1px solid rgba(255,255,255,0.8); z-index: 10; display: flex; flex-direction: column; gap: 15px; 
+        }
+        .timer-val { font-size: 46px; font-weight: 900; margin: 0; text-align: center; font-variant-numeric: tabular-nums; color: var(--text); letter-spacing: -1px;}
+        .timer-val span.ms { font-size: 24px; color: var(--text-dim); font-weight: 700;}
+        .timer-val .bonus-time { font-size: 16px; color: var(--danger); font-weight: 800; display: block; margin-top: -5px; letter-spacing: 0;}
+        
+        .action-row { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
+        .btn-study, .btn-record { 
+            flex: 1; min-width: 0; padding: 16px 0; border-radius: 16px; border: none; font-size: 15px; font-weight: 800; 
+            display: flex; justify-content: center; align-items: center; gap: 6px; cursor: pointer; 
+            white-space: nowrap !important; /* 버튼 글씨 절대 안 내려가게 강제 */
+            flex-shrink: 0 !important; 
+        }
+        .btn-study { background: var(--primary); color: #fff; box-shadow: var(--shadow-md); }
+        .btn-study.active { background: var(--danger); }
+        .btn-record { background: #fff; border: 1.5px solid var(--primary); color: var(--primary); }
+
+        /* ==========================================================================
+           4. Logs, Stats, Calendar (Views 2 & 3)
+           ========================================================================== */
+        .stats-board { display: flex; background: #fff; border-radius: 20px; border: 1px solid rgba(0,0,0,0.04); box-shadow: var(--shadow-sm); margin-bottom: 20px; flex-shrink: 0;}
+        .stat-box { flex: 1; text-align: center; padding: 18px 10px; position: relative; }
+        .stat-box:not(:last-child)::after { content:''; position: absolute; right: 0; top: 25%; height: 50%; width: 1px; background: rgba(0,0,0,0.06); }
+        .stat-label { font-size: 11px; color: var(--text-dim); font-weight: 700; margin-bottom: 6px; }
+        .stat-val { font-size: 18px; font-weight: 900; color: var(--primary); }
+
+        /* 단상 입력창 (Flex 래핑 방지 및 하단 여백 대폭 확보) */
+        .ui-input-row { display: flex; align-items: center; gap: 8px; width: 100%; background: #fff; border: 1px solid #DBDBDB; padding: 6px 12px; border-radius: 20px; box-sizing: border-box; }
+        .ui-input-row input { flex: 1 1 auto; min-width: 0; border: none; outline: none; font-size: 14.5px; background: transparent; color: var(--text); padding: 8px 5px; }
+        .ui-input-row button { flex: 0 0 auto !important; min-width: max-content; background: var(--ig-blue); color: #fff; border: none; font-weight: 700; font-size: 14px; cursor: pointer; padding: 10px 16px; border-radius: 14px; white-space: nowrap !important; }
+        
+        .memo-bar { margin-bottom: 28px !important; flex-shrink: 0; }
+        .memo-bar button { background: var(--gold); padding: 10px 18px; border-radius: 16px; font-size: 16px;}
+
+        /* 기록 리스트 아이템 */
+        .log-item { background: #fff; border-radius: 20px; padding: 20px 15px; margin-bottom: 15px !important; border: 1px solid rgba(0,0,0,0.05); box-shadow: var(--shadow-sm); position: relative; flex-shrink: 0; cursor: pointer;}
+        .log-seq { position: absolute; left: 15px; top: 20px; font-size: 14px; font-weight: 900; color: var(--primary); background: #f0f6fa; width: 34px; height: 34px; display: flex; justify-content: center; align-items: center; border-radius: 12px; border: 1px solid rgba(136,178,204,0.2); }
+        .log-body { margin-left: 50px; }
+        .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .log-title { font-size: 14.5px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 6px; }
+        .log-actions { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600;}
+        .log-time-edit { color: var(--primary); text-decoration: underline; cursor: pointer; padding: 2px 4px; border-radius: 4px; }
+        .btn-delete { background: none; border: none; color: #d1d1d1; font-size: 14px; cursor: pointer; padding: 4px; border-radius: 6px; }
+        .log-content { font-size: 14px; font-weight: 600; color: var(--text-dim); line-height: 1.5; word-break: keep-all; margin-top: 4px;}
+        .log-place { font-size: 12px; color: var(--gold); margin-top: 10px; font-weight: 700; background: rgba(194, 168, 120, 0.1); display: inline-block; padding: 5px 10px; border-radius: 8px;}
+
+        /* Calendar */
+        .calendar-card { background: #fff; border-radius: 20px; padding: 22px; border: 1px solid rgba(0,0,0,0.04); box-shadow: var(--shadow-sm); margin-bottom: 25px; flex-shrink: 0;}
+        .cal-header { display: flex; justify-content: space-between; align-items: center; font-weight: 900; margin-bottom: 20px; color: var(--primary); font-size: 18px;}
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+        .cal-day-hdr { font-size: 12px; color: var(--text-dim); padding-bottom: 12px; font-weight: 800; }
+        .cal-date { padding: 10px 0; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; color: var(--text); }
+        .cal-date.today { border: 2px solid var(--primary); color: var(--primary); font-weight: 900; }
+        .cal-date.selected { background: var(--primary); color: #fff; box-shadow: var(--shadow-md); border-color: transparent;}
+
+        /* ==========================================================================
+           5. Tavern (DM & Quest)
+           ========================================================================== */
+        #viewTavern { padding: 0 !important; }
+        .dm-header { padding: 18px 20px; background: #fff; border-bottom: 1px solid #EFEFEF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;}
+        .dm-header h2 { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
+        
+        .dm-tabs { display: flex; border-bottom: 1px solid #DBDBDB; background: #fff; flex-shrink: 0; }
+        .dm-tab { flex: 1; text-align: center; padding: 15px 0; font-size: 14px; font-weight: 700; color: var(--text-dim); cursor: pointer; transition: 0.2s; border-bottom: 2px solid transparent;}
+        .dm-tab.active { color: var(--text); border-bottom-color: var(--text); }
+
+        .tavern-section { flex: 1; display: none; flex-direction: column; overflow: hidden; background: #fff; }
+        .tavern-section.active { display: flex; }
+
+        .chat-stream { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding: 20px; padding-bottom: 20px; }
+        .empty-chat { text-align: center; color: var(--text-dim); padding: 40px 20px; font-size: 14px; font-weight: 600; line-height: 1.6;}
+        
+        .chat-msg { display: flex; gap: 10px; align-items: flex-end; }
+        .chat-msg.mine { flex-direction: row-reverse; }
+        .chat-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--ig-gray); background-size: cover; background-position: center; flex-shrink: 0; cursor: pointer; display: flex; justify-content: center; align-items: center; color: var(--text-dim); border: 1px solid rgba(0,0,0,0.05); }
+        .chat-bubble-wrap { display: flex; flex-direction: column; max-width: 75%; }
+        .chat-msg.mine .chat-bubble-wrap { align-items: flex-end; }
+        .chat-name { font-size: 11px; font-weight: 600; color: var(--text-dim); margin-bottom: 4px; padding: 0 4px; }
+        .chat-bubble { background: var(--ig-gray); padding: 10px 14px; border-radius: 18px 18px 18px 4px; font-size: 14.5px; font-weight: 500; color: var(--text); line-height: 1.4; word-break: break-all;}
+        .chat-bubble img { max-width: 100%; border-radius: 10px; margin-top: 5px; display: block; }
+        .chat-msg.mine .chat-bubble { background: var(--ig-blue); color: #fff; border-radius: 18px 18px 4px 18px; }
+        
+        .chat-input-area { padding: 12px 20px; background: #fff; border-top: 1px solid #EFEFEF; flex-shrink: 0; width: 100%; padding-bottom: calc(85px + env(safe-area-inset-bottom)); box-sizing: border-box;}
+        
+        .quest-board { padding: 20px; flex: 1; overflow-y: auto; padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+        .quest-card { display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid #EFEFEF; padding: 15px; border-radius: 16px; margin-bottom: 10px; box-shadow: var(--shadow-sm); }
+        .quest-card.done { opacity: 0.5; background: #FAFAFA; }
+        .quest-card.done .q-title { text-decoration: line-through; }
+        .q-info { display: flex; align-items: center; gap: 12px; flex: 1; cursor: pointer;}
+        .q-check { width: 24px; height: 24px; border: 2px solid var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: transparent; cursor: pointer; flex-shrink: 0;}
+        .quest-card.done .q-check { background: var(--primary); color: #fff; }
+        .q-title { font-size: 15px; font-weight: 700; color: var(--text); word-break: break-all; }
+        .q-del { color: #d1d1d1; cursor: pointer; font-size: 18px; padding: 5px; flex-shrink: 0;}
+
+        /* ==========================================================================
+           6. Bottom Nav
+           ========================================================================== */
+        .bottom-nav { position: absolute; bottom: 0; width: 100%; display: flex; background: rgba(255,255,255,0.98); border-top: 1px solid #DBDBDB; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); z-index: 1000; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-dim); font-size: 10px; font-weight: 600; cursor: pointer;}
+        .nav-item i { font-size: 22px; transition: 0.2s; }
+        .nav-item.active { color: var(--text); }
+        .nav-item.active i { transform: scale(1.1); color: var(--text); }
+
+        /* ==========================================================================
+           7. Modals
+           ========================================================================== */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .modal-overlay.bottom-sheet { align-items: flex-end; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { width: 100%; max-width: 500px; background: #fff; padding: 25px; box-shadow: var(--shadow-lg); transition: 0.3s; }
+        .modal-overlay.bottom-sheet .modal-content { border-radius: 20px 20px 0 0; padding-bottom: calc(30px + env(safe-area-inset-bottom)); transform: translateY(100%); }
+        .modal-overlay.center-popup .modal-content { width: 85%; border-radius: 20px; transform: scale(0.95); opacity: 0; }
+        .modal-overlay.bottom-sheet.active .modal-content { transform: translateY(0); }
+        .modal-overlay.center-popup.active .modal-content { transform: scale(1); opacity: 1; }
+        
+        .modal-title { text-align:center; margin:0 0 25px 0; color:var(--text); font-weight: 800; font-size: 16px; }
+        .event-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; }
+        .event-item { background: var(--bg); border-radius: 16px; padding: 18px 5px; text-align: center; cursor: pointer; border: 2px solid transparent; }
+        .event-item i { font-size: 24px; color: var(--text-dim); margin-bottom: 10px; display: block; transition: 0.2s;}
+        .event-item div { font-size: 13px; font-weight: 700; color: var(--text-dim); transition: 0.2s;}
+        .event-item.selected { background: #f0f6fa; border-color: var(--primary); }
+        .event-item.selected i, .event-item.selected div { color: var(--primary); }
+        
+        .profile-avatar-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
+        .profile-avatar-lrg { width: 80px; height: 80px; border-radius: 50%; background: var(--bg); border: 2px solid #DBDBDB; display: flex; justify-content: center; align-items: center; font-size: 30px; color: var(--text-dim); cursor: pointer; background-size: cover; background-position: center; position: relative;}
+        
+        #userJourneyLog { max-height: 300px; overflow-y: auto; margin-bottom: 15px; text-align: left;}
+        #userJourneyLog .log-item { padding: 12px 15px; box-shadow: none; border-color: rgba(0,0,0,0.05); margin-bottom: 8px;}
+        
+        .sync-box { background: #f9f9f9; padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid #eee; text-align: left;}
+        .sync-box label { font-size: 12px; font-weight: 700; color: var(--text-dim); display: block; margin-bottom: 5px;}
+        .sync-box .code-display { font-family: monospace; font-size: 11px; background: #eaeaea; padding: 5px; border-radius: 4px; word-break: break-all; margin-bottom: 15px; user-select: all; text-align:center; font-weight: bold;}
+        
+        .leaflet-control-zoom, .leaflet-control-attribution { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Header -->
+    <header class="header" id="globalHeader">
+        <h1>JOURNEY'S END</h1>
+        <div class="header-controls">
+            <span class="logical-date" id="headerDate"></span>
+            <div class="avatar-btn" id="btnOpenProfile"><i class="fa-solid fa-user" id="headerAvatarIcon"></i></div>
+        </div>
+    </header>
+
+    <!-- 1. View: Quest Map -->
+    <main id="viewQuest" class="view-section active">
+        <div id="map-container"><div id="questMap"></div></div>
+        
+        <!-- 투명망토 (Ghost) & Locate -->
+        <div class="map-btn btn-cloak" id="btnCloak"><i class="fa-solid fa-ghost"></i></div>
+        <div class="map-btn btn-locate" id="btnLocate"><i class="fa-solid fa-location-crosshairs"></i></div>
+        
+        <div class="quest-bottom-panel">
+            <div class="timer-val" id="stopwatch">00:00:00</div>
+            <div class="action-row">
+                <button class="btn-study" id="btnStudyToggle"><i class="fa-solid fa-book-journal-whills"></i> <span>마법 탐구 시작</span></button>
+                <button class="btn-record" id="btnOpenEvents"><i class="fa-solid fa-feather-pointed"></i> <span>기억 새기기</span></button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 2. View: Log & Stats -->
+    <main id="viewLog" class="view-section">
+        <div class="stats-board">
+            <div class="stat-box"><div class="stat-label">오늘의 탐구</div><div class="stat-val" id="stDay">0분</div></div>
+            <div class="stat-box"><div class="stat-label">이번 주</div><div class="stat-val" id="stWeek">0분</div></div>
+            <div class="stat-box"><div class="stat-label">이번 달</div><div class="stat-val" id="stMonth">0분</div></div>
+        </div>
+        <div class="ui-input-row memo-bar">
+            <input type="text" id="quickMemo" placeholder="✍️ 단상을 가볍게 남겨보세요...">
+            <button class="btn-submit gold" id="btnSaveMemo"><i class="fa-solid fa-pen-nib"></i></button>
+        </div>
+        <div id="logStream"></div>
+    </main>
+
+    <!-- 3. View: Journal Calendar -->
+    <main id="viewJournal" class="view-section">
+        <div class="calendar-card">
+            <div class="cal-header">
+                <button id="btnPrevMonth" style="background:none; border:none; cursor:pointer; color:var(--text-dim);"><i class="fa-solid fa-chevron-left"></i></button>
+                <span id="calMonthTitle"></span>
+                <button id="btnNextMonth" style="background:none; border:none; cursor:pointer; color:var(--text-dim);"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <div class="cal-grid" id="calendarGrid"></div>
+        </div>
+        <h3 style="font-size: 16px; color: var(--gold); margin-bottom: 15px; margin-top:0;" id="journalDateTitle">날짜 선택</h3>
+        <div id="journalLogList"></div>
+    </main>
+
+    <!-- 4. View: Tavern (DM & Quest) -->
+    <main id="viewTavern" class="view-section">
+        <div class="dm-header"><h2>모험가 길드 주점</h2></div>
+        <div class="dm-tabs">
+            <div class="dm-tab active" data-target="secGlobal">전체 채팅</div>
+            <div class="dm-tab" data-target="secSelf">나와의 DM</div>
+            <div class="dm-tab" data-target="secQuest">셀프 퀘스트</div>
+        </div>
+        
+        <!-- Global DM -->
+        <div class="tavern-section active" id="secGlobal">
+            <div class="chat-stream" id="chatStreamGlobal"></div>
+            <div class="chat-input-area">
+                <div class="ui-input-row">
+                    <input type="text" id="chatInputGlobal" placeholder="모험가들에게 인사하기...">
+                    <button class="btn-submit" id="btnSendGlobal">보내기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Self DM -->
+        <div class="tavern-section" id="secSelf">
+            <div class="chat-stream" id="chatStreamSelf" style="background:#f9f9f9;"></div>
+            <div class="chat-input-area">
+                <div class="ui-input-row">
+                    <input type="file" id="selfImageUpload" accept="image/*" style="display:none;">
+                    <label for="selfImageUpload" class="icon-btn" style="cursor:pointer;"><i class="fa-solid fa-camera"></i></label>
+                    <input type="text" id="chatInputSelf" placeholder="나에게 메모 남기기...">
+                    <button class="btn-submit" id="btnSendSelf">저장</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Self Quest -->
+        <div class="tavern-section" id="secQuest">
+            <div class="quest-board">
+                <div class="ui-input-row" style="margin-bottom: 20px;">
+                    <input type="text" id="questInput" placeholder="새로운 루틴/퀘스트 추가">
+                    <button class="btn-submit" id="btnAddQuest">추가</button>
+                </div>
+                <div id="questList"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" data-view="viewQuest"><i class="fa-solid fa-house"></i><span>여정</span></div>
+        <div class="nav-item" data-view="viewLog"><i class="fa-solid fa-magnifying-glass"></i><span>발자취</span></div>
+        <div class="nav-item" data-view="viewJournal"><i class="fa-regular fa-calendar-days"></i><span>마도서</span></div>
+        <div class="nav-item" data-view="viewTavern"><i class="fa-regular fa-paper-plane"></i><span>주점(DM)</span></div>
+    </nav>
+</div>
+
+<!-- ========================================================= -->
+<!-- MODALS -->
+<!-- ========================================================= -->
+
+<!-- 1. Event Recording Modal -->
+<div class="modal-overlay bottom-sheet" id="eventModal">
+    <div class="modal-content">
+        <h3 class="modal-title">작업 선택</h3>
+        <div class="event-grid">
+            <div class="event-item evt-opt" data-type="아침 맞이" data-icon="fa-solid fa-sun"><i class="fa-solid fa-sun"></i><div>아침 맞이</div></div>
+            <div class="event-item evt-opt" data-type="식사" data-icon="fa-solid fa-utensils"><i class="fa-solid fa-utensils"></i><div>식사/휴식</div></div>
+            <div class="event-item evt-opt" data-type="단련" data-icon="fa-solid fa-dumbbell"><i class="fa-solid fa-dumbbell"></i><div>체력 단련</div></div>
+            <div class="event-item evt-opt" data-type="탐구" data-icon="fa-solid fa-wand-magic-sparkles"><i class="fa-solid fa-wand-magic-sparkles"></i><div>마법 탐구</div></div>
+            <div class="event-item evt-opt" data-type="수면" data-icon="fa-solid fa-moon"><i class="fa-solid fa-moon"></i><div>야영/수면</div></div>
+            <div class="event-item evt-opt" data-type="여정" data-icon="fa-solid fa-route"><i class="fa-solid fa-route"></i><div>이동/기타</div></div>
+        </div>
+        <div id="eventInputs" style="display:none; flex-direction:column; gap:10px;">
+            <div class="ui-input-row"><input type="text" id="inputAction" placeholder="구체적인 내용 (예: 새로운 숲 탐험)"></div>
+            <div class="ui-input-row"><input type="text" id="inputPlace" placeholder="장소명 (예: 요정의 숲)"></div>
+            <button class="ui-input-row btn-submit" style="width:100%; justify-content:center; margin-top:5px; border-radius:16px;" id="btnSaveEvent">기록 남기기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Profile Modal -->
+<div class="modal-overlay center-popup" id="profileModal">
+    <div class="modal-content">
+        <h3 class="modal-title">내 정보 및 연동</h3>
+        <div class="profile-avatar-wrap">
+            <input type="file" id="avatarUpload" accept="image/*" style="display:none;">
+            <label for="avatarUpload" class="profile-avatar-lrg" id="profileAvatarUI">
+                <i class="fa-solid fa-camera" id="profileModalIcon"></i>
+            </label>
+        </div>
+        <button id="btnResetAvatar" style="display:block; margin: 0 auto 15px auto; background:none; border:none; text-decoration:underline; color:var(--danger); font-size:12px; cursor:pointer;">기본 아바타로 변경</button>
+        
+        <div class="ui-input-row" style="margin-bottom:10px;"><input type="text" id="profileNameInput" placeholder="모험가 이름" maxlength="12"></div>
+        <button class="ui-input-row btn-submit" style="width:100%; justify-content:center; background:var(--primary);" id="btnSaveProfile">정보 갱신</button>
+        
+        <div class="sync-box">
+            <label>기기 연동 고유 코드 (다른 기기에서 입력)</label>
+            <div class="code-display" id="syncCodeDisplay"></div>
+            <div class="ui-input-row">
+                <input type="text" id="syncCodeInput" placeholder="기존 연동 코드 붙여넣기">
+                <button class="btn-submit" id="btnApplySync">불러오기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. User Journey Modal -->
+<div class="modal-overlay bottom-sheet" id="userJourneyModal">
+    <div class="modal-content">
+        <h3 class="modal-title" id="userJourneyTitle">모험가의 오늘 여정</h3>
+        <div id="userJourneyLog"></div>
+        <button class="ui-input-row btn-submit" style="width:100%; justify-content:center; background:#fff; color:var(--text); border:1px solid #DBDBDB;" id="btnCloseJourney">닫기</button>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type="module">
+    /* ==========================================================================
+       [1] MODULE: INITIALIZATION & STATE (100% Robust Bindings)
+       ========================================================================== */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDoc, getDocs, query, orderBy, limit, serverTimestamp, doc, deleteDoc, updateDoc, onSnapshot, setDoc, where } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    const app = initializeApp({
+        apiKey: "AIzaSyB2FQGM7RGVjFQ7fxddIiAN5O7A0bF_omM", authDomain: "reader2-43b34.firebaseapp.com",
+        projectId: "reader2-43b34", storageBucket: "reader2-43b34.firebasestorage.app", appId: "1:909397198375:web:bd21eb8f3731b545af7002"
+    });
+    const db = getFirestore(app);
+
+    const getLogDate = (d = new Date()) => { let l = new Date(d); if (l.getHours() < 5) l.setDate(l.getDate() - 1); return l.toISOString().split('T')[0]; };
+
+    // Core Application State
+    const AppState = {
+        uid: localStorage.getItem('mystic_uid'),
+        name: localStorage.getItem('mystic_name') || "모험가_" + Math.floor(Math.random() * 9999),
+        avatar: localStorage.getItem('mystic_avatar') || "",
+        selDate: getLogDate(),
+        navDate: new Date(),
+        logCache: [], // Holds ALL logs matching UID
+        
+        init() {
+            if (!this.uid) {
+                this.uid = 'uid_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('mystic_uid', this.uid);
+                localStorage.setItem('mystic_name', this.name);
+            }
+            document.getElementById('headerDate').innerText = this.selDate.replace(/-/g, '. ');
+            document.getElementById('syncCodeDisplay').innerText = this.uid;
+            this.updateAvatarUI();
+        },
+        updateAvatarUI() {
+            const btnOp = document.getElementById('btnOpenProfile');
+            const pUI = document.getElementById('profileAvatarUI');
+            if (this.avatar) {
+                btnOp.style.backgroundImage = `url(${this.avatar})`; pUI.style.backgroundImage = `url(${this.avatar})`;
+                document.getElementById('headerAvatarIcon').style.display = 'none'; document.getElementById('profileModalIcon').style.display = 'none';
+            } else {
+                btnOp.style.backgroundImage = 'none'; pUI.style.backgroundImage = 'none';
+                document.getElementById('headerAvatarIcon').style.display = 'block'; document.getElementById('profileModalIcon').style.display = 'block';
+            }
+            if(MapCtrl.marker) MapCtrl.updateMarkerIcon();
+        }
+    };
+    AppState.init();
+
+    /* ==========================================================================
+       [2] MODULE: MAP CONTROLLER (CartoDB, Cloak, Locate, FlyTo)
+       ========================================================================== */
+    const MapCtrl = {
+        map: null, marker: null, layer: null, lat: 35.8714, lng: 128.6014, cloaked: false,
+        
+        getIconHTML() { return AppState.avatar ? `<div class='mystic-avatar' style="background-image: url(${AppState.avatar}); color: transparent;"></div>` : `<div class='mystic-avatar'>🧝🏻‍♀️</div>`; },
+        updateMarkerIcon() { if(this.marker) this.marker.setIcon(L.divIcon({ className: 'custom-div-icon', html: this.getIconHTML(), iconSize: [50,50], iconAnchor: [25,50] })); },
+        
+        init() {
+            if (this.map) return;
+            try {
+                this.map = L.map('questMap', {zoomControl: false, attributionControl: false}).setView([this.lat, this.lng], 16);
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {maxZoom: 19}).addTo(this.map);
+                this.layer = L.layerGroup().addTo(this.map);
+                
+                const icon = L.divIcon({ className: 'custom-div-icon', html: this.getIconHTML(), iconSize: [50,50], iconAnchor: [25,50] });
+                
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.watchPosition((p) => {
+                        this.lat = p.coords.latitude; this.lng = p.coords.longitude;
+                        if(!this.marker) { 
+                            this.marker = L.marker([this.lat, this.lng], {icon: icon, zIndexOffset:1000}).addTo(this.map); 
+                            this.map.setView([this.lat, this.lng], 17); 
+                            this.bindMarkerEvent();
+                        } else { this.marker.setLatLng([this.lat, this.lng]); }
+                    }, () => {}, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+                }
+            } catch(e) { console.error("Map Error", e); }
+        },
+        bindMarkerEvent() {
+            if(this.marker) {
+                this.marker.on('click', () => this.toggleCloak());
+            }
+        },
+        locateMe() { if(this.marker && this.map) this.map.flyTo([this.lat, this.lng], 17, {animate:true, duration: 1}); },
+        
+        // BUG 3 FIX: View On Map from Log
+        viewOnMap(lat, lng) {
+            UI.switchView('viewQuest', document.querySelector('.nav-item[data-view="viewQuest"]'));
+            setTimeout(() => {
+                if (this.map) {
+                    this.map.invalidateSize();
+                    this.map.flyTo([lat, lng], 18, { animate: true, duration: 1 });
+                }
+            }, 300);
+        },
+
+        toggleCloak() {
+            this.cloaked = !this.cloaked;
+            if (this.marker) {
+                const el = this.marker._icon.querySelector('.mystic-avatar');
+                if (el) { el.style.opacity = this.cloaked ? '0.3' : '1'; el.style.filter = this.cloaked ? 'grayscale(100%)' : 'none'; }
+            }
+            const btn = document.getElementById('btnCloak');
+            if(this.cloaked) { btn.style.background = 'var(--primary)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--primary)'; } 
+            else { btn.style.background = 'rgba(255,255,255,0.95)'; btn.style.color = 'var(--accent)'; btn.style.borderColor = 'var(--accent)'; }
+        },
+        drawPaths() {
+            if (!this.layer || !this.map) return;
+            this.layer.clearLayers();
+            const logs = AppState.logCache.filter(l => l.logicalDate === AppState.selDate).sort((a,b) => new Date(a.clientTime) - new Date(b.clientTime));
+            const latlngs = [];
+            logs.forEach((data, index) => {
+                if(data.lat && data.lng) {
+                    latlngs.push([data.lat, data.lng]);
+                    const isFa = data.icon && data.icon.includes('fa-'); const iconHtml = isFa ? `<i class="${data.icon}"></i>` : (data.icon || '🐾');
+                    const icon = L.divIcon({ className: 'custom-div-icon', html: `<div class="path-marker"><div class="path-seq">${index + 1}</div><div class="path-emoji">${iconHtml}</div></div>`, iconSize: [32,32], iconAnchor: [16,32] });
+                    L.marker([data.lat, data.lng], {icon}).bindPopup(`<div style="font-family:'Pretendard'; font-size:13px; text-align:center;"><b>${index + 1}. ${data.type}</b><br>${data.content}</div>`).addTo(this.layer);
+                }
+            });
+            if(latlngs.length > 1) L.polyline(latlngs, {color: '#88B2CC', weight: 4, dashArray: '8, 8', className: 'path-line-anim'}).addTo(this.layer);
+        }
+    };
+
+    /* ==========================================================================
+       [3] MODULE: UI CONTROLLER (Event Listeners & Modals)
+       ========================================================================== */
+    const UI = {
+        evtType: null, evtIcon: 'fa-solid fa-route',
+        
+        switchView(vid, navEl) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active')); 
+            document.getElementById(vid).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); navEl.classList.add('active');
+            
+            document.getElementById('globalHeader').style.display = (vid === 'viewTavern') ? 'none' : 'flex';
+
+            if(vid === 'viewQuest') { setTimeout(() => { if(MapCtrl.map) { MapCtrl.map.invalidateSize(); MapCtrl.drawPaths(); } else { MapCtrl.init(); } }, 100); }
+            if(vid === 'viewJournal') this.renderCalendar();
+            if(vid === 'viewTavern') { TavernCtrl.initGlobal(); TavernCtrl.initSelf(); TavernCtrl.initQuests(); } 
+        },
+        
+        showModal(id) { const m = document.getElementById(id); if(m) { m.style.display = 'flex'; setTimeout(() => m.classList.add('active'), 10); } },
+        hideModal(id) { const m = document.getElementById(id); if(m) { m.classList.remove('active'); setTimeout(() => m.style.display='none', 300); } },
+        
+        renderCalendar() {
+            const grid = document.getElementById('calendarGrid'); const y = AppState.navDate.getFullYear(), m = AppState.navDate.getMonth(), todayStr = getLogDate();
+            document.getElementById('calMonthTitle').innerText = `${y}년 ${m + 1}월`;
+            grid.innerHTML = ['일','월','화','수','목','금','토'].map(d => `<div class="cal-day-hdr">${d}</div>`).join('') + Array(new Date(y, m, 1).getDay()).fill('<div></div>').join('');
+            for (let i = 1; i <= new Date(y, m + 1, 0).getDate(); i++) {
+                const dStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                
+                // create element safely
+                let cell = document.createElement('div');
+                cell.className = `cal-date ${dStr === todayStr ? 'today' : ''} ${dStr === AppState.selDate ? 'selected' : ''}`;
+                cell.innerText = i;
+                cell.addEventListener('click', () => {
+                    AppState.selDate = dStr;
+                    document.getElementById('journalDateTitle').innerText = `${dStr.replace(/-/g, '.')}의 여정`;
+                    this.renderCalendar(); DataCtrl.renderViews();
+                });
+                grid.appendChild(cell);
+            }
+        },
+        
+        bindEvents() {
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(el => el.addEventListener('click', () => this.switchView(el.dataset.view, el)));
+            // Map Buttons
+            document.getElementById('btnCloak').addEventListener('click', () => MapCtrl.toggleCloak());
+            document.getElementById('btnLocate').addEventListener('click', () => MapCtrl.locateMe());
+            // Modals
+            document.getElementById('btnOpenEvents').addEventListener('click', () => this.showModal('eventModal'));
+            document.getElementById('btnOpenProfile').addEventListener('click', () => { document.getElementById('profileNameInput').value = AppState.name; this.showModal('profileModal'); });
+            
+            document.querySelectorAll('.modal-overlay').forEach(m => { m.addEventListener('click', (e) => { if(e.target === m) this.hideModal(m.id); }); });
+            
+            // Event Modal Grid
+            document.querySelectorAll('.evt-opt').forEach(el => {
+                el.addEventListener('click', () => {
+                    document.querySelectorAll('.evt-opt').forEach(x => x.classList.remove('selected'));
+                    el.classList.add('selected');
+                    this.evtType = el.dataset.type; this.evtIcon = el.dataset.icon;
+                    document.getElementById('eventInputs').style.display = 'flex';
+                });
+            });
+
+            // Calendar Prev/Next
+            document.getElementById('btnPrevMonth').addEventListener('click', () => { AppState.navDate.setMonth(AppState.navDate.getMonth() - 1); this.renderCalendar(); });
+            document.getElementById('btnNextMonth').addEventListener('click', () => { AppState.navDate.setMonth(AppState.navDate.getMonth() + 1); this.renderCalendar(); });
+
+            // Quick Memos
+            document.getElementById('quickMemo').addEventListener('keypress', (e) => { if(e.key === 'Enter') DataCtrl.saveQuickMemo(); });
+            document.getElementById('btnSaveMemo').addEventListener('click', () => DataCtrl.saveQuickMemo());
+            
+            // Profile logic
+            document.getElementById('btnSaveProfile').addEventListener('click', () => {
+                AppState.name = document.getElementById('profileNameInput').value.trim() || AppState.name;
+                localStorage.setItem('mystic_name', AppState.name);
+                localStorage.setItem('mystic_avatar', AppState.avatar);
+                this.hideModal('profileModal');
+                if(MapCtrl.map) { MapCtrl.map.remove(); MapCtrl.map = null; MapCtrl.marker = null; MapCtrl.init(); }
+            });
+
+            document.getElementById('btnResetAvatar').addEventListener('click', () => {
+                AppState.avatar = ""; localStorage.removeItem('mystic_avatar'); AppState.updateAvatarUI();
+                if(MapCtrl.map) { MapCtrl.map.remove(); MapCtrl.map = null; MapCtrl.marker = null; MapCtrl.init(); }
+                alert("기본 아바타로 복구되었습니다.");
+            });
+
+            document.getElementById('btnApplySync').addEventListener('click', () => {
+                const code = document.getElementById('syncCodeInput').value.trim();
+                if(code && code.startsWith('uid_')) {
+                    if(confirm("기존 데이터가 이 기기에 불러와집니다. 진행하시겠습니까?")) {
+                        localStorage.setItem('mystic_uid', code); location.reload();
+                    }
+                } else alert("유효하지 않은 코드입니다.");
+            });
+
+            // Timer
+            document.getElementById('btnStudyToggle').addEventListener('click', () => DataCtrl.toggleStudyTimer());
+            
+            // Save Event
+            document.getElementById('btnSaveEvent').addEventListener('click', () => DataCtrl.saveEvent());
+            
+            // Tavern Close Journey Modal
+            document.getElementById('btnCloseJourney').addEventListener('click', () => this.hideModal('userJourneyModal'));
+        }
+    };
+
+    /* ==========================================================================
+       [4] MODULE: DATA CONTROLLER (Firestore, Timer, Zero Data Loss)
+       ========================================================================== */
+    const DataCtrl = {
+        localStartTime: null, tInt: null,
+        
+        async fetchAllLogs() {
+            // [BUG 5 FIX]: Safest query ever. Fetch ALL, sort and filter locally. NO composite index required.
+            try {
+                const snap = await getDocs(collection(db, "questLogs"));
+                AppState.logCache = snap.docs.map(d => ({id: d.id, ...d.data()}))
+                    .filter(d => d.uid === AppState.uid || !d.uid); // My logs + ancient test logs
+                this.renderViews();
+            } catch(e) { console.error("Fetch Error:", e); }
+        },
+        
+        renderViews() {
+            const dailyLogs = AppState.logCache.filter(l => l.logicalDate === AppState.selDate).sort((a,b) => new Date(a.clientTime) - new Date(b.clientTime));
+
+            let sDay = 0, sWeek = 0, sMonth = 0;
+            let dObj = new Date(AppState.selDate); let day = dObj.getDay(), diff = dObj.getDate() - day + (day === 0 ? -6 : 1);
+            let wStart = new Date(dObj.setDate(diff)).toISOString().slice(0,10); let wEnd = new Date(dObj.setDate(diff+6)).toISOString().slice(0,10);
+
+            AppState.logCache.forEach(l => {
+                if(l.type === '탐구' && l.duration) {
+                    sMonth += l.duration;
+                    if(l.logicalDate === AppState.selDate) sDay += l.duration;
+                    if(l.logicalDate >= wStart && l.logicalDate <= wEnd) sWeek += l.duration;
+                }
+            });
+            
+            document.getElementById('stDay').innerText = sDay + "분"; document.getElementById('stWeek').innerText = sWeek + "분"; document.getElementById('stMonth').innerText = sMonth + "분";
+
+            const stream1 = document.getElementById('logStream');
+            const stream2 = document.getElementById('journalLogList');
+            
+            if (dailyLogs.length === 0) {
+                const emptyMsg = '<p style="text-align:center; color:var(--text-dim); margin-top:40px; font-weight:700;">남겨진 여정의 기억이 없습니다.</p>';
+                stream1.innerHTML = emptyMsg; stream2.innerHTML = emptyMsg;
+            } else {
+                const html = dailyLogs.map((l, i) => {
+                    const isFa = l.icon && l.icon.includes('fa-'); const logIcon = isFa ? `<i class="${l.icon}"></i>` : (l.icon || '🐾');
+                    const timeStr = new Date(l.clientTime).toTimeString().slice(0,5);
+                    return `
+                    <div class="log-item" id="log-${l.id}">
+                        <div class="log-seq">${i + 1}</div>
+                        <div class="log-body">
+                            <div class="log-header">
+                                <span class="log-title">${logIcon} ${l.type}</span>
+                                <div class="log-actions">
+                                    <span class="log-time-edit" id="edit-${l.id}">${timeStr}</span>
+                                    <button class="btn-delete" id="del-${l.id}"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            </div>
+                            <div class="log-content">${l.content}</div>
+                            ${l.place ? `<div class="log-place"><i class="fa-solid fa-location-dot"></i> ${l.place}</div>` : ''}
+                        </div>
+                    </div>`;
+                }).join('');
+                
+                stream1.innerHTML = html; stream2.innerHTML = html;
+                
+                // Bind dynamically generated events
+                dailyLogs.forEach(l => {
+                    document.querySelectorAll(`#log-${l.id}`).forEach(el => el.addEventListener('click', () => MapCtrl.viewOnMap(l.lat, l.lng)));
+                    document.querySelectorAll(`#del-${l.id}`).forEach(el => el.addEventListener('click', (e) => { e.stopPropagation(); this.deleteLog(l.id); }));
+                    document.querySelectorAll(`#edit-${l.id}`).forEach(el => el.addEventListener('click', (e) => { e.stopPropagation(); const timeStr = new Date(l.clientTime).toTimeString().slice(0,5); this.editLogTime(l.id, l.clientTime, timeStr); }));
+                });
+            }
+            
+            if(document.getElementById('viewQuest').classList.contains('active')) MapCtrl.drawPaths();
+        },
+        
+        async saveEvent() {
+            const act = document.getElementById('inputAction').value || UI.evtType;
+            const plc = document.getElementById('inputPlace').value;
+            if(!act) return;
+            try { 
+                const newLog = { uid: AppState.uid, name: AppState.name, type: UI.evtType, icon: UI.evtIcon, content: act, place: plc, lat: MapCtrl.lat, lng: MapCtrl.lng, logicalDate: getLogDate(), createdAt: serverTimestamp(), clientTime: new Date().toISOString() };
+                const docRef = await addDoc(collection(db, "questLogs"), newLog); 
+                AppState.logCache.push({ id: docRef.id, ...newLog });
+                AppState.selDate = getLogDate();
+                this.renderViews(); UI.renderCalendar(); UI.hideModal('eventModal');
+                document.getElementById('inputAction').value = ""; document.getElementById('inputPlace').value = ""; 
+            } catch (e) { alert("기록 실패: " + e.message); }
+        },
+        
+        async saveQuickMemo() {
+            const input = document.getElementById('quickMemo'); const txt = input.value.trim(); if(!txt) return;
+            try {
+                const newLog = { uid: AppState.uid, name: AppState.name, type: '단상', icon: 'fa-solid fa-pen-nib', content: txt, lat: MapCtrl.lat, lng: MapCtrl.lng, logicalDate: getLogDate(), createdAt: serverTimestamp(), clientTime: new Date().toISOString() };
+                const docRef = await addDoc(collection(db, "questLogs"), newLog); 
+                AppState.logCache.push({ id: docRef.id, ...newLog });
+                input.value = ""; AppState.selDate = getLogDate(); this.renderViews(); UI.renderCalendar();
+            } catch (e) { alert("저장 실패"); }
+        },
+        
+        async deleteLog(id) {
+            if(confirm("이 기억의 조각을 지우시겠습니까?")) {
+                await deleteDoc(doc(db, "questLogs", id)); AppState.logCache = AppState.logCache.filter(log => log.id !== id); this.renderViews();
+            }
+        },
+        
+        async editLogTime(id, fullDateStr, oldHHMM) {
+            let newTime = prompt("시간을 수정합니다. (HH:MM 형식)", oldHHMM);
+            if(newTime && /^\d{2}:\d{2}$/.test(newTime)) {
+                let d = new Date(fullDateStr); let parts = newTime.split(':'); d.setHours(parseInt(parts[0]), parseInt(parts[1]), 0);
+                await updateDoc(doc(db, "questLogs", id), { clientTime: d.toISOString() });
+                let idx = AppState.logCache.findIndex(l => l.id === id); if(idx > -1) AppState.logCache[idx].clientTime = d.toISOString();
+                this.renderViews();
+            }
+        },
+
+        /* Timer Sync */
+        async checkTimer() { try { const docSnap = await getDoc(doc(db, "activeTimers", AppState.uid)); if (docSnap.exists()) { this.localStartTime = docSnap.data().startTime; this.startTimerUI(); } } catch(e) {} },
+        async toggleStudyTimer() {
+            const sBtn = document.getElementById('btnStudyToggle');
+            if (!this.localStartTime) {
+                this.localStartTime = Date.now(); await setDoc(doc(db, "activeTimers", AppState.uid), { startTime: this.localStartTime, logicalDate: getLogDate() }); this.startTimerUI();
+            } else {
+                clearInterval(this.tInt); await deleteDoc(doc(db, "activeTimers", AppState.uid));
+                const totalMins = Math.floor((Date.now() - this.localStartTime) / 60000);
+                if (totalMins >= 1) { 
+                    let text = totalMins < 90 ? `마법 탐구 완료` : `마법 탐구 완료 (최소 90분 + 추가 ${totalMins - 90}분)`; 
+                    const newLog = { uid: AppState.uid, name: AppState.name, type: '탐구', icon: 'fa-solid fa-wand-magic-sparkles', content: text, duration: totalMins, place: '지혜의 전당', lat: MapCtrl.lat, lng: MapCtrl.lng, logicalDate: getLogDate(), createdAt: serverTimestamp(), clientTime: new Date().toISOString() };
+                    const docRef = await addDoc(collection(db, "questLogs"), newLog); AppState.logCache.push({ id: docRef.id, ...newLog }); AppState.selDate = getLogDate(); this.renderViews(); UI.renderCalendar();
+                }
+                this.localStartTime = null; document.getElementById('stopwatch').innerHTML = "00:00:00"; sBtn.innerHTML = '<i class="fa-solid fa-book-journal-whills"></i> <span>마법 탐구 시작</span>'; sBtn.classList.remove('active');
+            }
+        },
+        startTimerUI() {
+            const sBtn = document.getElementById('btnStudyToggle');
+            sBtn.innerHTML = '<i class="fa-solid fa-stop"></i> <span>탐구 종료</span>'; sBtn.classList.add('active');
+            this.tInt = setInterval(() => {
+                let diff = Date.now() - this.localStartTime; let totalMins = Math.floor(diff / 60000); let d = new Date(diff); const sw = document.getElementById('stopwatch');
+                if (totalMins < 90) { sw.innerHTML = `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}<span class="ms">:${String(d.getUTCSeconds()).padStart(2,'0')}</span>`; } 
+                else { let bonus = new Date(diff - (90 * 60000)); sw.innerHTML = `01:30<span class="ms">:00</span><span class="bonus-time">+ ${String(bonus.getUTCHours()).padStart(2,'0')}:${String(bonus.getUTCMinutes()).padStart(2,'0')}:${String(bonus.getUTCSeconds()).padStart(2,'0')}</span>`; }
+            }, 1000);
+        }
+    };
+
+    /* ==========================================================================
+       [5] MODULE: TAVERN CONTROLLER (Chat & Quests)
+       ========================================================================== */
+    const TavernCtrl = {
+        unsubGlobal: null, unsubSelf: null, unsubQuests: null, pendingSelfImage: null,
+        
+        bindEvents() {
+            document.querySelectorAll('.dm-tab').forEach(el => el.addEventListener('click', () => {
+                document.querySelectorAll('.dm-tab').forEach(t => t.classList.remove('active')); el.classList.add('active');
+                document.querySelectorAll('.tavern-section').forEach(s => s.classList.remove('active')); document.getElementById(el.dataset.target).classList.add('active');
+                if(el.dataset.target === 'secSelf') this.initSelf(); if(el.dataset.target === 'secQuest') this.initQuests();
+            }));
+            document.getElementById('btnSendGlobal').addEventListener('click', () => this.sendGlobalChat());
+            document.getElementById('chatInputGlobal').addEventListener('keypress', (e) => { if(e.key==='Enter') this.sendGlobalChat(); });
+            
+            document.getElementById('btnSendSelf').addEventListener('click', () => this.sendSelfChat());
+            document.getElementById('chatInputSelf').addEventListener('keypress', (e) => { if(e.key==='Enter') this.sendSelfChat(); });
+
+            document.getElementById('btnAddQuest').addEventListener('click', () => this.addQuest());
+            document.getElementById('questInput').addEventListener('keypress', (e) => { if(e.key==='Enter') this.addQuest(); });
+        },
+
+        initGlobal() {
+            if(this.unsubGlobal) return;
+            const q = query(collection(db, "tavernChats")); // BUG 4 FIX: Client side sort prevents index crashes
+            this.unsubGlobal = onSnapshot(q, (snapshot) => {
+                const msgs = []; snapshot.forEach(doc => msgs.push({id: doc.id, ...doc.data()})); 
+                msgs.sort((a,b) => new Date(a.clientTime) - new Date(b.clientTime));
+                
+                const stream = document.getElementById('chatStreamGlobal');
+                if(msgs.length === 0) stream.innerHTML = `<div class="empty-chat">아직 길드 주점의 메시지가 없습니다.<br>첫 인사를 남겨보세요!</div>`;
+                else {
+                    stream.innerHTML = msgs.map(msg => this.buildChatHTML(msg, false)).join('');
+                    msgs.forEach(msg => {
+                        const avatarEl = document.getElementById(`tavernavatar-${msg.id}`);
+                        if(avatarEl) avatarEl.addEventListener('click', () => this.viewUserJourney(msg.uid, msg.name));
+                    });
+                }
+                setTimeout(() => { stream.scrollTop = stream.scrollHeight; }, 100);
+            }, (error) => { console.error(error); });
+        },
+        async sendGlobalChat() {
+            const input = document.getElementById('chatInputGlobal'); if(!input.value.trim()) return; const text = input.value; input.value = "";
+            await addDoc(collection(db, "tavernChats"), { uid: AppState.uid, name: AppState.name, avatar: AppState.avatar, message: text, logicalDate: getLogDate(), createdAt: serverTimestamp(), clientTime: new Date().toISOString() });
+        },
+
+        initSelf() {
+            if(this.unsubSelf) return;
+            const q = query(collection(db, "selfChats"));
+            this.unsubSelf = onSnapshot(q, (snapshot) => {
+                const msgs = []; snapshot.forEach(doc => msgs.push({id: doc.id, ...doc.data()}));
+                const myMsgs = msgs.filter(m => m.uid === AppState.uid).sort((a,b) => new Date(a.clientTime) - new Date(b.clientTime));
+                
+                const stream = document.getElementById('chatStreamSelf');
+                if(myMsgs.length === 0) stream.innerHTML = `<div class="empty-chat">나만의 비밀 기록장입니다.<br>사진이나 메모를 남겨보세요!</div>`;
+                else stream.innerHTML = myMsgs.map(msg => this.buildChatHTML(msg, true)).join('');
+                setTimeout(() => { stream.scrollTop = stream.scrollHeight; }, 100);
+            });
+            
+            document.getElementById('selfImageUpload').addEventListener('change', (e) => {
+                const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = new Image(); img.onload = () => {
+                        const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                        let w = img.width, h = img.height; const maxW = 500; if(w > maxW) { h *= maxW / w; w = maxW; }
+                        canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
+                        this.pendingSelfImage = canvas.toDataURL('image/jpeg', 0.6); 
+                        document.getElementById('chatInputSelf').placeholder = "사진 첨부됨. 캡션 입력...";
+                    }; img.src = event.target.result;
+                }; reader.readAsDataURL(file);
+            });
+        },
+        async sendSelfChat() {
+            const input = document.getElementById('chatInputSelf'); const text = input.value.trim();
+            if(!text && !this.pendingSelfImage) return;
+            input.value = ""; input.placeholder = "나에게 메모 남기기...";
+            let localImgId = null;
+            if(this.pendingSelfImage) { localImgId = 's_img_' + Date.now(); try { localStorage.setItem(localImgId, this.pendingSelfImage); } catch(e) { localImgId = null; } this.pendingSelfImage = null; }
+            await addDoc(collection(db, "selfChats"), { uid: AppState.uid, message: text, localImageId: localImgId, logicalDate: getLogDate(), createdAt: serverTimestamp(), clientTime: new Date().toISOString() });
+        },
+
+        buildChatHTML(msg, isSelf) {
+            const isMe = msg.uid === AppState.uid; const avatarStyle = msg.avatar ? `background-image:url(${msg.avatar}); color:transparent;` : '';
+            let imgHtml = ''; 
+            if(isSelf && msg.localImageId) { 
+                const src = localStorage.getItem(msg.localImageId); 
+                imgHtml = src ? `<img src="${src}" style="max-width:100%; border-radius:10px; margin-top:5px; display:block;">` : `<div style="font-size:11px; color:#aaa; margin-top:5px;">[사진 만료됨]</div>`; 
+            }
+            const safeText = msg.message ? msg.message.replace(/
+/g, '<br>') : '';
+            return `
+            <div class="chat-msg ${isMe || isSelf ? 'mine' : ''}">
+                ${(!isMe && !isSelf) ? `<div class="chat-avatar" id="tavernavatar-${msg.id}" style="${avatarStyle}">${msg.avatar ? '' : '<i class="fa-solid fa-user"></i>'}</div>` : ''}
+                <div class="chat-bubble-wrap">
+                    ${(!isMe && !isSelf) ? `<div class="chat-name">${msg.name}</div>` : ''}
+                    <div class="chat-bubble">${safeText}${imgHtml}</div>
+                </div>
+            </div>`;
+        },
+
+        initQuests() {
+            if(this.unsubQuests) return;
+            const q = query(collection(db, "selfQuests"));
+            this.unsubQuests = onSnapshot(q, (snapshot) => {
+                const qs = []; snapshot.forEach(doc => qs.push({id: doc.id, ...doc.data()})); 
+                const myQs = qs.filter(q => q.uid === AppState.uid).sort((a,b) => new Date(a.createdAt) - new Date(b.createdAt));
+                
+                const stream = document.getElementById('questList');
+                if(myQs.length === 0) stream.innerHTML = `<div class="empty-chat">추가된 셀프 퀘스트가 없습니다.</div>`;
+                else {
+                    stream.innerHTML = myQs.map(q => `<div class="quest-card ${q.isDone ? 'done' : ''}"><div class="q-info" id="qinfo-${q.id}"><div class="q-check"><i class="fa-solid fa-check"></i></div><div class="q-title">${q.title}</div></div><div class="q-del" id="qdel-${q.id}"><i class="fa-solid fa-xmark"></i></div></div>`).join('');
+                    myQs.forEach(q => {
+                        document.getElementById(`qinfo-${q.id}`).addEventListener('click', () => this.toggleQuest(q.id, q.isDone));
+                        document.getElementById(`qdel-${q.id}`).addEventListener('click', () => this.deleteQuest(q.id));
+                    });
+                }
+            });
+        },
+        async addQuest() { const input = document.getElementById('questInput'); if(!input.value.trim()) return; await addDoc(collection(db, "selfQuests"), { uid: AppState.uid, title: input.value, isDone: false, createdAt: Date.now() }); input.value = ""; },
+        async toggleQuest(id, currentStatus) { await updateDoc(doc(db, "selfQuests", id), {isDone: !currentStatus}); },
+        async deleteQuest(id) { await deleteDoc(doc(db, "selfQuests", id)); },
+        
+        async viewUserJourney(targetUid, targetName) {
+            document.getElementById('userJourneyTitle').innerText = `${targetName}님의 오늘 여정`;
+            const logBox = document.getElementById('userJourneyLog'); logBox.innerHTML = "<div style='text-align:center; padding:20px;'><i class='fa-solid fa-spinner fa-spin'></i> 탐색 중...</div>"; UI.showModal('userJourneyModal');
+            try {
+                // Client-side filtering to avoid index requirements
+                const snap = await getDocs(collection(db, "questLogs"));
+                const logs = snap.docs.map(d=>d.data()).filter(d=> d.uid === targetUid && d.logicalDate === getLogDate()).sort((a,b) => new Date(a.clientTime) - new Date(b.clientTime));
+                if(logs.length === 0) { logBox.innerHTML = "<p style='text-align:center; color:var(--text-dim);'>오늘 남겨진 여정이 없습니다.</p>"; return; }
+                logBox.innerHTML = logs.map(l => { const logIcon = l.icon && l.icon.includes('fa-') ? `<i class="${l.icon}"></i>` : (l.icon || '🐾'); return `<div class="log-item" style="padding: 12px 15px; box-shadow: none; border-color: rgba(0,0,0,0.05); margin-bottom: 8px;"><div class="log-header" style="margin-bottom:4px;"><span class="log-title" style="font-size:13px;">${logIcon} ${l.type}</span><span style="font-size:11px; color:var(--text-dim);">${new Date(l.clientTime).toTimeString().slice(0,5)}</span></div><div class="log-content">${l.content}</div></div>`; }).join('');
+            } catch (e) { logBox.innerHTML = "<p style='color:red;'>여정을 불러오지 못했습니다.</p>"; }
+        }
+    };
+
+    /* ==========================================================================
+       [6] MODULE: BOOTSTRAP
+       ========================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+        UI.bindEvents();
+        TavernCtrl.bindEvents();
+        
+        setTimeout(() => { MapCtrl.init(); }, 100);
+        DataCtrl.fetchAllLogs(); // Single reliable fetch
+        DataCtrl.checkTimer();
+    });
+
+</script>
+</body>
+</html>
