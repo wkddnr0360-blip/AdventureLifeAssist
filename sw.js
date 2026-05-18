@@ -1,56 +1,60 @@
-const CACHE_NAME = 'journey-cache-v3';
+const CACHE_NAME = 'adv-life-assist-v1';
+
+// 사진의 구조에 맞춘 캐싱할 파일 목록 (GitHub Pages 경로 적용)
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+  '/AdventureLifeAssist/',
+  '/AdventureLifeAssist/index.html',
+  '/AdventureLifeAssist/styles/main.css',
+  '/AdventureLifeAssist/js/appState.js',
+  '/AdventureLifeAssist/js/authCtrl.js',
+  '/AdventureLifeAssist/js/dataCtrl.js',
+  '/AdventureLifeAssist/js/firebaseConfig.js',
+  '/AdventureLifeAssist/js/main.js',
+  '/AdventureLifeAssist/js/mapCtrl.js',
+  '/AdventureLifeAssist/js/tavernCtrl.js',
+  '/AdventureLifeAssist/js/uiCtrl.js',
+  '/AdventureLifeAssist/js/utils.js',
+  '/AdventureLifeAssist/icon-192.png',
+  '/AdventureLifeAssist/icon-512.png',
+  '/AdventureLifeAssist/manifest.json'
 ];
 
-// 서비스 워커 설치 및 핵심 리소스 캐싱
+// 서비스 워커 설치 및 파일 캐싱
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-      .then(() => self.skipWaiting())
+      .then(cache => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
   );
 });
 
-// 서비스 워커 활성화 및 구버전 캐시 삭제
+// 네트워크 요청 가로채기 (캐시에 있으면 캐시 반환, 없으면 네트워크 요청)
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
+  );
+});
+
+// 새로운 버전 업데이트 시 이전 캐시 삭제
 self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => self.clients.claim())
-  );
-});
-
-// 네트워크 요청 가로채기 (캐시 우선, 없으면 네트워크 탐색)
-self.addEventListener('fetch', event => {
-  // HTTP/HTTPS가 아닌 요청(ws, chrome-extension 등) 처리 제외
-  if (!event.request.url.startsWith('http')) {
-    return;
-  }
-
-  // 외부 파이어베이스 데이터베이스 요정 통신(firestore)은 캐싱에서 제외하여 동기화 유지
-  if (event.request.url.includes('firestore.googleapis.com')) {
-    return;
-  }
-
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        return response || fetch(event.request).catch(error => {
-          console.error('Fetch failed:', event.request.url, error);
-        });
-      })
+    })
   );
 });
