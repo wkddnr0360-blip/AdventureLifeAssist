@@ -1,8 +1,8 @@
-const CACHE_NAME = 'journey-cache-v2';
+const CACHE_NAME = 'journey-cache-v3';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
+  './',
+  './index.html',
+  './manifest.json',
   'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
