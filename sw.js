@@ -1,4 +1,4 @@
-const CACHE_NAME = 'adv-life-assist-v1';
+const CACHE_NAME = 'adv-life-assist-v2';
 
 // 사진의 구조에 맞춘 캐싱할 파일 목록 (GitHub Pages 경로 적용)
 const urlsToCache = [
