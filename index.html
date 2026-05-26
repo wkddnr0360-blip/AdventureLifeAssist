@@ -35,35 +35,35 @@
             font-family: "Pretendard", -apple-system, sans-serif;
             background-color: var(--bg-main); color: var(--text-main);
             display: flex; justify-content: center;
-            padding-bottom: 70px; /* 하단 네비게이션 여백 */
+            padding-bottom: 70px; 
             -webkit-font-smoothing: antialiased;
         }
         
         .app-container { width: 100%; max-width: 800px; padding: 20px 15px; }
 
         /* UI 컴포넌트 */
-        .card { background: var(--bg-card); border-radius: 16px; box-shadow: 0 2px 15px rgba(0,0,0,0.04); padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
-        .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .card { background: var(--bg-card); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;}
         .title-row h2 { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
         
         .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
         .input-group label { font-size: 12px; font-weight: 700; color: var(--text-sub); }
-        input, select, button { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; background: var(--input-bg); color: var(--text-main); }
+        input, select, button { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; background: var(--input-bg); color: var(--text-main); transition: border-color 0.2s;}
         input:focus, select:focus { border-color: #3B82F6; }
         
-        .btn-primary { background: #3B82F6; color: white; border: none; font-weight: 700; cursor: pointer; }
+        .btn-primary { background: #3B82F6; color: white; border: none; font-weight: 700; cursor: pointer; padding: 10px 16px; }
         .btn-toggle { background: transparent; border: 1px solid var(--border); cursor: pointer; font-weight: 600; width: 100%; }
 
         .d-day-badge { background: #EF4444; color: white; padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
 
-        textarea { width: 100%; height: 180px; padding: 15px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); font-family: inherit; font-size: 14px; resize: vertical; outline: none; line-height: 1.6; }
+        textarea { width: 100%; height: 160px; padding: 15px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); font-family: inherit; font-size: 14px; resize: vertical; outline: none; line-height: 1.6; }
 
         /* 하단 네비게이션 탭 */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 65px;
             background: var(--nav-bg); border-top: 1px solid var(--border);
             display: flex; justify-content: space-around; align-items: center;
-            z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+            z-index: 1000; box-shadow: 0 -4px 15px rgba(0,0,0,0.03);
         }
         .nav-item {
             flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -78,15 +78,14 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* [오늘 하루] 30분 단위 플래너 */
-        .daily-list { display: flex; flex-direction: column; gap: 8px; }
+        .daily-list { display: flex; flex-direction: column; gap: 6px; }
         .daily-row {
             display: flex; align-items: center; gap: 8px;
-            background: var(--bg-panel); padding: 8px; border-radius: 8px; border: 1px solid var(--border);
+            background: var(--bg-panel); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border);
         }
-        .time-badge { width: 45px; font-size: 11px; font-weight: 800; color: var(--text-sub); text-align: center; }
-        .type-select { width: 75px; padding: 6px; font-size: 12px; font-weight: 700; border: none; border-radius: 6px; }
+        .time-badge { width: 40px; font-size: 11px; font-weight: 800; color: var(--text-sub); text-align: center; }
+        .type-select { width: 70px; padding: 6px 4px; font-size: 11px; font-weight: 800; border: none; border-radius: 6px; text-align: center;}
         
-        /* 커스텀 선택자 컬러링 */
         .t-1 { background-color: var(--work-bg); color: white; }
         .t-2 { background-color: var(--free-bg); color: var(--work-bg); }
         .t-3 { background-color: var(--sleep-main); color: white; }
@@ -96,97 +95,108 @@
         .note-input:focus { border-bottom: 1px solid #3B82F6; }
 
         /* [일주일 전체] 와이드 보드 */
-        .schedule-board { width: 100%; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--bg-card); }
+        .schedule-board { width: 100%; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-card); margin-bottom: 15px;}
         .board-header { display: flex; background: var(--bg-panel); border-bottom: 1px solid var(--border); }
-        .board-left { width: 60px; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: 700; color: var(--text-sub); border-right: 1px solid var(--border); padding: 6px 0; }
-        .board-right-axis { flex-grow: 1; display: flex; justify-content: space-between; padding: 6px 5px; font-size: 10px; font-weight: 700; color: var(--text-sub); }
-        .board-row { display: flex; height: 38px; border-bottom: 1px solid var(--border); position: relative; }
+        .board-left { width: 65px; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: 700; color: var(--text-sub); border-right: 1px solid var(--border); padding: 8px 0; }
+        .board-right-axis { flex-grow: 1; display: flex; justify-content: space-between; padding: 8px 5px; font-size: 10px; font-weight: 700; color: var(--text-sub); }
+        .board-row { display: flex; height: 42px; border-bottom: 1px solid var(--border); position: relative; }
         .board-row:last-child { border-bottom: none; }
-        .row-label { width: 60px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--bg-card); border-right: 1px solid var(--border); font-size: 11px; font-weight: 800; }
+        .row-label { width: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--bg-card); border-right: 1px solid var(--border); font-size: 11px; font-weight: 800; }
         .row-label span.sub { font-size: 9px; color: var(--text-sub); font-weight: 600; margin-bottom: 2px; }
         .row-timeline { flex-grow: 1; display: flex; position: relative; background: var(--bg-card); }
-        .block { flex: 1; height: 100%; cursor: pointer; border-right: 1px solid rgba(0,0,0,0.03); }
+        .block { flex: 1; height: 100%; cursor: pointer; border-right: 1px solid rgba(0,0,0,0.03); transition: filter 0.2s;}
+        .block:active { filter: brightness(0.7); }
         
         .now-marker { position: absolute; top: 0; bottom: 0; width: 2px; background-color: #EF4444; z-index: 10; box-shadow: 0 0 4px rgba(239, 68, 68, 0.5); pointer-events: none; }
-        .now-marker::after { content: 'NOW'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #EF4444; color: white; font-size: 8px; padding: 2px 4px; border-radius: 4px; font-weight: 800; }
+        .now-marker::after { content: 'NOW'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #EF4444; color: white; font-size: 9px; padding: 2px 4px; border-radius: 4px; font-weight: 800; }
         
-        .sync-status { font-size: 11px; font-weight: 700; color: #10B981; display: none; align-items: center; gap: 4px; }
+        .sync-status { font-size: 12px; font-weight: 800; color: #10B981; display: none; align-items: center; gap: 6px; margin-top: 5px;}
+
+        /* 일주일 달력 툴팁 */
+        .tooltip {
+            position: fixed; background: #0F172A; color: #FFFFFF; padding: 8px 12px;
+            border-radius: 8px; font-size: 12px; font-weight: 600; pointer-events: none;
+            opacity: 0; transition: opacity 0.15s; z-index: 999; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); line-height: 1.4;
+        }
+        .tooltip-note { color: #FBBF24; margin-top: 4px; font-size: 11px; display: block;}
     </style>
 </head>
 <body>
 
 <div class="app-container">
 
-    <!-- 탭 1: 홈 (설정 및 메모) -->
     <div id="tab-home" class="tab-content active">
         <div class="card">
             <div class="title-row">
-                <h2>🏠 메인 대시보드</h2>
+                <h2>🏠 메인 설정</h2>
                 <div id="dDayDisplay" class="d-day-badge">D-Day 계산중</div>
             </div>
             
             <div class="input-group">
-                <label>🔥 유저 코드 (자동 동기화용)</label>
+                <label>🔥 내 기기 고유 코드 (다른 기기 연동시 입력)</label>
                 <div style="display: flex; gap: 8px;">
-                    <input type="text" id="userCode" placeholder="영문/숫자 코드 입력" style="flex: 1; text-transform: uppercase;">
-                    <button class="btn-primary" id="btnSync">연동</button>
+                    <input type="text" id="userCode" placeholder="코드 로딩중..." style="flex: 1; text-transform: uppercase; font-weight: 800; color: #3B82F6; letter-spacing: 2px; text-align: center;">
+                    <button class="btn-primary" id="btnSync">연동하기</button>
                 </div>
-                <div id="syncIndicator" class="sync-status">🟢 실시간 동기화 중</div>
+                <div id="syncIndicator" class="sync-status">🟢 실시간 클라우드 동기화 중</div>
+                <p style="font-size: 11px; color: var(--text-sub); margin-top: 4px;">※ 태블릿이나 PC에서 위 코드를 입력하면 일정이 즉시 연동됩니다.</p>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
                 <div class="input-group" style="flex: 1;">
-                    <label>기준 날짜 (리셋)</label>
+                    <label>기준 날짜 (주기 세팅)</label>
                     <input type="date" id="baseDate">
                 </div>
                 <div class="input-group" style="flex: 1;">
                     <label>기준 근무</label>
                     <select id="baseShift">
-                        <option value="0">주간</option>
-                        <option value="1">야간</option>
-                        <option value="2">비번</option>
-                        <option value="3">휴무</option>
+                        <option value="0">주간 근무</option>
+                        <option value="1">야간 근무</option>
+                        <option value="2">비번 (퇴근)</option>
+                        <option value="3">휴무 (휴식)</option>
                     </select>
                 </div>
             </div>
 
-            <button id="darkModeToggle" class="btn-toggle" style="margin-top: 10px;">🌙 야간 모드 전환</button>
+            <button id="darkModeToggle" class="btn-toggle" style="margin-top: 15px;">🌙 야간 모드 전환</button>
         </div>
 
         <div class="card">
-            <div class="title-row"><h2>📝 트리노트 퀵 메모</h2></div>
-            <textarea id="quickMemo" placeholder="- [판례] \n  - 핵심 포인트:\n- [루틴]\n  - 런닝 페이스:"></textarea>
+            <div class="title-row"><h2>📝 트리노트 퀵 메모 (자동저장)</h2></div>
+            <textarea id="quickMemo" placeholder="- [판례] 
+  - 핵심 포인트:
+  - 예외 지문:
+- [루틴]
+  - 런닝 페이스:"></textarea>
         </div>
     </div>
 
-    <!-- 탭 2: 오늘 하루 (플래너) -->
     <div id="tab-today" class="tab-content">
         <div class="card" style="padding: 15px;">
             <div class="title-row" style="margin-bottom: 5px;">
                 <h2>📝 일일 커스텀 플래너</h2>
-                <span id="todayShiftBadge" class="d-day-badge" style="background:#3B82F6;">오늘 근무</span>
+                <span id="todayShiftBadge" class="d-day-badge" style="background:#3B82F6;">오늘 근무 로딩중</span>
             </div>
-            <p style="font-size:11px; color:var(--text-sub); margin-bottom: 15px;">수면/기상 시간이 달라졌다면 직접 구간을 수정하고 계획을 메모하세요.</p>
+            <p style="font-size:11px; color:var(--text-sub); margin-bottom: 15px; font-weight: 600;">※ 수면/기상 시간 등 구간 변동사항을 직접 수정하고 기록하세요.</p>
             
             <div class="daily-list" id="dailyListContainer">
-                <!-- JS로 48개 블록 렌더링 -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- 탭 3: 일주일 전체 -->
     <div id="tab-weekly" class="tab-content">
         <div class="card" style="padding: 15px;">
             <div class="title-row" style="margin-bottom: 15px;">
-                <h2>📅 전체 일주일 계획</h2>
-                <input type="date" id="targetDate" style="padding: 6px; font-size: 12px; border:none; background:var(--bg-panel); font-weight:700;">
+                <h2>📅 전체 일주일 기록</h2>
+                <input type="date" id="targetDate" style="padding: 6px 8px; font-size: 13px; border:1px solid var(--border); background:var(--bg-panel); font-weight:700; border-radius: 8px;">
             </div>
             
-            <div style="display: flex; gap: 6px; justify-content: center; margin-bottom: 15px; font-size: 10px; font-weight: 700;">
-                <span style="color:var(--text-main);"><span style="display:inline-block; width:10px; height:10px; background:var(--work-bg); border-radius:2px; vertical-align:-1px;"></span> 업무</span>
-                <span style="color:var(--text-main);"><span style="display:inline-block; width:10px; height:10px; background:var(--free-bg); border-radius:2px; vertical-align:-1px;"></span> 자유</span>
-                <span style="color:var(--text-main);"><span style="display:inline-block; width:10px; height:10px; background:var(--sleep-main); border-radius:2px; vertical-align:-1px;"></span> 수면</span>
-                <span style="color:var(--text-main);"><span style="display:inline-block; width:10px; height:10px; background:var(--sleep-strat); border-radius:2px; vertical-align:-1px;"></span> 전략</span>
+            <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 15px; font-size: 11px; font-weight: 700;">
+                <span style="color:var(--text-main);"><span style="display:inline-block; width:12px; height:12px; background:var(--work-bg); border-radius:3px; vertical-align:-2px; margin-right: 2px;"></span> 업무</span>
+                <span style="color:var(--text-main);"><span style="display:inline-block; width:12px; height:12px; background:var(--free-bg); border-radius:3px; vertical-align:-2px; margin-right: 2px;"></span> 자유</span>
+                <span style="color:var(--text-main);"><span style="display:inline-block; width:12px; height:12px; background:var(--sleep-main); border-radius:3px; vertical-align:-2px; margin-right: 2px;"></span> 수면</span>
+                <span style="color:var(--text-main);"><span style="display:inline-block; width:12px; height:12px; background:var(--sleep-strat); border-radius:3px; vertical-align:-2px; margin-right: 2px;"></span> 전략</span>
             </div>
 
             <div class="schedule-board">
@@ -196,28 +206,29 @@
                 </div>
                 <div id="gridContainer"></div>
             </div>
+            <p style="font-size:11px; color:var(--text-sub); text-align: center; font-weight: 600;">※ 달력의 블록을 누르면 일일 플래너에 적은 메모가 표시됩니다.</p>
         </div>
     </div>
 
 </div>
 
-<!-- 하단 네비게이션 -->
 <nav class="bottom-nav">
     <div class="nav-item active" data-tab="tab-home">
-        <span class="nav-icon">🏠</span><span>홈</span>
+        <span class="nav-icon">🏠</span><span>홈 설정</span>
     </div>
     <div class="nav-item" data-tab="tab-today">
-        <span class="nav-icon">📝</span><span>오늘 하루</span>
+        <span class="nav-icon">📝</span><span>오늘 플래너</span>
     </div>
     <div class="nav-item" data-tab="tab-weekly">
-        <span class="nav-icon">📅</span><span>일주일</span>
+        <span class="nav-icon">📅</span><span>일주일 기록</span>
     </div>
 </nav>
 
-<!-- Firebase SDK (모듈 방식) -->
+<div class="tooltip" id="tooltip"></div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyB2FQGM7RGVjFQ7fxddIiAN5O7A0bF_omM",
@@ -225,30 +236,29 @@
       projectId: "reader2-43b34",
       storageBucket: "reader2-43b34.firebasestorage.app",
       messagingSenderId: "909397198375",
-      appId: "1:909397198375:web:bd21eb8f3731b545af7002"
+      appId: "1:909397198375:web:bd21eb8f3731b545af7002",
+      measurementId: "G-K2RR68SPZV"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- 글로벌 상태 관리 (State) ---
+    // --- 글로벌 상태 관리 ---
     let appState = {
         baseDate: "",
         baseShift: "0",
         memo: "",
-        dailyData: {} // { "2026-05-27": { "0": {type:1, note:"공부"}, ... } }
+        dailyData: {} // 커스텀 블록 저장소
     };
-    let activeUserCode = localStorage.getItem('userCode') || "";
-    let unsubscribe = null; // 리스너 해제용
+    let activeUserCode = "";
+    let unsubscribe = null; 
 
-    // --- 유틸: KST(로컬) 기준 날짜 문자열 구하기 (타임존 버그 완벽 픽스) ---
+    // 타임존 버그 해결용 로컬 시간 추출
     function getLocalDateString(dateObj) {
         const offset = dateObj.getTimezoneOffset() * 60000;
-        const localISOTime = (new Date(dateObj.getTime() - offset)).toISOString().slice(0, 10);
-        return localISOTime;
+        return (new Date(dateObj.getTime() - offset)).toISOString().slice(0, 10);
     }
 
-    // --- DOM 요소 ---
     const els = {
         baseDate: document.getElementById('baseDate'),
         baseShift: document.getElementById('baseShift'),
@@ -262,7 +272,7 @@
         todayBadge: document.getElementById('todayShiftBadge')
     };
 
-    // --- 마스터 패턴 ---
+    // 마스터 근무 패턴 (1:업무, 2:자유, 3:정상수면, 4:전략수면)
     const shiftPattern = {
         0: { name: '주간', blocks: Array(48).fill(2) },
         1: { name: '야간', blocks: Array(48).fill(2) },
@@ -277,45 +287,61 @@
 
     const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
 
-    // --- 초기화 ---
+    // 랜덤 6자리 유저코드 생성
+    function generateUserCode() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code = '';
+        for(let i=0; i<6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+        return code;
+    }
+
     function init() {
         const todayStr = getLocalDateString(new Date());
         appState.baseDate = todayStr;
         els.baseDate.value = todayStr;
         els.targetDate.value = todayStr;
 
-        if (activeUserCode) {
-            els.userCode.value = activeUserCode;
-            startSync(activeUserCode);
-        } else {
-            renderAll();
+        // 기기 첫 접속 시 고유 코드 자동 발급
+        let savedCode = localStorage.getItem('userCode');
+        if (!savedCode) {
+            savedCode = generateUserCode();
+            localStorage.setItem('userCode', savedCode);
         }
+        activeUserCode = savedCode;
+        els.userCode.value = activeUserCode;
+        
+        startSync(activeUserCode);
 
-        // 이벤트 바인딩
+        // 연동 버튼 로직
         els.btnSync.addEventListener('click', () => {
-            const code = els.userCode.value.trim().toUpperCase();
-            if(!code) return alert("유저 코드를 입력하세요.");
-            activeUserCode = code;
-            localStorage.setItem('userCode', activeUserCode);
-            startSync(activeUserCode);
+            const inputCode = els.userCode.value.trim().toUpperCase();
+            if(!inputCode) return alert("유저 코드를 입력하세요.");
+            if(inputCode === activeUserCode) return alert("현재 기기에 이미 연동되어 있습니다.");
+            
+            if(confirm(`[${inputCode}] 코드로 연동하시겠습니까?\n기존 기기의 데이터로 실시간 덮어씌워집니다.`)) {
+                activeUserCode = inputCode;
+                localStorage.setItem('userCode', activeUserCode);
+                startSync(activeUserCode);
+            } else {
+                els.userCode.value = activeUserCode; // 취소시 복구
+            }
         });
 
+        // 상태 변경 리스너
         els.baseDate.addEventListener('change', (e) => { appState.baseDate = e.target.value; saveToFirebase(); });
         els.baseShift.addEventListener('change', (e) => { appState.baseShift = e.target.value; saveToFirebase(); });
         els.memo.addEventListener('input', (e) => { appState.memo = e.target.value; saveToFirebase(); });
-        els.targetDate.addEventListener('change', renderWeekly);
+        els.targetDate.addEventListener('change', renderAll);
 
-        // 하단 탭 로직
+        // 하단 탭 로직 (항상 최신화 보장)
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function() {
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
                 document.getElementById(this.dataset.tab).classList.add('active');
-                
-                // 탭 전환 시 렌더링 최신화
-                if(this.dataset.tab === 'tab-today') renderToday();
-                if(this.dataset.tab === 'tab-weekly') renderWeekly();
+                // 탭 누를때 혹시 모를 레이아웃 보정을 위해 렌더링
+                renderAll(); 
             });
         });
 
@@ -328,7 +354,6 @@
             toggleDark(isDark);
         });
         
-        // 1분마다 NOW 마커 갱신
         setInterval(updateNowMarker, 60000);
         updateDDay();
     }
@@ -346,41 +371,36 @@
         
         const userRef = doc(db, "users", code);
         
-        // 실시간 리스너
         unsubscribe = onSnapshot(userRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 appState = { ...appState, ...data };
                 if(!appState.dailyData) appState.dailyData = {};
                 
-                // UI 업데이트 (현재 포커스 중인 입력창이 아니면 덮어쓰기)
+                // 포커스 안 된 UI만 업데이트 (타이핑 방해 금지)
                 if(document.activeElement !== els.memo) els.memo.value = appState.memo || "";
-                els.baseDate.value = appState.baseDate;
-                els.baseShift.value = appState.baseShift;
+                if(document.activeElement !== els.baseDate) els.baseDate.value = appState.baseDate;
+                if(document.activeElement !== els.baseShift) els.baseShift.value = appState.baseShift;
                 
                 renderAll();
             } else {
-                // 첫 접속인 경우 초기 데이터 생성
-                saveToFirebase();
+                saveToFirebase(); // 신규 코드면 DB 생성
             }
         });
     }
 
-    // 디바운싱 적용 (타이핑할 때마다 DB 폭주 방지)
     let saveTimeout;
     function saveToFirebase() {
-        renderAll(); // 로컬 UI 즉시 반영
+        renderAll(); 
         if(!activeUserCode) return;
         
         clearTimeout(saveTimeout);
         saveTimeout = setTimeout(async () => {
-            try {
-                await setDoc(doc(db, "users", activeUserCode), appState);
-            } catch(e) { console.error("Sync Error:", e); }
+            try { await setDoc(doc(db, "users", activeUserCode), appState); } 
+            catch(e) { console.error("Sync Error:", e); }
         }, 800);
     }
 
-    // --- 공통 유틸 ---
     function getShiftIndexForDate(targetDateStr) {
         if(!appState.baseDate) return 0;
         const b = new Date(appState.baseDate + 'T00:00:00');
@@ -390,7 +410,7 @@
         return ((bIdx + diffDays) % 4 + 4) % 4;
     }
 
-    // --- 탭 2: 오늘 하루 플래너 렌더링 ---
+    // --- 렌더링: 탭 2 오늘 플래너 ---
     function renderToday() {
         const todayStr = getLocalDateString(new Date());
         const shiftIdx = getShiftIndexForDate(todayStr);
@@ -400,31 +420,28 @@
         const dayData = appState.dailyData[todayStr] || {};
         
         for(let i=0; i<48; i++) {
-            // 기본 스케줄 패턴에서 가져오되, 수정한 값이 있으면 덮어씀
             const defaultType = shiftPattern[shiftIdx].blocks[i];
             const blockData = dayData[i] || { type: defaultType, note: '' };
-            
             const hour = Math.floor(i / 2).toString().padStart(2, '0');
             const min = (i % 2 === 0) ? '00' : '30';
-            const timeStr = `${hour}:${min}`;
             
             html += `
                 <div class="daily-row">
-                    <div class="time-badge">${timeStr}</div>
+                    <div class="time-badge">${hour}:${min}</div>
                     <select class="type-select t-${blockData.type}" data-idx="${i}" onchange="window.updateDailyBlock(this)">
                         <option value="1" ${blockData.type == 1 ? 'selected' : ''}>업무</option>
                         <option value="2" ${blockData.type == 2 ? 'selected' : ''}>자유</option>
                         <option value="3" ${blockData.type == 3 ? 'selected' : ''}>수면</option>
                         <option value="4" ${blockData.type == 4 ? 'selected' : ''}>전략</option>
                     </select>
-                    <input type="text" class="note-input" data-idx="${i}" placeholder="계획 및 기록" value="${blockData.note}" oninput="window.updateDailyBlock(this)">
+                    <input type="text" class="note-input" data-idx="${i}" placeholder="계획 및 기록 메모" value="${blockData.note}" oninput="window.updateDailyBlock(this)">
                 </div>
             `;
         }
         els.dailyList.innerHTML = html;
     }
 
-    // 플래너 입력 시 상태 업데이트 및 파이어베이스 저장 (전역 노출 필요)
+    // 플래너 입력 시 전역 상태 반영
     window.updateDailyBlock = function(element) {
         const idx = element.getAttribute('data-idx');
         const todayStr = getLocalDateString(new Date());
@@ -434,17 +451,18 @@
         
         if(element.tagName === 'SELECT') {
             appState.dailyData[todayStr][idx].type = parseInt(element.value);
-            element.className = `type-select t-${element.value}`; // 즉시 색상 변경
+            element.className = `type-select t-${element.value}`; 
         } else {
             appState.dailyData[todayStr][idx].note = element.value;
         }
         
-        saveToFirebase(); // 디바운스 적용되어 안전함
+        saveToFirebase(); 
     }
 
-    // --- 탭 3: 일주일 전체 렌더링 ---
+    // --- 렌더링: 탭 3 일주일 전체 ---
     function renderWeekly() {
-        const targetD = new Date(els.targetDate.value + 'T00:00:00');
+        const targetDStr = els.targetDate.value || getLocalDateString(new Date());
+        const targetD = new Date(targetDStr + 'T00:00:00');
         let html = '';
 
         for(let i=0; i<7; i++) {
@@ -458,8 +476,6 @@
             
             const shiftIdx = getShiftIndexForDate(dateStr);
             const shiftInfo = shiftPattern[shiftIdx];
-            
-            // 오늘 데이터에 커스텀 수정된 내역이 있는지 확인
             const customDayData = appState.dailyData[dateStr] || {};
 
             html += `<div class="board-row" id="board-row-${dateStr}">`;
@@ -467,10 +483,19 @@
             html += `<div class="row-timeline">`;
             
             for(let j=0; j<48; j++) {
-                // 커스텀 데이터가 있으면 우선 적용, 없으면 마스터 패턴
                 const typeCode = (customDayData[j] && customDayData[j].type) ? customDayData[j].type : shiftInfo.blocks[j];
                 const cls = ['bg-work', 'bg-free', 'bg-sleep-main', 'bg-sleep-strat'][typeCode - 1];
-                html += `<div class="block ${cls}"></div>`;
+                const typeName = ['업무', '자유', '정상 수면', '전략 수면'][typeCode - 1];
+                
+                // 툴팁 구성 (시간 + 타입 + 메모)
+                const hour = Math.floor(j / 2).toString().padStart(2, '0');
+                const min = (j % 2 === 0) ? '00' : '30';
+                let tooltipStr = `${hour}:${min} - ${typeName}`;
+                if(customDayData[j] && customDayData[j].note) {
+                    tooltipStr += `<span class="tooltip-note">📝 ${customDayData[j].note}</span>`;
+                }
+
+                html += `<div class="block ${cls}" data-tooltip='${tooltipStr}' onclick="showBoardTooltip(event)" onmouseleave="hideBoardTooltip()"></div>`;
             }
             html += `</div></div>`;
         }
@@ -478,15 +503,29 @@
         updateNowMarker();
     }
 
-    // --- 실시간 KST NOW 마커 ---
+    // --- 툴팁 로직 ---
+    const tooltipEl = document.getElementById('tooltip');
+    window.showBoardTooltip = function(e) {
+        const str = e.target.getAttribute('data-tooltip');
+        if(!str) return;
+        tooltipEl.innerHTML = str;
+        
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        
+        tooltipEl.style.left = clientX + 'px';
+        tooltipEl.style.top = (clientY - 45) + 'px';
+        tooltipEl.style.transform = 'translate(-50%, 0)';
+        tooltipEl.style.opacity = '1';
+        
+        if (window.innerWidth <= 768) { setTimeout(hideBoardTooltip, 2500); }
+    };
+    window.hideBoardTooltip = function() { tooltipEl.style.opacity = '0'; };
+
     function updateNowMarker() {
-        // 기존 마커 삭제
         document.querySelectorAll('.now-marker').forEach(el => el.remove());
-        
         const now = new Date();
-        const todayStr = getLocalDateString(now);
-        const row = document.getElementById(`board-row-${todayStr}`);
-        
+        const row = document.getElementById(`board-row-${getLocalDateString(now)}`);
         if(row) {
             const timeline = row.querySelector('.row-timeline');
             const nowPercent = ((now.getHours() * 60 + now.getMinutes()) / 1440) * 100;
@@ -497,23 +536,20 @@
         }
     }
 
-    // --- 렌더링 통합 호출 ---
     function renderAll() {
-        // 현재 활성화된 탭에 따라 필요한 뷰 렌더링
-        if(document.getElementById('tab-today').classList.contains('active')) renderToday();
-        if(document.getElementById('tab-weekly').classList.contains('active')) renderWeekly();
+        // 데이터가 변경되면 두 뷰를 모두 다시 그려서 완벽한 동기화 유지
+        renderToday();
+        renderWeekly();
     }
 
     function updateDDay() {
         const target = new Date('2026-08-22T00:00:00');
         const diff = Math.round((target - new Date()) / (1000 * 60 * 60 * 24));
-        document.getElementById('dDayDisplay').innerText = diff > 0 ? `경찰 채용 D-${diff}` : (diff === 0 ? 'D-Day' : `D+${Math.abs(diff)}`);
+        document.getElementById('dDayDisplay').innerText = diff > 0 ? `D-${diff}` : (diff === 0 ? 'D-Day' : `D+${Math.abs(diff)}`);
     }
 
-    // 실행
     init();
 </script>
 
 </body>
 </html>
-
