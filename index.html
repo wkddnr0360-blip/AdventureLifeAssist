@@ -2,132 +2,183 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>주야비휴 프리미엄 스케줄러 & AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- PWA 메타 태그 연동 -->
+    <meta name="theme-color" content="#F8FAFC" id="themeColorMeta">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <title>주야비휴 라이프 어시스트</title>
+    
     <style>
-        /* 프리미엄 폰트 & 초기화 */
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        
+        :root {
+            --bg-main: #F8FAFC;
+            --bg-card: #FFFFFF;
+            --bg-panel: #F1F5F9;
+            --text-main: #1E293B;
+            --text-sub: #64748B;
+            --border: #E2E8F0;
+            --input-bg: #FFFFFF;
+            
+            /* 스케줄 컬러 팔레트 */
+            --work-bg: #1E3A8A; /* 짙은 네이비 */
+            --free-bg: #DBEAFE; /* 연한 아이스블루 */
+            --sleep-main: #7C3AED; /* 딥 퍼플 */
+            --sleep-strat: #C4B5FD; /* 라이트 퍼플 */
+        }
+
+        /* 다크 모드 변수 */
+        body.dark-mode {
+            --bg-main: #0F172A;
+            --bg-card: #1E293B;
+            --bg-panel: #334155;
+            --text-main: #F8FAFC;
+            --text-sub: #94A3B8;
+            --border: #475569;
+            --input-bg: #1E293B;
+            
+            --work-bg: #3B82F6;
+            --free-bg: #1E3A8A;
+            --sleep-main: #A78BFA;
+            --sleep-strat: #6D28D9;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #F8FAFC;
-            color: #1E293B;
-            display: flex;
-            justify-content: center;
-            padding: 40px 15px;
+            font-family: "Pretendard", -apple-system, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex; justify-content: center;
+            padding: 30px 15px;
+            transition: background-color 0.3s, color 0.3s;
             -webkit-font-smoothing: antialiased;
         }
         
         .app-container {
-            width: 100%;
-            max-width: 1050px;
-            background: #FFFFFF;
+            width: 100%; max-width: 1050px;
+            background: var(--bg-card);
             border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            box-shadow: 0 4px 25px rgba(0,0,0,0.08);
             padding: 30px;
+            transition: background-color 0.3s;
         }
 
-        .header { margin-bottom: 25px; text-align: center; }
-        .header h1 { font-size: 26px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; }
+        /* 헤더 & D-Day */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
+        .header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px;}
+        .d-day-badge {
+            background: #EF4444; color: white; padding: 6px 14px;
+            border-radius: 20px; font-weight: 800; font-size: 15px;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+        }
 
-        /* 설정 패널 */
+        /* 컨트롤 패널 */
         .control-panel {
             display: flex; flex-wrap: wrap; gap: 15px;
-            background: #F8FAFC; padding: 20px; border-radius: 12px;
-            margin-bottom: 25px; border: 1px solid #E2E8F0;
+            background: var(--bg-panel); padding: 20px; border-radius: 12px;
+            margin-bottom: 25px; border: 1px solid var(--border);
         }
-        .input-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
-        .input-group label { font-size: 13px; font-weight: 700; color: #475569; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 180px; }
+        .input-group label { font-size: 13px; font-weight: 700; color: var(--text-sub); }
         input, select, button {
-            padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px;
-            font-family: inherit; font-size: 14px; outline: none; transition: all 0.2s;
-            background: #FFFFFF;
+            padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+            font-family: inherit; font-size: 14px; outline: none;
+            background: var(--input-bg); color: var(--text-main);
+            transition: all 0.2s;
         }
-        input:focus, select:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        input:focus, select:focus { border-color: #3B82F6; }
         
-        button.primary-btn { background: #0F172A; color: white; border: none; font-weight: 600; cursor: pointer; }
-        button.primary-btn:hover { background: #334155; }
+        .btn-toggle {
+            background: transparent; border: 1px solid var(--border); cursor: pointer;
+            padding: 10px 15px; border-radius: 8px; font-weight: 600; color: var(--text-main);
+        }
+        .btn-toggle:hover { background: var(--border); }
 
+        /* 단백질 트래커 */
+        .tracker-panel {
+            background: var(--bg-panel); padding: 15px 20px; border-radius: 12px;
+            margin-bottom: 25px; border: 1px solid var(--border);
+        }
+        .tracker-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .tracker-title { font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .progress-bar-bg { width: 100%; height: 12px; background: var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 15px; }
+        .progress-bar-fill { height: 100%; background: #3B82F6; width: 0%; transition: width 0.3s ease; }
+        .tracker-controls { display: flex; gap: 10px; align-items: center; }
+        .btn-add { background: #3B82F6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        
         /* 범례 */
         .legend {
-            display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;
-            margin-bottom: 20px; font-size: 13px; font-weight: 600; color: #334155;
+            display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
+            margin-bottom: 20px; font-size: 13px; font-weight: 600; color: var(--text-main);
         }
         .legend-item { display: flex; align-items: center; gap: 8px; }
         .dot { width: 14px; height: 14px; border-radius: 4px; }
         
-        /* ★ 컬러 개편 (업무/자유는 톤온톤, 수면은 보색) */
-        .bg-work { background-color: #1E3A8A; } /* 딥 네이비 (업무) */
-        .bg-free { background-color: #DBEAFE; } /* 아주 연한 아이스블루 (자유) */
-        .bg-sleep-main { background-color: #7C3AED; } /* 딥 퍼플 (정상 수면) */
-        .bg-sleep-strat { background-color: #C4B5FD; } /* 라이트 퍼플 (전략적 수면) */
+        .bg-work { background-color: var(--work-bg); }
+        .bg-free { background-color: var(--free-bg); }
+        .bg-sleep-main { background-color: var(--sleep-main); }
+        .bg-sleep-strat { background-color: var(--sleep-strat); }
 
-        /* 스크롤 그리드 */
+        /* 그리드 뷰 */
         .grid-wrapper {
             width: 100%; overflow-x: auto; border-radius: 12px;
-            border: 1px solid #E2E8F0; background: #FFFFFF;
+            border: 1px solid var(--border); background: var(--bg-card);
+            margin-bottom: 25px;
         }
         .time-grid {
             display: inline-grid;
-            grid-template-columns: 140px repeat(48, minmax(18px, 1fr)); /* 140px로 늘려 글자 깨짐 방지 */
-            min-width: max-content; border-bottom: 1px solid #F1F5F9;
+            grid-template-columns: 130px repeat(48, minmax(18px, 1fr));
+            min-width: max-content; border-bottom: 1px solid var(--border);
         }
         .time-grid:last-child { border-bottom: none; }
-        .header-row { background: #F8FAFC; position: sticky; top: 0; z-index: 5; border-bottom: 1px solid #E2E8F0; }
+        .header-row { background: var(--bg-panel); position: sticky; top: 0; z-index: 5; }
         
-        .cell { padding: 8px 0; text-align: center; font-size: 11px; color: #64748B; border-right: 1px dashed #E2E8F0; }
-        .cell.time-header { grid-column: span 2; border-right: 1px solid #CBD5E1; font-weight: 700; }
+        .cell { padding: 8px 0; text-align: center; font-size: 11px; color: var(--text-sub); border-right: 1px dashed var(--border); }
+        .cell.time-header { grid-column: span 2; border-right: 1px solid var(--border); font-weight: 700; }
         
-        /* ★ 왼쪽 요일 글자 밀림 방지 */
+        /* 좌측 요일 고정 & 밀림 방지 */
         .date-label {
-            position: sticky; left: 0; background: #FFFFFF; padding: 12px 15px;
-            font-size: 13px; font-weight: 700; color: #1E293B;
-            border-right: 2px solid #E2E8F0; z-index: 10;
-            white-space: nowrap; /* 글자 쪼개짐 원천 차단 */
-            display: flex; align-items: center;
+            position: sticky; left: 0; background: var(--bg-card); padding: 0 15px;
+            font-size: 13px; font-weight: 700; color: var(--text-main);
+            border-right: 2px solid var(--border); z-index: 10;
+            white-space: nowrap; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
         }
-        .header-row .date-label { background: #F8FAFC; z-index: 15; }
+        .header-row .date-label { background: var(--bg-panel); z-index: 15; }
 
-        .block { height: 100%; transition: opacity 0.2s; cursor: pointer; }
+        .block { height: 100%; transition: opacity 0.2s; cursor: pointer; border-right: 1px solid rgba(0,0,0,0.02); }
         .block:hover { opacity: 0.7; }
         
-        /* ★ 현재 시간 인디케이터 (모던 스타일) */
         .current-time-block {
-            position: relative;
-            background-color: #EF4444 !important; /* 강력한 레드 포인트 */
-            z-index: 20;
-            transform: scaleY(1.1);
+            position: relative; background-color: #EF4444 !important; z-index: 20; transform: scaleY(1.1);
         }
         .current-time-block::before {
-            content: 'NOW';
-            position: absolute;
-            top: -22px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #EF4444;
-            color: white;
-            font-size: 10px;
-            font-weight: 800;
-            padding: 2px 6px;
-            border-radius: 12px;
-            z-index: 25;
+            content: 'NOW'; position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+            background: #EF4444; color: white; font-size: 10px; font-weight: 800;
+            padding: 2px 6px; border-radius: 12px; z-index: 25;
         }
+
+        /* 트리노트 퀵 메모 */
+        .memo-panel {
+            background: var(--bg-panel); padding: 20px; border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .memo-panel label { display: block; font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
+        textarea {
+            width: 100%; height: 120px; padding: 15px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--input-bg);
+            color: var(--text-main); font-family: inherit; font-size: 14px;
+            resize: vertical; outline: none; line-height: 1.5;
+        }
+        textarea:focus { border-color: #3B82F6; }
 
         /* 툴팁 */
         .tooltip {
-            position: fixed; background: #0F172A; color: #FFFFFF; padding: 8px 12px;
-            border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: none;
+            position: fixed; background: #0F172A; color: #FFFFFF; padding: 6px 10px;
+            border-radius: 6px; font-size: 12px; font-weight: 600; pointer-events: none;
             opacity: 0; transform: translateY(5px); transition: all 0.2s; z-index: 999;
-        }
-
-        /* AI 코치 패널 */
-        .ai-panel { margin-top: 30px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; }
-        .ai-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;}
-        .ai-header h3 { font-size: 16px; color: #0F172A; display: flex; align-items: center; gap: 8px; }
-        .ai-controls { display: flex; gap: 10px; flex-wrap: wrap; }
-        .ai-response {
-            background: white; padding: 15px; border-radius: 8px; border: 1px solid #E2E8F0;
-            font-size: 14px; line-height: 1.6; color: #334155; min-height: 60px;
         }
     </style>
 </head>
@@ -135,12 +186,13 @@
 
 <div class="app-container">
     <div class="header">
-        <h1>🚓 2026 주야비휴 스케줄러 & 코치</h1>
+        <h1>🚓 Adventure Life Assist</h1>
+        <div id="dDayDisplay" class="d-day-badge">D-Day 계산중...</div>
     </div>
     
     <div class="control-panel">
         <div class="input-group">
-            <label>기준 근무 (주기 세팅)</label>
+            <label>기준 근무 설정 (주기 리셋용)</label>
             <div style="display: flex; gap: 10px;">
                 <input type="date" id="baseDate" style="flex: 1;">
                 <select id="baseShift" style="flex: 1;">
@@ -151,43 +203,134 @@
                 </select>
             </div>
         </div>
-        <div class="input-group" style="max-width: 200px;">
-            <label>조회 시작일</label>
+        <div class="input-group" style="max-width: 180px;">
+            <label>달력 조회 시작일</label>
             <input type="date" id="targetDate">
+        </div>
+        <div class="input-group" style="max-width: 120px; justify-content: flex-end;">
+            <button id="darkModeToggle" class="btn-toggle">🌙 야간 모드</button>
+        </div>
+    </div>
+
+    <!-- 단백질 트래커 (목표 160g) -->
+    <div class="tracker-panel">
+        <div class="tracker-header">
+            <span class="tracker-title">💪 일일 영양 트래커 (목표: 160g)</span>
+            <span id="proteinText" style="font-weight: 800; font-size: 14px; color: #3B82F6;">0g / 160g</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div id="proteinBar" class="progress-bar-fill"></div>
+        </div>
+        <div class="tracker-controls">
+            <button class="btn-add" onclick="addProtein(20)">+ 20g (닭가슴살)</button>
+            <button class="btn-add" onclick="addProtein(30)">+ 30g (쉐이크)</button>
+            <button class="btn-toggle" style="padding: 6px 12px; margin-left: auto;" onclick="resetProtein()">초기화</button>
         </div>
     </div>
 
     <div class="legend">
-        <div class="legend-item"><div class="dot bg-work"></div>업무 (집중)</div>
-        <div class="legend-item"><div class="dot bg-free"></div>자유 (휴식)</div>
-        <div class="legend-item"><div class="dot bg-sleep-main"></div>정상 수면 (밤잠)</div>
-        <div class="legend-item"><div class="dot bg-sleep-strat"></div>전략적 수면 (낮잠)</div>
+        <div class="legend-item"><div class="dot bg-work"></div>업무 시간 (집중)</div>
+        <div class="legend-item"><div class="dot bg-free"></div>자유 시간 (운동/여가)</div>
+        <div class="legend-item"><div class="dot bg-sleep-main"></div>메인 수면 (밤잠)</div>
+        <div class="legend-item"><div class="dot bg-sleep-strat"></div>전략 수면 (낮잠/앵커)</div>
     </div>
 
     <div class="grid-wrapper" id="gridContainer"></div>
 
-    <div class="ai-panel">
-        <div class="ai-header">
-            <h3>✨ 최신 AI 실시간 컨디션 분석</h3>
-            <div class="ai-controls">
-                <select id="aiModelSelect">
-                    <option value="gemini-3.1-flash-light">Gemini 3.1 Flash Light</option>
-                    <option value="gemini-3-flash-live">Gemini 3 Flash Live</option>
-                    <option value="gemma-4-31b">Gemma 4 31B (통합 API)</option>
-                </select>
-                <input type="password" id="apiKeyInput" placeholder="API Key 입력" style="width: 180px;">
-                <button class="primary-btn" onclick="askAI()">내 상태 분석하기</button>
-            </div>
-        </div>
-        <div id="aiResponse" class="ai-response">
-            API 키를 입력하고 모델을 선택한 뒤 버튼을 누르면, 현재 시간과 근무 스케줄을 분석하여 실시간 팁을 제공합니다. (새로고침해도 설정이 유지됩니다.)
-        </div>
+    <!-- 트리노트 방식 메모장 -->
+    <div class="memo-panel">
+        <label>📝 트리노트 퀵 메모 (자동 저장)</label>
+        <textarea id="quickMemo" placeholder="- [판례] 
+  - 핵심 포인트:
+  - 예외 지문:
+- [루틴]
+  - 런닝 페이스:"></textarea>
     </div>
 </div>
 
 <div class="tooltip" id="tooltip"></div>
 
 <script>
+    /* 1. PWA Service Worker Registration */
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker Registered!', reg))
+                .catch(err => console.log('Service Worker Registration Failed:', err));
+        });
+    }
+
+    /* 2. D-Day 로직 (2026-08-22) */
+    function updateDDay() {
+        const examDate = new Date('2026-08-22T00:00:00+09:00');
+        const today = new Date();
+        const diffTime = examDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        const dDayEl = document.getElementById('dDayDisplay');
+        if (diffDays > 0) {
+            dDayEl.innerText = `경찰 채용 D-${diffDays}`;
+        } else if (diffDays === 0) {
+            dDayEl.innerText = `결전의 날 (D-Day)`;
+        } else {
+            dDayEl.innerText = `시험 종료 (D+${Math.abs(diffDays)})`;
+            dDayEl.style.background = '#64748B';
+        }
+    }
+
+    /* 3. 단백질 트래커 로직 */
+    let currentProtein = 0;
+    const proteinTarget = 160;
+    const getTodayKey = () => `protein_${new Date().toISOString().split('T')[0]}`;
+
+    function loadProtein() {
+        currentProtein = parseInt(localStorage.getItem(getTodayKey())) || 0;
+        renderProtein();
+    }
+    
+    function addProtein(amount) {
+        currentProtein += amount;
+        localStorage.setItem(getTodayKey(), currentProtein);
+        renderProtein();
+    }
+    
+    function resetProtein() {
+        currentProtein = 0;
+        localStorage.setItem(getTodayKey(), currentProtein);
+        renderProtein();
+    }
+    
+    function renderProtein() {
+        const percent = Math.min((currentProtein / proteinTarget) * 100, 100);
+        document.getElementById('proteinBar').style.width = `${percent}%`;
+        document.getElementById('proteinText').innerText = `${currentProtein}g / ${proteinTarget}g`;
+        if (percent >= 100) {
+            document.getElementById('proteinBar').style.background = '#10B981'; // 완료 시 초록색
+        } else {
+            document.getElementById('proteinBar').style.background = '#3B82F6';
+        }
+    }
+
+    /* 4. 다크 모드 및 메모 로컬 스토리지 로직 */
+    const memoEl = document.getElementById('quickMemo');
+    const darkModeBtn = document.getElementById('darkModeToggle');
+    
+    memoEl.value = localStorage.getItem('treeNoteMemo') || '';
+    memoEl.addEventListener('input', () => localStorage.setItem('treeNoteMemo', memoEl.value));
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('isDarkMode', isDark);
+        darkModeBtn.innerText = isDark ? '☀️ 주간 모드' : '🌙 야간 모드';
+        document.getElementById('themeColorMeta').setAttribute('content', isDark ? '#0F172A' : '#F8FAFC');
+    }
+    if (localStorage.getItem('isDarkMode') === 'true') {
+        toggleDarkMode();
+    }
+    darkModeBtn.addEventListener('click', toggleDarkMode);
+
+    /* 5. 스케줄러 핵심 로직 (1=업무, 2=자유, 3=정상수면, 4=전략수면) */
     const shiftPattern = {
         0: { name: '주간', blocks: Array(48).fill(2) },
         1: { name: '야간', blocks: Array(48).fill(2) },
@@ -212,38 +355,25 @@
     const elBaseDate = document.getElementById('baseDate');
     const elBaseShift = document.getElementById('baseShift');
     const elTargetDate = document.getElementById('targetDate');
-    const elApiKey = document.getElementById('apiKeyInput');
-    const elModelSelect = document.getElementById('aiModelSelect');
     const elGridContainer = document.getElementById('gridContainer');
     const elTooltip = document.getElementById('tooltip');
-
-    let currentLiveShiftName = "";
-    let currentLiveBlockType = "";
 
     function getSafeDate(dateString) {
         const parts = dateString.split('-');
         return new Date(parts[0], parts[1] - 1, parts[2]);
     }
 
-    // ★ 로컬스토리지 완벽 보존 로직
-    function init() {
+    function initScheduler() {
         const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
         
         elBaseDate.value = localStorage.getItem('shiftBaseDate') || todayStr;
         elBaseShift.value = localStorage.getItem('shiftBaseIndex') || '0';
         elTargetDate.value = localStorage.getItem('shiftTargetDate') || todayStr;
-        
-        if(localStorage.getItem('savedApiKey')) elApiKey.value = localStorage.getItem('savedApiKey');
-        if(localStorage.getItem('savedAiModel')) elModelSelect.value = localStorage.getItem('savedAiModel');
 
         [elBaseDate, elBaseShift, elTargetDate].forEach(el => {
             el.addEventListener('change', renderGrid);
         });
 
-        // 설정 변경 시 스토리지 자동 저장
-        elApiKey.addEventListener('change', () => localStorage.setItem('savedApiKey', elApiKey.value));
-        elModelSelect.addEventListener('change', () => localStorage.setItem('savedAiModel', elModelSelect.value));
-        
         renderGrid();
         setInterval(markCurrentTime, 60000); 
     }
@@ -275,7 +405,7 @@
             const shiftIndex = ((baseIndex + diffDays + i) % 4 + 4) % 4;
             const shiftInfo = shiftPattern[shiftIndex];
 
-            html += `<div class="time-grid" id="row-${dateStrId}" data-shiftname="${shiftInfo.name}">`;
+            html += `<div class="time-grid" id="row-${dateStrId}">`;
             html += `<div class="date-label">${month}/${date}(${dayStr}) ${shiftInfo.name}</div>`;
             
             shiftInfo.blocks.forEach((typeCode, blockIndex) => {
@@ -306,63 +436,9 @@
         const blockIndex = (now.getHours() * 2) + (now.getMinutes() >= 30 ? 1 : 0);
         
         const targetBlock = document.getElementById(`block-${todayStr}-${blockIndex}`);
-        const targetRow = document.getElementById(`row-${todayStr}`);
         
-        if(targetBlock && targetRow) {
+        if(targetBlock) {
             targetBlock.classList.add('current-time-block');
-            currentLiveShiftName = targetRow.getAttribute('data-shiftname');
-            currentLiveBlockType = targetBlock.getAttribute('data-type');
-        }
-    }
-
-    // ★ 최신 모델 API 호출 로직
-    async function askAI() {
-        const apiKey = elApiKey.value.trim();
-        const selectedModel = elModelSelect.value;
-        
-        if(!apiKey) {
-            alert("API 키를 입력해주세요!");
-            return;
-        }
-        localStorage.setItem('savedApiKey', apiKey);
-        localStorage.setItem('savedAiModel', selectedModel);
-
-        const responseBox = document.getElementById('aiResponse');
-        responseBox.innerHTML = `<i>${selectedModel} 모델을 통해 분석 중입니다... ⏳</i>`;
-
-        const now = new Date();
-        const timeStr = `${now.getHours()}시 ${now.getMinutes()}분`;
-        
-        if(!currentLiveShiftName) {
-            responseBox.innerHTML = "❌ 달력 조회 기간에 '오늘'이 포함되어 있지 않아 분석할 수 없습니다.";
-            return;
-        }
-
-        const prompt = `
-당신은 교대근무자의 건강 코치입니다.
-상태: [오늘 근무: ${currentLiveShiftName}], [현재 시간: ${timeStr}], [현재 스케줄: ${currentLiveBlockType}]
-이 정보를 바탕으로 현재 시점에 맞는 행동 지침 1~2가지를 아주 짧고 명확하게 알려주세요. 3문장 이내로 작성하세요.
-`;
-
-        try {
-            // 선택된 모델을 URL에 동적으로 바인딩
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }]
-                })
-            });
-
-            if(!res.ok) throw new Error(`API 호출 실패 (상태 코드: ${res.status})`);
-
-            const data = await res.json();
-            const reply = data.candidates[0].content.parts[0].text;
-            
-            responseBox.innerHTML = reply.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-        } catch (error) {
-            responseBox.innerHTML = `<span style="color: #EF4444;">오류 발생: ${error.message}<br>선택한 모델명(${selectedModel})이 키 권한과 맞는지 확인하세요.</span>`;
         }
     }
 
@@ -385,7 +461,10 @@
         elTooltip.style.transform = 'translateY(5px)';
     };
 
-    init();
+    // 앱 초기화 실행
+    updateDDay();
+    loadProtein();
+    initScheduler();
 </script>
 
 </body>
