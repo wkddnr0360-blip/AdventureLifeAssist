@@ -21,10 +21,10 @@
             --border: #E2E8F0;
             --input-bg: #FFFFFF;
             
-            --work-bg: #1E3A8A;
-            --free-bg: #DBEAFE;
-            --sleep-main: #7C3AED;
-            --sleep-strat: #C4B5FD;
+            --work-bg: #1E3A8A;     /* 짙은 네이비 (업무) */
+            --free-bg: #DBEAFE;     /* 아주 연한 파랑 (자유) */
+            --sleep-main: #7C3AED;  /* 딥 퍼플 (정상 수면) */
+            --sleep-strat: #C4B5FD; /* 연한 퍼플 (전략 수면) */
         }
 
         body.dark-mode {
@@ -48,142 +48,171 @@
             background-color: var(--bg-main);
             color: var(--text-main);
             display: flex; justify-content: center;
-            padding: 30px 15px;
+            padding: 20px 10px;
             transition: background-color 0.3s, color 0.3s;
             -webkit-font-smoothing: antialiased;
         }
         
         .app-container {
-            width: 100%; max-width: 1050px;
+            width: 100%; max-width: 900px; /* 태블릿 보기 좋게 넓이 제한 */
             background: var(--bg-card);
             border-radius: 16px;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.08);
-            padding: 30px;
-            transition: background-color 0.3s;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.06);
+            padding: 25px;
         }
 
         /* 헤더 & D-Day */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
-        .header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .header h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
         .d-day-badge {
             background: #EF4444; color: white; padding: 6px 14px;
-            border-radius: 20px; font-weight: 800; font-size: 15px;
+            border-radius: 20px; font-weight: 800; font-size: 14px;
             box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
         }
 
         /* 컨트롤 패널 */
         .control-panel {
-            display: flex; flex-wrap: wrap; gap: 15px;
-            background: var(--bg-panel); padding: 20px; border-radius: 12px;
-            margin-bottom: 25px; border: 1px solid var(--border);
+            display: flex; flex-wrap: wrap; gap: 10px;
+            background: var(--bg-panel); padding: 15px; border-radius: 12px;
+            margin-bottom: 20px; border: 1px solid var(--border);
         }
-        .input-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 180px; }
-        .input-group label { font-size: 13px; font-weight: 700; color: var(--text-sub); }
+        .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 140px; }
+        .input-group label { font-size: 12px; font-weight: 700; color: var(--text-sub); }
         input, select, button {
-            padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
-            font-family: inherit; font-size: 14px; outline: none;
+            padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px;
+            font-family: inherit; font-size: 13px; outline: none;
             background: var(--input-bg); color: var(--text-main);
-            transition: all 0.2s;
         }
         input:focus, select:focus { border-color: #3B82F6; }
         
         .btn-toggle {
             background: transparent; border: 1px solid var(--border); cursor: pointer;
-            padding: 10px 15px; border-radius: 8px; font-weight: 600; color: var(--text-main);
-            width: 100%;
+            padding: 8px 12px; border-radius: 8px; font-weight: 600; width: 100%;
         }
-        .btn-toggle:hover { background: var(--border); }
 
         /* 범례 */
         .legend {
-            display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
-            margin-bottom: 15px; font-size: 13px; font-weight: 600; color: var(--text-main);
+            display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+            margin-bottom: 15px; font-size: 11px; font-weight: 600; color: var(--text-main);
         }
-        .legend-item { display: flex; align-items: center; gap: 6px; }
-        .dot { width: 14px; height: 14px; border-radius: 4px; }
-        
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .dot { width: 12px; height: 12px; border-radius: 3px; }
         .bg-work { background-color: var(--work-bg); }
         .bg-free { background-color: var(--free-bg); }
         .bg-sleep-main { background-color: var(--sleep-main); }
         .bg-sleep-strat { background-color: var(--sleep-strat); }
 
-        /* 모바일 스크롤 유도 텍스트 */
-        .scroll-hint { display: none; text-align: right; font-size: 11px; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: translateX(0); } 50% { opacity: 1; transform: translateX(-4px); } }
+        /* ★★★ 가독성 최적화 스케줄 보드 (스크롤 없음) ★★★ */
+        .schedule-board {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            background: var(--bg-card);
+        }
+        
+        /* 보드 헤더 (시간축 가이드) */
+        .board-header {
+            display: flex;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+        }
+        .board-left {
+            width: 70px;
+            flex-shrink: 0;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 12px; font-weight: 700; color: var(--text-sub);
+            border-right: 1px solid var(--border);
+            padding: 8px 0;
+        }
+        .board-right-axis {
+            flex-grow: 1;
+            display: flex; justify-content: space-between;
+            padding: 8px 5px;
+            font-size: 10px; font-weight: 700; color: var(--text-sub);
+        }
+        
+        /* 개별 날짜 행 */
+        .board-row {
+            display: flex;
+            height: 44px;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .board-row:last-child { border-bottom: none; }
+        
+        .row-label {
+            width: 70px;
+            flex-shrink: 0;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            font-size: 12px; font-weight: 800; line-height: 1.2;
+        }
+        .row-label span.sub { font-size: 9px; color: var(--text-sub); font-weight: 600; margin-bottom: 2px; }
+        
+        /* 100% 꽉 차는 타임라인 */
+        .row-timeline {
+            flex-grow: 1;
+            display: flex;
+            position: relative;
+            background: var(--bg-card);
+        }
+        .block {
+            flex: 1; /* 48개 블록이 가로 길이를 정확히 N등분하여 꽉 채움 */
+            height: 100%;
+            transition: filter 0.2s;
+            cursor: pointer;
+        }
+        .block:active { filter: brightness(0.7); }
 
-        /* 그리드 뷰 */
-        .grid-wrapper {
-            width: 100%; overflow-x: auto; border-radius: 12px;
-            border: 1px solid var(--border); background: var(--bg-card);
-            margin-bottom: 25px; -webkit-overflow-scrolling: touch;
+        /* ★ 세련된 NOW 선 인디케이터 */
+        .now-marker {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 2px;
+            background-color: #EF4444;
+            z-index: 10;
+            box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+            pointer-events: none; /* 터치 방해 금지 */
         }
-        .time-grid {
-            display: inline-grid;
-            grid-template-columns: 120px repeat(48, minmax(20px, 1fr));
-            min-width: max-content; border-bottom: 1px solid var(--border);
-        }
-        .time-grid:last-child { border-bottom: none; }
-        .header-row { background: var(--bg-panel); position: sticky; top: 0; z-index: 5; }
-        
-        .cell { padding: 8px 0; text-align: center; font-size: 11px; color: var(--text-sub); border-right: 1px dashed var(--border); }
-        .cell.time-header { grid-column: span 2; border-right: 1px solid var(--border); font-weight: 700; }
-        
-        .date-label {
-            position: sticky; left: 0; background: var(--bg-card); padding: 0 15px;
-            font-size: 13px; font-weight: 700; color: var(--text-main);
-            border-right: 2px solid var(--border); z-index: 10;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .date-label span.date-sub { display: none; }
-        .header-row .date-label { background: var(--bg-panel); z-index: 15; }
-
-        .block { height: 100%; cursor: pointer; border-right: 1px solid rgba(0,0,0,0.02); transition: opacity 0.2s; }
-        .block:active { opacity: 0.5; }
-        
-        .current-time-block {
-            position: relative; background-color: #EF4444 !important; z-index: 20; transform: scaleY(1.1);
-        }
-        .current-time-block::before {
-            content: 'NOW'; position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
-            background: #EF4444; color: white; font-size: 10px; font-weight: 800;
-            padding: 2px 6px; border-radius: 12px; z-index: 25;
+        .now-marker::after {
+            content: 'NOW';
+            position: absolute;
+            top: -9px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #EF4444;
+            color: white;
+            font-size: 8px;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-weight: 800;
         }
 
         /* 트리노트 퀵 메모 */
-        .memo-panel { background: var(--bg-panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
-        .memo-panel label { display: block; font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
+        .memo-panel { background: var(--bg-panel); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+        .memo-panel label { display: block; font-size: 13px; font-weight: 700; color: var(--text-main); margin-bottom: 8px; }
         textarea {
-            width: 100%; height: 120px; padding: 15px; border-radius: 8px;
+            width: 100%; height: 100px; padding: 12px; border-radius: 8px;
             border: 1px solid var(--border); background: var(--input-bg);
-            color: var(--text-main); font-family: inherit; font-size: 14px;
+            color: var(--text-main); font-family: inherit; font-size: 13px;
             resize: vertical; outline: none; line-height: 1.5;
         }
 
         /* 툴팁 */
         .tooltip {
-            position: fixed; background: #0F172A; color: #FFFFFF; padding: 8px 12px;
-            border-radius: 8px; font-size: 12px; font-weight: 600; pointer-events: none;
+            position: fixed; background: #0F172A; color: #FFFFFF; padding: 6px 10px;
+            border-radius: 6px; font-size: 11px; font-weight: 600; pointer-events: none;
             opacity: 0; transition: opacity 0.15s; z-index: 999; text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
 
-        /* ★★★ 모바일 최적화 (가독성 패치 핵심) ★★★ */
-        @media (max-width: 768px) {
+        /* 모바일 패딩 다이어트 */
+        @media (max-width: 600px) {
             body { padding: 0; }
-            .app-container { border-radius: 0; padding: 20px 15px; box-shadow: none; border: none; min-height: 100vh; }
-            .header h1 { font-size: 20px; }
-            .control-panel { flex-direction: column; gap: 12px; padding: 15px; }
-            .input-group { min-width: 100%; }
-            .scroll-hint { display: block; }
-            .legend { font-size: 11px; gap: 8px; justify-content: flex-start; }
-            
-            /* 타임라인 폭 조정 & 좌측 요일칸 다이어트 */
-            .time-grid { grid-template-columns: 60px repeat(48, minmax(20px, 1fr)); }
-            .date-label { 
-                padding: 5px; flex-direction: column; font-size: 13px; line-height: 1.3;
-            }
-            .date-label span.date-sub { display: block; font-size: 10px; color: var(--text-sub); margin-bottom: 2px; }
-            .date-label span.date-text { display: none; }
+            .app-container { border-radius: 0; padding: 15px; border: none; box-shadow: none; min-height: 100vh; }
         }
     </style>
 </head>
@@ -191,30 +220,30 @@
 
 <div class="app-container">
     <div class="header">
-        <h1>🚓 Adventure Life Assist</h1>
-        <div id="dDayDisplay" class="d-day-badge">D-Day 계산중...</div>
+        <h1>🚓 시프트 매니저</h1>
+        <div id="dDayDisplay" class="d-day-badge">D-Day 계산중</div>
     </div>
     
     <div class="control-panel">
         <div class="input-group">
-            <label>1. 나의 목표 D-Day 설정</label>
+            <label>1. 목표 D-Day</label>
             <input type="date" id="dDayInput">
         </div>
         <div class="input-group">
-            <label>2. 기준 근무 (주기 리셋용)</label>
-            <div style="display: flex; gap: 10px;">
-                <input type="date" id="baseDate" style="flex: 1;">
-                <select id="baseShift" style="flex: 1;">
-                    <option value="0">주간 근무</option>
-                    <option value="1">야간 근무</option>
-                    <option value="2">비번 (퇴근)</option>
-                    <option value="3">휴무 (휴식)</option>
+            <label>2. 기준 근무 (주기 리셋)</label>
+            <div style="display: flex; gap: 5px;">
+                <input type="date" id="baseDate" style="flex: 3;">
+                <select id="baseShift" style="flex: 2; padding: 8px 2px;">
+                    <option value="0">주간</option>
+                    <option value="1">야간</option>
+                    <option value="2">비번</option>
+                    <option value="3">휴무</option>
                 </select>
             </div>
         </div>
         <div class="input-group" style="flex-direction: row; align-items: flex-end; gap: 10px;">
-            <div style="flex: 2; display: flex; flex-direction: column; gap: 8px;">
-                <label>3. 달력 조회 시작일</label>
+            <div style="flex: 2; display: flex; flex-direction: column; gap: 6px;">
+                <label>3. 달력 시작일</label>
                 <input type="date" id="targetDate">
             </div>
             <div style="flex: 1;">
@@ -227,18 +256,26 @@
         <div class="legend-item"><div class="dot bg-work"></div>업무</div>
         <div class="legend-item"><div class="dot bg-free"></div>자유</div>
         <div class="legend-item"><div class="dot bg-sleep-main"></div>정상 수면</div>
-        <div class="legend-item"><div class="dot bg-sleep-strat"></div>전략 수면(낮/앵커)</div>
+        <div class="legend-item"><div class="dot bg-sleep-strat"></div>전략 수면</div>
     </div>
 
-    <div class="scroll-hint">👉 타임라인을 좌우로 스크롤 하세요</div>
-    
-    <div class="grid-wrapper" id="gridContainer"></div>
+    <!-- ★ 가로 스크롤 없는 풀 와이드 스케줄 보드 -->
+    <div class="schedule-board">
+        <div class="board-header">
+            <div class="board-left">날짜</div>
+            <div class="board-right-axis">
+                <span>00</span><span>06</span><span>12</span><span>18</span><span>24</span>
+            </div>
+        </div>
+        <div id="gridContainer">
+            <!-- JS 렌더링 영역 -->
+        </div>
+    </div>
 
     <div class="memo-panel">
-        <label>📝 트리노트 퀵 메모 (자동 저장)</label>
+        <label>📝 트리노트 퀵 메모</label>
         <textarea id="quickMemo" placeholder="- [판례] 
   - 핵심 포인트:
-  - 예외 지문:
 - [루틴]
   - 런닝 페이스:"></textarea>
     </div>
@@ -248,43 +285,31 @@
 
 <script>
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
-        });
+        window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
     }
 
-    /* 1. 커스텀 D-Day 로직 */
+    /* 커스텀 D-Day 로직 */
     const dDayInput = document.getElementById('dDayInput');
     dDayInput.value = localStorage.getItem('targetDDay') || '2026-08-22';
-    
-    dDayInput.addEventListener('change', () => {
-        localStorage.setItem('targetDDay', dDayInput.value);
-        updateDDay();
-    });
+    dDayInput.addEventListener('change', () => { localStorage.setItem('targetDDay', dDayInput.value); updateDDay(); });
 
     function updateDDay() {
         if(!dDayInput.value) return;
         const targetDate = new Date(dDayInput.value + 'T00:00:00+09:00');
         const today = new Date();
-        today.setHours(0,0,0,0);
-        targetDate.setHours(0,0,0,0);
+        today.setHours(0,0,0,0); targetDate.setHours(0,0,0,0);
         
-        const diffTime = targetDate - today;
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-        
+        const diffDays = Math.round((targetDate - today) / (1000 * 60 * 60 * 24));
         const dDayEl = document.getElementById('dDayDisplay');
+        
         if (diffDays > 0) dDayEl.innerText = `D-${diffDays}`;
         else if (diffDays === 0) dDayEl.innerText = `D-Day`;
-        else {
-            dDayEl.innerText = `D+${Math.abs(diffDays)}`;
-            dDayEl.style.background = '#64748B';
-        }
+        else { dDayEl.innerText = `D+${Math.abs(diffDays)}`; dDayEl.style.background = '#64748B'; }
     }
 
-    /* 2. 다크 모드 및 메모 로컬 스토리지 로직 */
+    /* 다크 모드 및 메모 로컬 스토리지 로직 */
     const memoEl = document.getElementById('quickMemo');
     const darkModeBtn = document.getElementById('darkModeToggle');
-    
     memoEl.value = localStorage.getItem('treeNoteMemo') || '';
     memoEl.addEventListener('input', () => localStorage.setItem('treeNoteMemo', memoEl.value));
 
@@ -298,7 +323,7 @@
     if (localStorage.getItem('isDarkMode') === 'true') toggleDarkMode();
     darkModeBtn.addEventListener('click', toggleDarkMode);
 
-    /* 3. 스케줄러 핵심 로직 */
+    /* 스케줄러 핵심 마스터 데이터 (1=업무, 2=자유, 3=정상수면, 4=전략수면) */
     const shiftPattern = {
         0: { name: '주간', blocks: Array(48).fill(2) },
         1: { name: '야간', blocks: Array(48).fill(2) },
@@ -337,12 +362,10 @@
         elBaseShift.value = localStorage.getItem('shiftBaseIndex') || '0';
         elTargetDate.value = localStorage.getItem('shiftTargetDate') || todayStr;
 
-        [elBaseDate, elBaseShift, elTargetDate].forEach(el => {
-            el.addEventListener('change', renderGrid);
-        });
+        [elBaseDate, elBaseShift, elTargetDate].forEach(el => { el.addEventListener('change', renderGrid); });
 
         renderGrid();
-        setInterval(markCurrentTime, 60000); 
+        setInterval(renderGrid, 60000); // 1분마다 리렌더링하여 NOW 바 이동
     }
 
     function renderGrid() {
@@ -355,15 +378,18 @@
         const baseIndex = parseInt(elBaseShift.value);
         const diffDays = Math.round((targetD - baseD) / (1000 * 60 * 60 * 24));
 
+        // 현재 시간 퍼센트 계산 (NOW 인디케이터용)
+        const now = new Date();
+        const todayStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+        const nowPercent = ((now.getHours() * 60 + now.getMinutes()) / 1440) * 100;
+
         let html = '';
-        html += '<div class="time-grid header-row"><div class="date-label">날짜</div>';
-        for(let i = 0; i < 24; i++) html += `<div class="cell time-header">${i.toString().padStart(2, '0')}</div>`;
-        html += '</div>';
 
         for(let i = 0; i < 7; i++) {
             const currentD = new Date(targetD);
             currentD.setDate(targetD.getDate() + i);
             const dateStrId = currentD.toISOString().split('T')[0]; 
+            const isToday = (dateStrId === todayStr);
             
             const month = (currentD.getMonth() + 1).toString().padStart(2, '0');
             const date = currentD.getDate().toString().padStart(2, '0');
@@ -372,43 +398,37 @@
             const shiftIndex = ((baseIndex + diffDays + i) % 4 + 4) % 4;
             const shiftInfo = shiftPattern[shiftIndex];
 
-            html += `<div class="time-grid" id="row-${dateStrId}">`;
-            // 모바일용 쪼개진 텍스트(span.date-sub)와 데스크탑용 텍스트(span.date-text) 결합
-            html += `<div class="date-label"><span class="date-sub">${month}/${date}(${dayStr})</span><span class="date-text">${month}/${date}(${dayStr}) </span>${shiftInfo.name}</div>`;
+            html += `<div class="board-row">`;
             
+            // 좌측 요일/근무 (위아래 압축)
+            html += `<div class="row-label"><span class="sub">${month}/${date}(${dayStr})</span>${shiftInfo.name}</div>`;
+            
+            // 우측 풀 와이드 타임라인
+            html += `<div class="row-timeline">`;
+            
+            // 오늘인 경우 실시간 얇은 선 인디케이터 렌더링
+            if (isToday) {
+                html += `<div class="now-marker" style="left: ${nowPercent}%;"></div>`;
+            }
+
+            // 48개 블록 렌더링 (flex: 1로 공간 자동 채움)
             shiftInfo.blocks.forEach((typeCode, blockIndex) => {
                 const typeData = typeMap[typeCode];
                 const hour = Math.floor(blockIndex / 2).toString().padStart(2, '0');
                 const min = (blockIndex % 2 === 0) ? '00' : '30';
                 
                 html += `<div class="block ${typeData.cls}" 
-                              id="block-${dateStrId}-${blockIndex}"
                               data-time="${hour}:${min}" 
                               data-type="${typeData.label}"
                               onclick="showTooltip(event)"
                               onmouseleave="hideTooltip()"></div>`;
             });
-            html += `</div>`;
+            html += `</div></div>`;
         }
         elGridContainer.innerHTML = html;
-        markCurrentTime(); 
     }
 
-    function markCurrentTime() {
-        document.querySelectorAll('.current-time-block').forEach(el => el.classList.remove('current-time-block'));
-        
-        const now = new Date();
-        const todayStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
-        const blockIndex = (now.getHours() * 2) + (now.getMinutes() >= 30 ? 1 : 0);
-        
-        const targetBlock = document.getElementById(`block-${todayStr}-${blockIndex}`);
-        
-        if(targetBlock) {
-            targetBlock.classList.add('current-time-block');
-        }
-    }
-
-    /* 터치 및 마우스 툴팁 중앙 상단 보정 */
+    /* 툴팁 중앙 상단 보정 */
     window.showTooltip = function(e) {
         const target = e.target;
         const time = target.getAttribute('data-time');
@@ -418,21 +438,14 @@
         const clientX = e.clientX || (e.touches && e.touches[0].clientX);
         const clientY = e.clientY || (e.touches && e.touches[0].clientY);
         
-        // 손가락에 가려지지 않게 탭한 위치 기준 위로 45px 띄우고 정중앙 정렬
         elTooltip.style.left = clientX + 'px';
-        elTooltip.style.top = (clientY - 45) + 'px';
+        elTooltip.style.top = (clientY - 35) + 'px';
         elTooltip.style.transform = 'translate(-50%, 0)'; 
         elTooltip.style.opacity = '1';
         
-        // 모바일에서 터치 후 1.5초 뒤 자동 숨김 처리
-        if (window.innerWidth <= 768) {
-            setTimeout(hideTooltip, 1500);
-        }
+        if (window.innerWidth <= 768) { setTimeout(hideTooltip, 1500); }
     };
-    
-    window.hideTooltip = function() {
-        elTooltip.style.opacity = '0';
-    };
+    window.hideTooltip = function() { elTooltip.style.opacity = '0'; };
 
     updateDDay();
     initScheduler();
