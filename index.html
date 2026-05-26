@@ -2,206 +2,391 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Journey's End - Master Edition</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#88B2CC">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Journey">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주야비휴 프리미엄 스케줄러 & AI</title>
+    <style>
+        /* 프리미엄 폰트 & 초기화 */
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+            display: flex;
+            justify-content: center;
+            padding: 40px 15px;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .app-container {
+            width: 100%;
+            max-width: 1050px;
+            background: #FFFFFF;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            padding: 30px;
+        }
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="styles/main.css" />
+        .header { margin-bottom: 25px; text-align: center; }
+        .header h1 { font-size: 26px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; }
+
+        /* 설정 패널 */
+        .control-panel {
+            display: flex; flex-wrap: wrap; gap: 15px;
+            background: #F8FAFC; padding: 20px; border-radius: 12px;
+            margin-bottom: 25px; border: 1px solid #E2E8F0;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
+        .input-group label { font-size: 13px; font-weight: 700; color: #475569; }
+        input, select, button {
+            padding: 10px 12px; border: 1px solid #CBD5E1; border-radius: 8px;
+            font-family: inherit; font-size: 14px; outline: none; transition: all 0.2s;
+            background: #FFFFFF;
+        }
+        input:focus, select:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        
+        button.primary-btn { background: #0F172A; color: white; border: none; font-weight: 600; cursor: pointer; }
+        button.primary-btn:hover { background: #334155; }
+
+        /* 범례 */
+        .legend {
+            display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;
+            margin-bottom: 20px; font-size: 13px; font-weight: 600; color: #334155;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .dot { width: 14px; height: 14px; border-radius: 4px; }
+        
+        /* ★ 컬러 개편 (업무/자유는 톤온톤, 수면은 보색) */
+        .bg-work { background-color: #1E3A8A; } /* 딥 네이비 (업무) */
+        .bg-free { background-color: #DBEAFE; } /* 아주 연한 아이스블루 (자유) */
+        .bg-sleep-main { background-color: #7C3AED; } /* 딥 퍼플 (정상 수면) */
+        .bg-sleep-strat { background-color: #C4B5FD; } /* 라이트 퍼플 (전략적 수면) */
+
+        /* 스크롤 그리드 */
+        .grid-wrapper {
+            width: 100%; overflow-x: auto; border-radius: 12px;
+            border: 1px solid #E2E8F0; background: #FFFFFF;
+        }
+        .time-grid {
+            display: inline-grid;
+            grid-template-columns: 140px repeat(48, minmax(18px, 1fr)); /* 140px로 늘려 글자 깨짐 방지 */
+            min-width: max-content; border-bottom: 1px solid #F1F5F9;
+        }
+        .time-grid:last-child { border-bottom: none; }
+        .header-row { background: #F8FAFC; position: sticky; top: 0; z-index: 5; border-bottom: 1px solid #E2E8F0; }
+        
+        .cell { padding: 8px 0; text-align: center; font-size: 11px; color: #64748B; border-right: 1px dashed #E2E8F0; }
+        .cell.time-header { grid-column: span 2; border-right: 1px solid #CBD5E1; font-weight: 700; }
+        
+        /* ★ 왼쪽 요일 글자 밀림 방지 */
+        .date-label {
+            position: sticky; left: 0; background: #FFFFFF; padding: 12px 15px;
+            font-size: 13px; font-weight: 700; color: #1E293B;
+            border-right: 2px solid #E2E8F0; z-index: 10;
+            white-space: nowrap; /* 글자 쪼개짐 원천 차단 */
+            display: flex; align-items: center;
+        }
+        .header-row .date-label { background: #F8FAFC; z-index: 15; }
+
+        .block { height: 100%; transition: opacity 0.2s; cursor: pointer; }
+        .block:hover { opacity: 0.7; }
+        
+        /* ★ 현재 시간 인디케이터 (모던 스타일) */
+        .current-time-block {
+            position: relative;
+            background-color: #EF4444 !important; /* 강력한 레드 포인트 */
+            z-index: 20;
+            transform: scaleY(1.1);
+        }
+        .current-time-block::before {
+            content: 'NOW';
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #EF4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 12px;
+            z-index: 25;
+        }
+
+        /* 툴팁 */
+        .tooltip {
+            position: fixed; background: #0F172A; color: #FFFFFF; padding: 8px 12px;
+            border-radius: 6px; font-size: 13px; font-weight: 500; pointer-events: none;
+            opacity: 0; transform: translateY(5px); transition: all 0.2s; z-index: 999;
+        }
+
+        /* AI 코치 패널 */
+        .ai-panel { margin-top: 30px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px; }
+        .ai-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;}
+        .ai-header h3 { font-size: 16px; color: #0F172A; display: flex; align-items: center; gap: 8px; }
+        .ai-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+        .ai-response {
+            background: white; padding: 15px; border-radius: 8px; border: 1px solid #E2E8F0;
+            font-size: 14px; line-height: 1.6; color: #334155; min-height: 60px;
+        }
+    </style>
 </head>
 <body>
 
 <div class="app-container">
-    <header class="header" id="globalHeader">
-        <h1>JOURNEY'S END</h1>
-        <div class="header-controls">
-            <span class="logical-date" id="headerDate"></span>
-            <div class="avatar-btn" id="btnOpenProfile"><i class="fa-solid fa-user" id="headerAvatarIcon"></i></div>
-        </div>
-    </header>
-
-    <main id="viewQuest" class="view-section active">
-        <div id="map-container"><div id="questMap"></div></div>
-        <div class="map-btn btn-cloak" id="btnCloak"><i class="fa-solid fa-ghost"></i></div>
-        <div class="map-btn btn-locate" id="btnLocate"><i class="fa-solid fa-location-crosshairs"></i></div>
-        
-        <div class="quest-bottom-panel">
-            <div class="timer-val" id="stopwatch">00:00:00</div>
-            <div class="action-row">
-                <button class="btn-study" id="btnStudyToggle"><i class="fa-solid fa-book-journal-whills"></i> <span>마법 탐구 시작</span></button>
-                <button class="btn-record" id="btnOpenEvents"><i class="fa-solid fa-feather-pointed"></i> <span>기억 새기기</span></button>
-            </div>
-        </div>
-    </main>
-
-    <main id="viewLog" class="view-section">
-        <div class="stats-board">
-            <div class="stat-box"><div class="stat-label">오늘의 탐구</div><div class="stat-val" id="stDay">0분</div></div>
-            <div class="stat-box"><div class="stat-label">이번 주</div><div class="stat-val" id="stWeek">0분</div></div>
-            <div class="stat-box"><div class="stat-label">이번 달</div><div class="stat-val" id="stMonth">0분</div></div>
-        </div>
-        <div class="ui-input-row memo-bar">
-            <input type="text" id="quickMemo" placeholder="✍️ 단상을 가볍게 남겨보세요...">
-            <button class="btn-submit gold" id="btnSaveMemo"><i class="fa-solid fa-pen-nib"></i></button>
-        </div>
-        <div id="logStream"></div>
-    </main>
-
-    <main id="viewJournal" class="view-section">
-        <div class="calendar-card">
-            <div class="cal-header">
-                <button id="btnPrevMonth" style="background:none; border:none; cursor:pointer; color:var(--text-dim);"><i class="fa-solid fa-chevron-left"></i></button>
-                <span id="calMonthTitle"></span>
-                <button id="btnNextMonth" style="background:none; border:none; cursor:pointer; color:var(--text-dim);"><i class="fa-solid fa-chevron-right"></i></button>
-            </div>
-            <div class="cal-grid" id="calendarGrid"></div>
-        </div>
-        <h3 style="font-size: 16px; color: var(--gold); margin-bottom: 15px; margin-top:0;" id="journalDateTitle">날짜 선택</h3>
-        <div id="journalLogList"></div>
-    </main>
-
-    <main id="viewTavern" class="view-section">
-        <div class="dm-header"><h2>모험가 길드 주점</h2></div>
-        <div class="dm-tabs">
-            <div class="dm-tab active" data-target="secGlobal">전체 채팅</div>
-            <div class="dm-tab" data-target="secSelf">나와의 DM</div>
-            <div class="dm-tab" data-target="secQuest">셀프 퀘스트</div>
-        </div>
-        
-        <div class="tavern-section active" id="secGlobal">
-            <div class="chat-stream" id="chatStreamGlobal"></div>
-            <div class="chat-input-area">
-                <div class="ui-input-row">
-                    <input type="text" id="chatInputGlobal" placeholder="모험가들에게 인사하기...">
-                    <button class="btn-submit" id="btnSendGlobal">보내기</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="tavern-section" id="secSelf">
-            <div class="chat-stream" id="chatStreamSelf" style="background:#f9f9f9;"></div>
-            <div class="chat-input-area">
-                <div class="ui-input-row">
-                    <input type="file" id="selfImageUpload" accept="image/*" style="display:none;">
-                    <label for="selfImageUpload" class="icon-btn" style="cursor:pointer;"><i class="fa-solid fa-camera"></i></label>
-                    <input type="text" id="chatInputSelf" placeholder="나에게 메모 남기기...">
-                    <button class="btn-submit" id="btnSendSelf">저장</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="tavern-section" id="secQuest">
-            <div class="quest-board">
-                <div class="ui-input-row" style="margin-bottom: 20px;">
-                    <input type="text" id="questInput" placeholder="새로운 루틴/퀘스트 추가">
-                    <button class="btn-submit" id="btnAddQuest">추가</button>
-                </div>
-                <div id="questList"></div>
-            </div>
-        </div>
-    </main>
-
-    <nav class="bottom-nav">
-        <div class="nav-item active" data-view="viewQuest"><i class="fa-solid fa-house"></i><span>여정</span></div>
-        <div class="nav-item" data-view="viewLog"><i class="fa-solid fa-magnifying-glass"></i><span>발자취</span></div>
-        <div class="nav-item" data-view="viewJournal"><i class="fa-regular fa-calendar-days"></i><span>마도서</span></div>
-        <div class="nav-item" data-view="viewTavern"><i class="fa-regular fa-paper-plane"></i><span>주점(DM)</span></div>
-    </nav>
-</div>
-
-<div class="modal-overlay bottom-sheet" id="eventModal">
-    <div class="modal-content">
-        <h3 class="modal-title">작업 선택</h3>
-        <div class="event-grid">
-            <div class="event-item evt-opt" data-type="아침 맞이" data-icon="fa-solid fa-sun"><i class="fa-solid fa-sun"></i><div>아침 맞이</div></div>
-            <div class="event-item evt-opt" data-type="식사" data-icon="fa-solid fa-utensils"><i class="fa-solid fa-utensils"></i><div>식사/휴식</div></div>
-            <div class="event-item evt-opt" data-type="단련" data-icon="fa-solid fa-dumbbell"><i class="fa-solid fa-dumbbell"></i><div>체력 단련</div></div>
-            <div class="event-item evt-opt" data-type="탐구" data-icon="fa-solid fa-wand-magic-sparkles"><i class="fa-solid fa-wand-magic-sparkles"></i><div>마법 탐구</div></div>
-            <div class="event-item evt-opt" data-type="수면" data-icon="fa-solid fa-moon"><i class="fa-solid fa-moon"></i><div>야영/수면</div></div>
-            <div class="event-item evt-opt" data-type="여정" data-icon="fa-solid fa-route"><i class="fa-solid fa-route"></i><div>이동/기타</div></div>
-        </div>
-        <div id="eventInputs" style="display:none; flex-direction:column; gap:10px;">
-            <div class="ui-input-row"><input type="text" id="inputAction" placeholder="구체적인 내용 (예: 새로운 숲 탐험)"></div>
-            <div class="ui-input-row"><input type="text" id="inputPlace" placeholder="장소명 (예: 요정의 숲)"></div>
-            <button class="ui-input-row btn-submit" style="width:100%; justify-content:center; margin-top:5px; border-radius:16px;" id="btnSaveEvent">기록 남기기</button>
-        </div>
+    <div class="header">
+        <h1>🚓 2026 주야비휴 스케줄러 & 코치</h1>
     </div>
-</div>
-
-<div class="modal-overlay center-popup" id="profileModal">
-    <div class="modal-content">
-        <h3 class="modal-title">내 정보 및 연동</h3>
-        
-        <div id="loginSection" style="text-align: center; margin-bottom: 20px;">
-            <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 10px;">여정을 안전하게 기록하기 위해 로그인하세요.</p>
-            <div class="ui-input-row" style="margin-bottom: 10px;">
-                <input type="email" id="loginEmail" placeholder="이메일">
-            </div>
-            <div class="ui-input-row" style="margin-bottom: 10px;">
-                <input type="password" id="loginPassword" placeholder="비밀번호">
-            </div>
+    
+    <div class="control-panel">
+        <div class="input-group">
+            <label>기준 근무 (주기 세팅)</label>
             <div style="display: flex; gap: 10px;">
-                <button id="btnLogin" style="flex: 1; padding: 14px 0; border-radius: 16px; border: none; font-size: 15px; font-weight: 800; color: #fff; background: var(--primary); cursor: pointer; box-shadow: var(--shadow-md);">로그인</button>
-                <button id="btnSignup" style="flex: 1; padding: 14px 0; border-radius: 16px; border: 1.5px solid var(--primary); font-size: 15px; font-weight: 800; color: var(--primary); background: #fff; cursor: pointer;">회원가입</button>
+                <input type="date" id="baseDate" style="flex: 1;">
+                <select id="baseShift" style="flex: 1;">
+                    <option value="0">주간 근무</option>
+                    <option value="1">야간 근무</option>
+                    <option value="2">비번 (퇴근)</option>
+                    <option value="3">휴무 (휴식)</option>
+                </select>
             </div>
-            <button id="btnGoogleLogin" style="width: 100%; padding: 14px 0; border-radius: 16px; border: 1px solid #DBDBDB; font-size: 15px; font-weight: 800; color: var(--text); background: #fff; cursor: pointer; margin-top: 10px; box-shadow: var(--shadow-sm); display: flex; justify-content: center; align-items: center;">
-                <i class="fa-brands fa-google" style="margin-right: 8px;"></i> 구글로 로그인
-            </button>
         </div>
+        <div class="input-group" style="max-width: 200px;">
+            <label>조회 시작일</label>
+            <input type="date" id="targetDate">
+        </div>
+    </div>
 
-        <div id="userInfoSection" style="display: none;">
-            <p style="text-align: center; margin-bottom: 10px; color: var(--gold); font-weight: bold;">환영합니다, <span id="userNameDisplay"></span>님!</p>
-            <div class="profile-avatar-wrap">
-                <input type="file" id="avatarUpload" accept="image/*" style="display:none;">
-                <label for="avatarUpload" class="profile-avatar-lrg" id="profileAvatarUI">
-                    <i class="fa-solid fa-camera" id="profileModalIcon"></i>
-                </label>
+    <div class="legend">
+        <div class="legend-item"><div class="dot bg-work"></div>업무 (집중)</div>
+        <div class="legend-item"><div class="dot bg-free"></div>자유 (휴식)</div>
+        <div class="legend-item"><div class="dot bg-sleep-main"></div>정상 수면 (밤잠)</div>
+        <div class="legend-item"><div class="dot bg-sleep-strat"></div>전략적 수면 (낮잠)</div>
+    </div>
+
+    <div class="grid-wrapper" id="gridContainer"></div>
+
+    <div class="ai-panel">
+        <div class="ai-header">
+            <h3>✨ 최신 AI 실시간 컨디션 분석</h3>
+            <div class="ai-controls">
+                <select id="aiModelSelect">
+                    <option value="gemini-3.1-flash-light">Gemini 3.1 Flash Light</option>
+                    <option value="gemini-3-flash-live">Gemini 3 Flash Live</option>
+                    <option value="gemma-4-31b">Gemma 4 31B (통합 API)</option>
+                </select>
+                <input type="password" id="apiKeyInput" placeholder="API Key 입력" style="width: 180px;">
+                <button class="primary-btn" onclick="askAI()">내 상태 분석하기</button>
             </div>
-            <button id="btnResetAvatar" style="display:block; margin: 0 auto 15px auto; background:none; border:none; text-decoration:underline; color:var(--danger); font-size:12px; cursor:pointer;">기본 아바타로 변경</button>
-            <div class="ui-input-row" style="margin-bottom:10px;"><input type="text" id="profileNameInput" placeholder="모험가 이름" maxlength="12"></div>
-            <button class="ui-input-row btn-submit" style="width:100%; justify-content:center; background:var(--primary); margin-bottom: 10px;" id="btnSaveProfile">정보 갱신</button>
-            
-            <button id="btnLogout" class="btn-submit" style="width: 100%; justify-content: center; background: var(--surface); color: var(--text); border: 1px solid var(--border);">로그아웃</button>
         </div>
-        
-        <div class="sync-box" style="margin-top: 20px;">
-            <label>기기 연동 고유 코드 (구버전 호환용)</label>
-            <div class="code-display" id="syncCodeDisplay"></div>
-            <div class="ui-input-row">
-                <input type="text" id="syncCodeInput" placeholder="기존 연동 코드 붙여넣기">
-                <button class="btn-submit" id="btnApplySync">불러오기</button>
-            </div>
+        <div id="aiResponse" class="ai-response">
+            API 키를 입력하고 모델을 선택한 뒤 버튼을 누르면, 현재 시간과 근무 스케줄을 분석하여 실시간 팁을 제공합니다. (새로고침해도 설정이 유지됩니다.)
         </div>
     </div>
 </div>
 
-<div class="modal-overlay bottom-sheet" id="userJourneyModal">
-    <div class="modal-content">
-        <h3 class="modal-title" id="userJourneyTitle">모험가의 오늘 여정</h3>
-        <div id="userJourneyLog"></div>
-        <button class="ui-input-row btn-submit" style="width:100%; justify-content:center; background:#fff; color:var(--text); border:1px solid #DBDBDB;" id="btnCloseJourney">닫기</button>
-    </div>
-</div>
+<div class="tooltip" id="tooltip"></div>
 
 <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('ServiceWorker 등록 성공:', reg.scope))
-                .catch(err => console.error('ServiceWorker 등록 실패:', err));
-        });
+    const shiftPattern = {
+        0: { name: '주간', blocks: Array(48).fill(2) },
+        1: { name: '야간', blocks: Array(48).fill(2) },
+        2: { name: '비번', blocks: Array(48).fill(2) },
+        3: { name: '휴무', blocks: Array(48).fill(2) }
+    };
+    function fillBlocks(shiftIdx, start, length, type) {
+        for(let i = start; i < start + length; i++) shiftPattern[shiftIdx].blocks[i] = type;
     }
+    
+    fillBlocks(0, 0, 13, 3); fillBlocks(0, 18, 18, 1); fillBlocks(0, 46, 2, 3);
+    fillBlocks(1, 0, 13, 3); fillBlocks(1, 28, 3, 4); fillBlocks(1, 36, 12, 1);
+    fillBlocks(2, 0, 18, 1); fillBlocks(2, 20, 8, 4); fillBlocks(2, 46, 2, 3);
+    fillBlocks(3, 0, 14, 3); fillBlocks(3, 46, 2, 3);
+
+    const typeMap = { 
+        1: {cls: 'bg-work', label:'근무 중'}, 2: {cls: 'bg-free', label:'자유 시간'}, 
+        3: {cls: 'bg-sleep-main', label:'정상 수면'}, 4: {cls: 'bg-sleep-strat', label:'전략적 수면'}
+    };
+    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+
+    const elBaseDate = document.getElementById('baseDate');
+    const elBaseShift = document.getElementById('baseShift');
+    const elTargetDate = document.getElementById('targetDate');
+    const elApiKey = document.getElementById('apiKeyInput');
+    const elModelSelect = document.getElementById('aiModelSelect');
+    const elGridContainer = document.getElementById('gridContainer');
+    const elTooltip = document.getElementById('tooltip');
+
+    let currentLiveShiftName = "";
+    let currentLiveBlockType = "";
+
+    function getSafeDate(dateString) {
+        const parts = dateString.split('-');
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    // ★ 로컬스토리지 완벽 보존 로직
+    function init() {
+        const todayStr = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split('T')[0];
+        
+        elBaseDate.value = localStorage.getItem('shiftBaseDate') || todayStr;
+        elBaseShift.value = localStorage.getItem('shiftBaseIndex') || '0';
+        elTargetDate.value = localStorage.getItem('shiftTargetDate') || todayStr;
+        
+        if(localStorage.getItem('savedApiKey')) elApiKey.value = localStorage.getItem('savedApiKey');
+        if(localStorage.getItem('savedAiModel')) elModelSelect.value = localStorage.getItem('savedAiModel');
+
+        [elBaseDate, elBaseShift, elTargetDate].forEach(el => {
+            el.addEventListener('change', renderGrid);
+        });
+
+        // 설정 변경 시 스토리지 자동 저장
+        elApiKey.addEventListener('change', () => localStorage.setItem('savedApiKey', elApiKey.value));
+        elModelSelect.addEventListener('change', () => localStorage.setItem('savedAiModel', elModelSelect.value));
+        
+        renderGrid();
+        setInterval(markCurrentTime, 60000); 
+    }
+
+    function renderGrid() {
+        localStorage.setItem('shiftBaseDate', elBaseDate.value);
+        localStorage.setItem('shiftBaseIndex', elBaseShift.value);
+        localStorage.setItem('shiftTargetDate', elTargetDate.value);
+
+        const baseD = getSafeDate(elBaseDate.value);
+        const targetD = getSafeDate(elTargetDate.value);
+        const baseIndex = parseInt(elBaseShift.value);
+        const diffDays = Math.round((targetD - baseD) / (1000 * 60 * 60 * 24));
+
+        let html = '';
+        html += '<div class="time-grid header-row"><div class="date-label">근무일자</div>';
+        for(let i = 0; i < 24; i++) html += `<div class="cell time-header">${i.toString().padStart(2, '0')}</div>`;
+        html += '</div>';
+
+        for(let i = 0; i < 7; i++) {
+            const currentD = new Date(targetD);
+            currentD.setDate(targetD.getDate() + i);
+            const dateStrId = currentD.toISOString().split('T')[0]; 
+            
+            const month = (currentD.getMonth() + 1).toString().padStart(2, '0');
+            const date = currentD.getDate().toString().padStart(2, '0');
+            const dayStr = dayNames[currentD.getDay()];
+            
+            const shiftIndex = ((baseIndex + diffDays + i) % 4 + 4) % 4;
+            const shiftInfo = shiftPattern[shiftIndex];
+
+            html += `<div class="time-grid" id="row-${dateStrId}" data-shiftname="${shiftInfo.name}">`;
+            html += `<div class="date-label">${month}/${date}(${dayStr}) ${shiftInfo.name}</div>`;
+            
+            shiftInfo.blocks.forEach((typeCode, blockIndex) => {
+                const typeData = typeMap[typeCode];
+                const hour = Math.floor(blockIndex / 2).toString().padStart(2, '0');
+                const min = (blockIndex % 2 === 0) ? '00' : '30';
+                
+                html += `<div class="block ${typeData.cls}" 
+                              id="block-${dateStrId}-${blockIndex}"
+                              data-time="${hour}:${min}" 
+                              data-type="${typeData.label}"
+                              onmouseenter="showTooltip(event)" 
+                              ontouchstart="showTooltip(event)"
+                              onmouseleave="hideTooltip()"
+                              ontouchend="hideTooltip()"></div>`;
+            });
+            html += `</div>`;
+        }
+        elGridContainer.innerHTML = html;
+        markCurrentTime(); 
+    }
+
+    function markCurrentTime() {
+        document.querySelectorAll('.current-time-block').forEach(el => el.classList.remove('current-time-block'));
+        
+        const now = new Date();
+        const todayStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+        const blockIndex = (now.getHours() * 2) + (now.getMinutes() >= 30 ? 1 : 0);
+        
+        const targetBlock = document.getElementById(`block-${todayStr}-${blockIndex}`);
+        const targetRow = document.getElementById(`row-${todayStr}`);
+        
+        if(targetBlock && targetRow) {
+            targetBlock.classList.add('current-time-block');
+            currentLiveShiftName = targetRow.getAttribute('data-shiftname');
+            currentLiveBlockType = targetBlock.getAttribute('data-type');
+        }
+    }
+
+    // ★ 최신 모델 API 호출 로직
+    async function askAI() {
+        const apiKey = elApiKey.value.trim();
+        const selectedModel = elModelSelect.value;
+        
+        if(!apiKey) {
+            alert("API 키를 입력해주세요!");
+            return;
+        }
+        localStorage.setItem('savedApiKey', apiKey);
+        localStorage.setItem('savedAiModel', selectedModel);
+
+        const responseBox = document.getElementById('aiResponse');
+        responseBox.innerHTML = `<i>${selectedModel} 모델을 통해 분석 중입니다... ⏳</i>`;
+
+        const now = new Date();
+        const timeStr = `${now.getHours()}시 ${now.getMinutes()}분`;
+        
+        if(!currentLiveShiftName) {
+            responseBox.innerHTML = "❌ 달력 조회 기간에 '오늘'이 포함되어 있지 않아 분석할 수 없습니다.";
+            return;
+        }
+
+        const prompt = `
+당신은 교대근무자의 건강 코치입니다.
+상태: [오늘 근무: ${currentLiveShiftName}], [현재 시간: ${timeStr}], [현재 스케줄: ${currentLiveBlockType}]
+이 정보를 바탕으로 현재 시점에 맞는 행동 지침 1~2가지를 아주 짧고 명확하게 알려주세요. 3문장 이내로 작성하세요.
+`;
+
+        try {
+            // 선택된 모델을 URL에 동적으로 바인딩
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }]
+                })
+            });
+
+            if(!res.ok) throw new Error(`API 호출 실패 (상태 코드: ${res.status})`);
+
+            const data = await res.json();
+            const reply = data.candidates[0].content.parts[0].text;
+            
+            responseBox.innerHTML = reply.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+        } catch (error) {
+            responseBox.innerHTML = `<span style="color: #EF4444;">오류 발생: ${error.message}<br>선택한 모델명(${selectedModel})이 키 권한과 맞는지 확인하세요.</span>`;
+        }
+    }
+
+    // 툴팁 로직
+    window.showTooltip = function(e) {
+        const target = e.target || e.touches[0].target;
+        const time = target.getAttribute('data-time');
+        const type = target.getAttribute('data-type');
+        elTooltip.innerHTML = `<strong>${time}</strong><br/>${type}`;
+        elTooltip.style.opacity = '1';
+        elTooltip.style.transform = 'translateY(0)';
+        
+        const clientX = e.clientX || e.touches[0].clientX;
+        const clientY = e.clientY || e.touches[0].clientY;
+        elTooltip.style.left = (clientX + 15) + 'px';
+        elTooltip.style.top = (clientY + 15) + 'px';
+    };
+    window.hideTooltip = function() {
+        elTooltip.style.opacity = '0';
+        elTooltip.style.transform = 'translateY(5px)';
+    };
+
+    init();
 </script>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="js/main.js"></script>
 </body>
 </html>
