@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- PWA 메타 태그 연동 -->
     <meta name="theme-color" content="#F8FAFC" id="themeColorMeta">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -22,14 +21,12 @@
             --border: #E2E8F0;
             --input-bg: #FFFFFF;
             
-            /* 스케줄 컬러 팔레트 */
-            --work-bg: #1E3A8A; /* 짙은 네이비 */
-            --free-bg: #DBEAFE; /* 연한 아이스블루 */
-            --sleep-main: #7C3AED; /* 딥 퍼플 */
-            --sleep-strat: #C4B5FD; /* 라이트 퍼플 */
+            --work-bg: #1E3A8A;
+            --free-bg: #DBEAFE;
+            --sleep-main: #7C3AED;
+            --sleep-strat: #C4B5FD;
         }
 
-        /* 다크 모드 변수 */
         body.dark-mode {
             --bg-main: #0F172A;
             --bg-card: #1E293B;
@@ -67,7 +64,7 @@
 
         /* 헤더 & D-Day */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
-        .header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px;}
+        .header h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
         .d-day-badge {
             background: #EF4444; color: white; padding: 6px 14px;
             border-radius: 20px; font-weight: 800; font-size: 15px;
@@ -93,27 +90,16 @@
         .btn-toggle {
             background: transparent; border: 1px solid var(--border); cursor: pointer;
             padding: 10px 15px; border-radius: 8px; font-weight: 600; color: var(--text-main);
+            width: 100%;
         }
         .btn-toggle:hover { background: var(--border); }
 
-        /* 단백질 트래커 */
-        .tracker-panel {
-            background: var(--bg-panel); padding: 15px 20px; border-radius: 12px;
-            margin-bottom: 25px; border: 1px solid var(--border);
-        }
-        .tracker-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .tracker-title { font-size: 14px; font-weight: 700; color: var(--text-main); }
-        .progress-bar-bg { width: 100%; height: 12px; background: var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 15px; }
-        .progress-bar-fill { height: 100%; background: #3B82F6; width: 0%; transition: width 0.3s ease; }
-        .tracker-controls { display: flex; gap: 10px; align-items: center; }
-        .btn-add { background: #3B82F6; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        
         /* 범례 */
         .legend {
-            display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
-            margin-bottom: 20px; font-size: 13px; font-weight: 600; color: var(--text-main);
+            display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+            margin-bottom: 15px; font-size: 13px; font-weight: 600; color: var(--text-main);
         }
-        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
         .dot { width: 14px; height: 14px; border-radius: 4px; }
         
         .bg-work { background-color: var(--work-bg); }
@@ -121,15 +107,19 @@
         .bg-sleep-main { background-color: var(--sleep-main); }
         .bg-sleep-strat { background-color: var(--sleep-strat); }
 
+        /* 모바일 스크롤 유도 텍스트 */
+        .scroll-hint { display: none; text-align: right; font-size: 11px; color: var(--text-sub); margin-bottom: 5px; font-weight: 600; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: translateX(0); } 50% { opacity: 1; transform: translateX(-4px); } }
+
         /* 그리드 뷰 */
         .grid-wrapper {
             width: 100%; overflow-x: auto; border-radius: 12px;
             border: 1px solid var(--border); background: var(--bg-card);
-            margin-bottom: 25px;
+            margin-bottom: 25px; -webkit-overflow-scrolling: touch;
         }
         .time-grid {
             display: inline-grid;
-            grid-template-columns: 130px repeat(48, minmax(18px, 1fr));
+            grid-template-columns: 120px repeat(48, minmax(20px, 1fr));
             min-width: max-content; border-bottom: 1px solid var(--border);
         }
         .time-grid:last-child { border-bottom: none; }
@@ -138,33 +128,29 @@
         .cell { padding: 8px 0; text-align: center; font-size: 11px; color: var(--text-sub); border-right: 1px dashed var(--border); }
         .cell.time-header { grid-column: span 2; border-right: 1px solid var(--border); font-weight: 700; }
         
-        /* 좌측 요일 고정 & 밀림 방지 */
         .date-label {
             position: sticky; left: 0; background: var(--bg-card); padding: 0 15px;
             font-size: 13px; font-weight: 700; color: var(--text-main);
             border-right: 2px solid var(--border); z-index: 10;
-            white-space: nowrap; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
         }
+        .date-label span.date-sub { display: none; }
         .header-row .date-label { background: var(--bg-panel); z-index: 15; }
 
-        .block { height: 100%; transition: opacity 0.2s; cursor: pointer; border-right: 1px solid rgba(0,0,0,0.02); }
-        .block:hover { opacity: 0.7; }
+        .block { height: 100%; cursor: pointer; border-right: 1px solid rgba(0,0,0,0.02); transition: opacity 0.2s; }
+        .block:active { opacity: 0.5; }
         
         .current-time-block {
             position: relative; background-color: #EF4444 !important; z-index: 20; transform: scaleY(1.1);
         }
         .current-time-block::before {
-            content: 'NOW'; position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+            content: 'NOW'; position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
             background: #EF4444; color: white; font-size: 10px; font-weight: 800;
             padding: 2px 6px; border-radius: 12px; z-index: 25;
         }
 
         /* 트리노트 퀵 메모 */
-        .memo-panel {
-            background: var(--bg-panel); padding: 20px; border-radius: 12px;
-            border: 1px solid var(--border);
-        }
+        .memo-panel { background: var(--bg-panel); padding: 20px; border-radius: 12px; border: 1px solid var(--border); }
         .memo-panel label { display: block; font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
         textarea {
             width: 100%; height: 120px; padding: 15px; border-radius: 8px;
@@ -172,13 +158,32 @@
             color: var(--text-main); font-family: inherit; font-size: 14px;
             resize: vertical; outline: none; line-height: 1.5;
         }
-        textarea:focus { border-color: #3B82F6; }
 
         /* 툴팁 */
         .tooltip {
-            position: fixed; background: #0F172A; color: #FFFFFF; padding: 6px 10px;
-            border-radius: 6px; font-size: 12px; font-weight: 600; pointer-events: none;
-            opacity: 0; transform: translateY(5px); transition: all 0.2s; z-index: 999;
+            position: fixed; background: #0F172A; color: #FFFFFF; padding: 8px 12px;
+            border-radius: 8px; font-size: 12px; font-weight: 600; pointer-events: none;
+            opacity: 0; transition: opacity 0.15s; z-index: 999; text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        /* ★★★ 모바일 최적화 (가독성 패치 핵심) ★★★ */
+        @media (max-width: 768px) {
+            body { padding: 0; }
+            .app-container { border-radius: 0; padding: 20px 15px; box-shadow: none; border: none; min-height: 100vh; }
+            .header h1 { font-size: 20px; }
+            .control-panel { flex-direction: column; gap: 12px; padding: 15px; }
+            .input-group { min-width: 100%; }
+            .scroll-hint { display: block; }
+            .legend { font-size: 11px; gap: 8px; justify-content: flex-start; }
+            
+            /* 타임라인 폭 조정 & 좌측 요일칸 다이어트 */
+            .time-grid { grid-template-columns: 60px repeat(48, minmax(20px, 1fr)); }
+            .date-label { 
+                padding: 5px; flex-direction: column; font-size: 13px; line-height: 1.3;
+            }
+            .date-label span.date-sub { display: block; font-size: 10px; color: var(--text-sub); margin-bottom: 2px; }
+            .date-label span.date-text { display: none; }
         }
     </style>
 </head>
@@ -192,7 +197,11 @@
     
     <div class="control-panel">
         <div class="input-group">
-            <label>기준 근무 설정 (주기 리셋용)</label>
+            <label>1. 나의 목표 D-Day 설정</label>
+            <input type="date" id="dDayInput">
+        </div>
+        <div class="input-group">
+            <label>2. 기준 근무 (주기 리셋용)</label>
             <div style="display: flex; gap: 10px;">
                 <input type="date" id="baseDate" style="flex: 1;">
                 <select id="baseShift" style="flex: 1;">
@@ -203,41 +212,28 @@
                 </select>
             </div>
         </div>
-        <div class="input-group" style="max-width: 180px;">
-            <label>달력 조회 시작일</label>
-            <input type="date" id="targetDate">
-        </div>
-        <div class="input-group" style="max-width: 120px; justify-content: flex-end;">
-            <button id="darkModeToggle" class="btn-toggle">🌙 야간 모드</button>
-        </div>
-    </div>
-
-    <!-- 단백질 트래커 (목표 160g) -->
-    <div class="tracker-panel">
-        <div class="tracker-header">
-            <span class="tracker-title">💪 일일 영양 트래커 (목표: 160g)</span>
-            <span id="proteinText" style="font-weight: 800; font-size: 14px; color: #3B82F6;">0g / 160g</span>
-        </div>
-        <div class="progress-bar-bg">
-            <div id="proteinBar" class="progress-bar-fill"></div>
-        </div>
-        <div class="tracker-controls">
-            <button class="btn-add" onclick="addProtein(20)">+ 20g (닭가슴살)</button>
-            <button class="btn-add" onclick="addProtein(30)">+ 30g (쉐이크)</button>
-            <button class="btn-toggle" style="padding: 6px 12px; margin-left: auto;" onclick="resetProtein()">초기화</button>
+        <div class="input-group" style="flex-direction: row; align-items: flex-end; gap: 10px;">
+            <div style="flex: 2; display: flex; flex-direction: column; gap: 8px;">
+                <label>3. 달력 조회 시작일</label>
+                <input type="date" id="targetDate">
+            </div>
+            <div style="flex: 1;">
+                <button id="darkModeToggle" class="btn-toggle">🌙 야간</button>
+            </div>
         </div>
     </div>
 
     <div class="legend">
-        <div class="legend-item"><div class="dot bg-work"></div>업무 시간 (집중)</div>
-        <div class="legend-item"><div class="dot bg-free"></div>자유 시간 (운동/여가)</div>
-        <div class="legend-item"><div class="dot bg-sleep-main"></div>메인 수면 (밤잠)</div>
-        <div class="legend-item"><div class="dot bg-sleep-strat"></div>전략 수면 (낮잠/앵커)</div>
+        <div class="legend-item"><div class="dot bg-work"></div>업무</div>
+        <div class="legend-item"><div class="dot bg-free"></div>자유</div>
+        <div class="legend-item"><div class="dot bg-sleep-main"></div>정상 수면</div>
+        <div class="legend-item"><div class="dot bg-sleep-strat"></div>전략 수면(낮/앵커)</div>
     </div>
 
+    <div class="scroll-hint">👉 타임라인을 좌우로 스크롤 하세요</div>
+    
     <div class="grid-wrapper" id="gridContainer"></div>
 
-    <!-- 트리노트 방식 메모장 -->
     <div class="memo-panel">
         <label>📝 트리노트 퀵 메모 (자동 저장)</label>
         <textarea id="quickMemo" placeholder="- [판례] 
@@ -251,67 +247,41 @@
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-    /* 1. PWA Service Worker Registration */
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('Service Worker Registered!', reg))
-                .catch(err => console.log('Service Worker Registration Failed:', err));
+            navigator.serviceWorker.register('sw.js').catch(() => {});
         });
     }
 
-    /* 2. D-Day 로직 (2026-08-22) */
+    /* 1. 커스텀 D-Day 로직 */
+    const dDayInput = document.getElementById('dDayInput');
+    dDayInput.value = localStorage.getItem('targetDDay') || '2026-08-22';
+    
+    dDayInput.addEventListener('change', () => {
+        localStorage.setItem('targetDDay', dDayInput.value);
+        updateDDay();
+    });
+
     function updateDDay() {
-        const examDate = new Date('2026-08-22T00:00:00+09:00');
+        if(!dDayInput.value) return;
+        const targetDate = new Date(dDayInput.value + 'T00:00:00+09:00');
         const today = new Date();
-        const diffTime = examDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        today.setHours(0,0,0,0);
+        targetDate.setHours(0,0,0,0);
+        
+        const diffTime = targetDate - today;
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
         
         const dDayEl = document.getElementById('dDayDisplay');
-        if (diffDays > 0) {
-            dDayEl.innerText = `경찰 채용 D-${diffDays}`;
-        } else if (diffDays === 0) {
-            dDayEl.innerText = `결전의 날 (D-Day)`;
-        } else {
-            dDayEl.innerText = `시험 종료 (D+${Math.abs(diffDays)})`;
+        if (diffDays > 0) dDayEl.innerText = `D-${diffDays}`;
+        else if (diffDays === 0) dDayEl.innerText = `D-Day`;
+        else {
+            dDayEl.innerText = `D+${Math.abs(diffDays)}`;
             dDayEl.style.background = '#64748B';
         }
     }
 
-    /* 3. 단백질 트래커 로직 */
-    let currentProtein = 0;
-    const proteinTarget = 160;
-    const getTodayKey = () => `protein_${new Date().toISOString().split('T')[0]}`;
-
-    function loadProtein() {
-        currentProtein = parseInt(localStorage.getItem(getTodayKey())) || 0;
-        renderProtein();
-    }
-    
-    function addProtein(amount) {
-        currentProtein += amount;
-        localStorage.setItem(getTodayKey(), currentProtein);
-        renderProtein();
-    }
-    
-    function resetProtein() {
-        currentProtein = 0;
-        localStorage.setItem(getTodayKey(), currentProtein);
-        renderProtein();
-    }
-    
-    function renderProtein() {
-        const percent = Math.min((currentProtein / proteinTarget) * 100, 100);
-        document.getElementById('proteinBar').style.width = `${percent}%`;
-        document.getElementById('proteinText').innerText = `${currentProtein}g / ${proteinTarget}g`;
-        if (percent >= 100) {
-            document.getElementById('proteinBar').style.background = '#10B981'; // 완료 시 초록색
-        } else {
-            document.getElementById('proteinBar').style.background = '#3B82F6';
-        }
-    }
-
-    /* 4. 다크 모드 및 메모 로컬 스토리지 로직 */
+    /* 2. 다크 모드 및 메모 로컬 스토리지 로직 */
     const memoEl = document.getElementById('quickMemo');
     const darkModeBtn = document.getElementById('darkModeToggle');
     
@@ -322,15 +292,13 @@
         document.body.classList.toggle('dark-mode');
         const isDark = document.body.classList.contains('dark-mode');
         localStorage.setItem('isDarkMode', isDark);
-        darkModeBtn.innerText = isDark ? '☀️ 주간 모드' : '🌙 야간 모드';
+        darkModeBtn.innerText = isDark ? '☀️ 주간' : '🌙 야간';
         document.getElementById('themeColorMeta').setAttribute('content', isDark ? '#0F172A' : '#F8FAFC');
     }
-    if (localStorage.getItem('isDarkMode') === 'true') {
-        toggleDarkMode();
-    }
+    if (localStorage.getItem('isDarkMode') === 'true') toggleDarkMode();
     darkModeBtn.addEventListener('click', toggleDarkMode);
 
-    /* 5. 스케줄러 핵심 로직 (1=업무, 2=자유, 3=정상수면, 4=전략수면) */
+    /* 3. 스케줄러 핵심 로직 */
     const shiftPattern = {
         0: { name: '주간', blocks: Array(48).fill(2) },
         1: { name: '야간', blocks: Array(48).fill(2) },
@@ -340,15 +308,14 @@
     function fillBlocks(shiftIdx, start, length, type) {
         for(let i = start; i < start + length; i++) shiftPattern[shiftIdx].blocks[i] = type;
     }
-    
     fillBlocks(0, 0, 13, 3); fillBlocks(0, 18, 18, 1); fillBlocks(0, 46, 2, 3);
     fillBlocks(1, 0, 13, 3); fillBlocks(1, 28, 3, 4); fillBlocks(1, 36, 12, 1);
     fillBlocks(2, 0, 18, 1); fillBlocks(2, 20, 8, 4); fillBlocks(2, 46, 2, 3);
     fillBlocks(3, 0, 14, 3); fillBlocks(3, 46, 2, 3);
 
     const typeMap = { 
-        1: {cls: 'bg-work', label:'근무 중'}, 2: {cls: 'bg-free', label:'자유 시간'}, 
-        3: {cls: 'bg-sleep-main', label:'정상 수면'}, 4: {cls: 'bg-sleep-strat', label:'전략적 수면'}
+        1: {cls: 'bg-work', label:'근무'}, 2: {cls: 'bg-free', label:'자유'}, 
+        3: {cls: 'bg-sleep-main', label:'정상 수면'}, 4: {cls: 'bg-sleep-strat', label:'전략 수면'}
     };
     const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
 
@@ -389,7 +356,7 @@
         const diffDays = Math.round((targetD - baseD) / (1000 * 60 * 60 * 24));
 
         let html = '';
-        html += '<div class="time-grid header-row"><div class="date-label">근무일자</div>';
+        html += '<div class="time-grid header-row"><div class="date-label">날짜</div>';
         for(let i = 0; i < 24; i++) html += `<div class="cell time-header">${i.toString().padStart(2, '0')}</div>`;
         html += '</div>';
 
@@ -406,7 +373,8 @@
             const shiftInfo = shiftPattern[shiftIndex];
 
             html += `<div class="time-grid" id="row-${dateStrId}">`;
-            html += `<div class="date-label">${month}/${date}(${dayStr}) ${shiftInfo.name}</div>`;
+            // 모바일용 쪼개진 텍스트(span.date-sub)와 데스크탑용 텍스트(span.date-text) 결합
+            html += `<div class="date-label"><span class="date-sub">${month}/${date}(${dayStr})</span><span class="date-text">${month}/${date}(${dayStr}) </span>${shiftInfo.name}</div>`;
             
             shiftInfo.blocks.forEach((typeCode, blockIndex) => {
                 const typeData = typeMap[typeCode];
@@ -417,10 +385,8 @@
                               id="block-${dateStrId}-${blockIndex}"
                               data-time="${hour}:${min}" 
                               data-type="${typeData.label}"
-                              onmouseenter="showTooltip(event)" 
-                              ontouchstart="showTooltip(event)"
-                              onmouseleave="hideTooltip()"
-                              ontouchend="hideTooltip()"></div>`;
+                              onclick="showTooltip(event)"
+                              onmouseleave="hideTooltip()"></div>`;
             });
             html += `</div>`;
         }
@@ -442,28 +408,33 @@
         }
     }
 
-    // 툴팁 로직
+    /* 터치 및 마우스 툴팁 중앙 상단 보정 */
     window.showTooltip = function(e) {
-        const target = e.target || e.touches[0].target;
+        const target = e.target;
         const time = target.getAttribute('data-time');
         const type = target.getAttribute('data-type');
-        elTooltip.innerHTML = `<strong>${time}</strong><br/>${type}`;
-        elTooltip.style.opacity = '1';
-        elTooltip.style.transform = 'translateY(0)';
+        elTooltip.innerHTML = `<span style="color:#94A3B8;">${time}</span><br/>${type}`;
         
-        const clientX = e.clientX || e.touches[0].clientX;
-        const clientY = e.clientY || e.touches[0].clientY;
-        elTooltip.style.left = (clientX + 15) + 'px';
-        elTooltip.style.top = (clientY + 15) + 'px';
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        
+        // 손가락에 가려지지 않게 탭한 위치 기준 위로 45px 띄우고 정중앙 정렬
+        elTooltip.style.left = clientX + 'px';
+        elTooltip.style.top = (clientY - 45) + 'px';
+        elTooltip.style.transform = 'translate(-50%, 0)'; 
+        elTooltip.style.opacity = '1';
+        
+        // 모바일에서 터치 후 1.5초 뒤 자동 숨김 처리
+        if (window.innerWidth <= 768) {
+            setTimeout(hideTooltip, 1500);
+        }
     };
+    
     window.hideTooltip = function() {
         elTooltip.style.opacity = '0';
-        elTooltip.style.transform = 'translateY(5px)';
     };
 
-    // 앱 초기화 실행
     updateDDay();
-    loadProtein();
     initScheduler();
 </script>
 
