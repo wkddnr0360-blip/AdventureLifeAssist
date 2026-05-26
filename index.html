@@ -39,9 +39,8 @@
             -webkit-font-smoothing: antialiased;
         }
         
-        .app-container { width: 100%; max-width: 800px; padding: 20px 15px; }
+        .app-container { width: 100%; max-width: 900px; padding: 20px 15px; }
 
-        /* UI 컴포넌트 */
         .card { background: var(--bg-card); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
         .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;}
         .title-row h2 { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
@@ -72,7 +71,6 @@
         .nav-item.active { color: #3B82F6; }
         .nav-icon { font-size: 20px; }
 
-        /* 탭 콘텐츠 전환 */
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -103,9 +101,16 @@
         .board-row:last-child { border-bottom: none; }
         .row-label { width: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--bg-card); border-right: 1px solid var(--border); font-size: 11px; font-weight: 800; }
         .row-label span.sub { font-size: 9px; color: var(--text-sub); font-weight: 600; margin-bottom: 2px; }
+        
         .row-timeline { flex-grow: 1; display: flex; position: relative; background: var(--bg-card); }
+        
+        /* 블록 클래스가 무조건 색상을 표시하도록 중요도 격상 */
         .block { flex: 1; height: 100%; cursor: pointer; border-right: 1px solid rgba(0,0,0,0.03); transition: filter 0.2s;}
         .block:active { filter: brightness(0.7); }
+        .bg-work { background-color: var(--work-bg) !important; }
+        .bg-free { background-color: var(--free-bg) !important; }
+        .bg-sleep-main { background-color: var(--sleep-main) !important; }
+        .bg-sleep-strat { background-color: var(--sleep-strat) !important; }
         
         .now-marker { position: absolute; top: 0; bottom: 0; width: 2px; background-color: #EF4444; z-index: 10; box-shadow: 0 0 4px rgba(239, 68, 68, 0.5); pointer-events: none; }
         .now-marker::after { content: 'NOW'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #EF4444; color: white; font-size: 9px; padding: 2px 4px; border-radius: 4px; font-weight: 800; }
@@ -243,21 +248,21 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- 글로벌 상태 관리 ---
-    let appState = {
-        baseDate: "",
-        baseShift: "0",
-        memo: "",
-        dailyData: {} // 커스텀 블록 저장소
-    };
-    let activeUserCode = "";
-    let unsubscribe = null; 
-
     // 타임존 버그 해결용 로컬 시간 추출
     function getLocalDateString(dateObj) {
         const offset = dateObj.getTimezoneOffset() * 60000;
         return (new Date(dateObj.getTime() - offset)).toISOString().slice(0, 10);
     }
+
+    // --- 글로벌 상태 관리 ---
+    let appState = {
+        baseDate: getLocalDateString(new Date()), // 디폴트 값
+        baseShift: "0",
+        memo: "",
+        dailyData: {} 
+    };
+    let activeUserCode = "";
+    let unsubscribe = null; 
 
     const els = {
         baseDate: document.getElementById('baseDate'),
@@ -272,22 +277,38 @@
         todayBadge: document.getElementById('todayShiftBadge')
     };
 
-    // 마스터 근무 패턴 (1:업무, 2:자유, 3:정상수면, 4:전략수면)
+    // 버그 원천 차단: Array.fill 대신 명시적 for 루프로 하드코딩
     const shiftPattern = {
-        0: { name: '주간', blocks: Array(48).fill(2) },
-        1: { name: '야간', blocks: Array(48).fill(2) },
-        2: { name: '비번', blocks: Array(48).fill(2) },
-        3: { name: '휴무', blocks: Array(48).fill(2) }
+        0: { name: '주간', blocks: [] },
+        1: { name: '야간', blocks: [] },
+        2: { name: '비번', blocks: [] },
+        3: { name: '휴무', blocks: [] }
     };
-    function fillBlocks(s, start, len, type) { for(let i=start; i<start+len; i++) shiftPattern[s].blocks[i] = type; }
-    fillBlocks(0, 0, 13, 3); fillBlocks(0, 18, 18, 1); fillBlocks(0, 46, 2, 3);
-    fillBlocks(1, 0, 13, 3); fillBlocks(1, 28, 3, 4); fillBlocks(1, 36, 12, 1);
-    fillBlocks(2, 0, 18, 1); fillBlocks(2, 20, 8, 4); fillBlocks(2, 46, 2, 3);
-    fillBlocks(3, 0, 14, 3); fillBlocks(3, 46, 2, 3);
+    
+    // 일단 전체를 자유(2)로 채운 후 특정 구간을 덮어씌움
+    for(let s=0; s<4; s++) { for(let i=0; i<48; i++) shiftPattern[s].blocks.push(2); }
+    
+    // 주간: 00:00~06:30(13칸) 수면, 09:00~18:00(18칸) 업무, 23:00~24:00(2칸) 수면
+    for(let i=0; i<13; i++) shiftPattern[0].blocks[i] = 3;
+    for(let i=18; i<36; i++) shiftPattern[0].blocks[i] = 1;
+    for(let i=46; i<48; i++) shiftPattern[0].blocks[i] = 3;
+
+    // 야간: 00:00~06:30(13칸) 수면, 14:00~15:30(3칸) 낮잠, 18:00~24:00(12칸) 업무
+    for(let i=0; i<13; i++) shiftPattern[1].blocks[i] = 3;
+    for(let i=28; i<31; i++) shiftPattern[1].blocks[i] = 4;
+    for(let i=36; i<48; i++) shiftPattern[1].blocks[i] = 1;
+
+    // 비번: 00:00~09:00(18칸) 업무연장, 10:00~14:00(8칸) 앵커수면, 23:00~24:00(2칸) 수면
+    for(let i=0; i<18; i++) shiftPattern[2].blocks[i] = 1;
+    for(let i=20; i<28; i++) shiftPattern[2].blocks[i] = 4;
+    for(let i=46; i<48; i++) shiftPattern[2].blocks[i] = 3;
+
+    // 휴무: 00:00~07:00(14칸) 수면, 23:00~24:00(2칸) 수면
+    for(let i=0; i<14; i++) shiftPattern[3].blocks[i] = 3;
+    for(let i=46; i<48; i++) shiftPattern[3].blocks[i] = 3;
 
     const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
 
-    // 랜덤 6자리 유저코드 생성
     function generateUserCode() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         let code = '';
@@ -297,11 +318,8 @@
 
     function init() {
         const todayStr = getLocalDateString(new Date());
-        appState.baseDate = todayStr;
-        els.baseDate.value = todayStr;
-        els.targetDate.value = todayStr;
+        els.targetDate.value = todayStr; // 달력 시작일은 오늘로 고정
 
-        // 기기 첫 접속 시 고유 코드 자동 발급
         let savedCode = localStorage.getItem('userCode');
         if (!savedCode) {
             savedCode = generateUserCode();
@@ -312,7 +330,7 @@
         
         startSync(activeUserCode);
 
-        // 연동 버튼 로직
+        // 연동 로직
         els.btnSync.addEventListener('click', () => {
             const inputCode = els.userCode.value.trim().toUpperCase();
             if(!inputCode) return alert("유저 코드를 입력하세요.");
@@ -323,24 +341,23 @@
                 localStorage.setItem('userCode', activeUserCode);
                 startSync(activeUserCode);
             } else {
-                els.userCode.value = activeUserCode; // 취소시 복구
+                els.userCode.value = activeUserCode; 
             }
         });
 
-        // 상태 변경 리스너
+        // 설정 변경 리스너
         els.baseDate.addEventListener('change', (e) => { appState.baseDate = e.target.value; saveToFirebase(); });
         els.baseShift.addEventListener('change', (e) => { appState.baseShift = e.target.value; saveToFirebase(); });
         els.memo.addEventListener('input', (e) => { appState.memo = e.target.value; saveToFirebase(); });
         els.targetDate.addEventListener('change', renderAll);
 
-        // 하단 탭 로직 (항상 최신화 보장)
+        // 하단 탭 로직
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function() {
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
                 document.getElementById(this.dataset.tab).classList.add('active');
-                // 탭 누를때 혹시 모를 레이아웃 보정을 위해 렌더링
                 renderAll(); 
             });
         });
@@ -364,7 +381,7 @@
         if(isDark) document.body.classList.add('dark-mode');
     }
 
-    // --- Firebase 통신 로직 ---
+    // --- Firebase 로직 ---
     function startSync(code) {
         if(unsubscribe) unsubscribe();
         els.syncIndicator.style.display = 'flex';
@@ -377,14 +394,14 @@
                 appState = { ...appState, ...data };
                 if(!appState.dailyData) appState.dailyData = {};
                 
-                // 포커스 안 된 UI만 업데이트 (타이핑 방해 금지)
+                // UI 덮어쓰기 (입력 중인 폼 제외)
                 if(document.activeElement !== els.memo) els.memo.value = appState.memo || "";
-                if(document.activeElement !== els.baseDate) els.baseDate.value = appState.baseDate;
-                if(document.activeElement !== els.baseShift) els.baseShift.value = appState.baseShift;
+                if(document.activeElement !== els.baseDate) els.baseDate.value = appState.baseDate || getLocalDateString(new Date());
+                if(document.activeElement !== els.baseShift) els.baseShift.value = appState.baseShift || "0";
                 
                 renderAll();
             } else {
-                saveToFirebase(); // 신규 코드면 DB 생성
+                saveToFirebase(); // 신규 코드 DB 생성
             }
         });
     }
@@ -410,7 +427,7 @@
         return ((bIdx + diffDays) % 4 + 4) % 4;
     }
 
-    // --- 렌더링: 탭 2 오늘 플래너 ---
+    // --- [탭 2] 일일 플래너 ---
     function renderToday() {
         const todayStr = getLocalDateString(new Date());
         const shiftIdx = getShiftIndexForDate(todayStr);
@@ -421,20 +438,28 @@
         
         for(let i=0; i<48; i++) {
             const defaultType = shiftPattern[shiftIdx].blocks[i];
-            const blockData = dayData[i] || { type: defaultType, note: '' };
+            
+            // Firebase 에러 방지: 안전하게 타입 추출
+            let blockType = defaultType;
+            let blockNote = '';
+            if (dayData[i]) {
+                if (dayData[i].type !== undefined) blockType = parseInt(dayData[i].type);
+                if (dayData[i].note !== undefined) blockNote = dayData[i].note;
+            }
+
             const hour = Math.floor(i / 2).toString().padStart(2, '0');
             const min = (i % 2 === 0) ? '00' : '30';
             
             html += `
                 <div class="daily-row">
                     <div class="time-badge">${hour}:${min}</div>
-                    <select class="type-select t-${blockData.type}" data-idx="${i}" onchange="window.updateDailyBlock(this)">
-                        <option value="1" ${blockData.type == 1 ? 'selected' : ''}>업무</option>
-                        <option value="2" ${blockData.type == 2 ? 'selected' : ''}>자유</option>
-                        <option value="3" ${blockData.type == 3 ? 'selected' : ''}>수면</option>
-                        <option value="4" ${blockData.type == 4 ? 'selected' : ''}>전략</option>
+                    <select class="type-select t-${blockType}" data-idx="${i}" onchange="window.updateDailyBlock(this)">
+                        <option value="1" ${blockType === 1 ? 'selected' : ''}>업무</option>
+                        <option value="2" ${blockType === 2 ? 'selected' : ''}>자유</option>
+                        <option value="3" ${blockType === 3 ? 'selected' : ''}>수면</option>
+                        <option value="4" ${blockType === 4 ? 'selected' : ''}>전략</option>
                     </select>
-                    <input type="text" class="note-input" data-idx="${i}" placeholder="계획 및 기록 메모" value="${blockData.note}" oninput="window.updateDailyBlock(this)">
+                    <input type="text" class="note-input" data-idx="${i}" placeholder="계획 및 기록 메모" value="${blockNote}" oninput="window.updateDailyBlock(this)">
                 </div>
             `;
         }
@@ -447,7 +472,12 @@
         const todayStr = getLocalDateString(new Date());
         
         if(!appState.dailyData[todayStr]) appState.dailyData[todayStr] = {};
-        if(!appState.dailyData[todayStr][idx]) appState.dailyData[todayStr][idx] = {};
+        if(!appState.dailyData[todayStr][idx]) {
+            appState.dailyData[todayStr][idx] = { 
+                type: shiftPattern[getShiftIndexForDate(todayStr)].blocks[idx], 
+                note: '' 
+            };
+        }
         
         if(element.tagName === 'SELECT') {
             appState.dailyData[todayStr][idx].type = parseInt(element.value);
@@ -459,11 +489,15 @@
         saveToFirebase(); 
     }
 
-    // --- 렌더링: 탭 3 일주일 전체 ---
+    // --- [탭 3] 일주일 전체 뷰 ---
     function renderWeekly() {
         const targetDStr = els.targetDate.value || getLocalDateString(new Date());
         const targetD = new Date(targetDStr + 'T00:00:00');
         let html = '';
+
+        // 클래스명 매핑 (절대 undefined가 뜨지 않게 방어)
+        const classMap = { 1: 'bg-work', 2: 'bg-free', 3: 'bg-sleep-main', 4: 'bg-sleep-strat' };
+        const nameMap = { 1: '업무', 2: '자유', 3: '정상 수면', 4: '전략 수면' };
 
         for(let i=0; i<7; i++) {
             const currentD = new Date(targetD);
@@ -483,11 +517,17 @@
             html += `<div class="row-timeline">`;
             
             for(let j=0; j<48; j++) {
-                const typeCode = (customDayData[j] && customDayData[j].type) ? customDayData[j].type : shiftInfo.blocks[j];
-                const cls = ['bg-work', 'bg-free', 'bg-sleep-main', 'bg-sleep-strat'][typeCode - 1];
-                const typeName = ['업무', '자유', '정상 수면', '전략 수면'][typeCode - 1];
+                // 타입 강제 변환 및 폴백
+                let typeCode = shiftInfo.blocks[j];
+                if (customDayData[j] && customDayData[j].type !== undefined) {
+                    typeCode = parseInt(customDayData[j].type);
+                }
+                if (!classMap[typeCode]) typeCode = 2; // 안전망
                 
-                // 툴팁 구성 (시간 + 타입 + 메모)
+                const cls = classMap[typeCode];
+                const typeName = nameMap[typeCode];
+                
+                // 툴팁 구성
                 const hour = Math.floor(j / 2).toString().padStart(2, '0');
                 const min = (j % 2 === 0) ? '00' : '30';
                 let tooltipStr = `${hour}:${min} - ${typeName}`;
@@ -503,7 +543,6 @@
         updateNowMarker();
     }
 
-    // --- 툴팁 로직 ---
     const tooltipEl = document.getElementById('tooltip');
     window.showBoardTooltip = function(e) {
         const str = e.target.getAttribute('data-tooltip');
@@ -537,7 +576,6 @@
     }
 
     function renderAll() {
-        // 데이터가 변경되면 두 뷰를 모두 다시 그려서 완벽한 동기화 유지
         renderToday();
         renderWeekly();
     }
