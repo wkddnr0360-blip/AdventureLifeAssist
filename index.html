@@ -50,7 +50,7 @@
         input, select, button { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; background: var(--input-bg); color: var(--text-main); transition: border-color 0.2s;}
         input:focus, select:focus { border-color: #3B82F6; }
         
-        .btn-primary { background: #3B82F6; color: white; border: none; font-weight: 700; cursor: pointer; padding: 10px 16px; }
+        .btn-primary { background: #3B82F6; color: white; border: none; font-weight: 700; cursor: pointer; padding: 10px 16px; flex-shrink: 0; white-space: nowrap; }
         .btn-toggle { background: transparent; border: 1px solid var(--border); cursor: pointer; font-weight: 600; width: 100%; }
 
         .d-day-badge { background: #EF4444; color: white; padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
@@ -75,7 +75,7 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* [오늘 하루] 30분 단위 플래너 */
+        /* [오늘 하루] 플래너 */
         .daily-list { display: flex; flex-direction: column; gap: 6px; }
         .daily-row {
             display: flex; align-items: center; gap: 8px;
@@ -89,23 +89,24 @@
         .t-3 { background-color: var(--sleep-main); color: white; }
         .t-4 { background-color: var(--sleep-strat); color: #4C1D95; }
 
-        .note-input { flex: 1; border: none; background: transparent; border-bottom: 1px solid var(--border); border-radius: 0; padding: 4px; font-size: 13px; }
+        .note-input { flex: 1; border: none; background: transparent; border-bottom: 1px solid var(--border); border-radius: 0; padding: 4px; font-size: 13px; min-width: 0;}
         .note-input:focus { border-bottom: 1px solid #3B82F6; }
 
-        /* [일주일 전체] 와이드 보드 */
+        /* [일주일 전체] 와이드 보드 모바일 최적화 */
         .schedule-board { width: 100%; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-card); margin-bottom: 15px;}
         .board-header { display: flex; background: var(--bg-panel); border-bottom: 1px solid var(--border); }
         .board-left { width: 65px; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: 700; color: var(--text-sub); border-right: 1px solid var(--border); padding: 8px 0; }
         .board-right-axis { flex-grow: 1; display: flex; justify-content: space-between; padding: 8px 5px; font-size: 10px; font-weight: 700; color: var(--text-sub); }
-        .board-row { display: flex; height: 42px; border-bottom: 1px solid var(--border); position: relative; }
+        .board-row { display: flex; height: 50px; border-bottom: 1px solid var(--border); position: relative; }
         .board-row:last-child { border-bottom: none; }
         .row-label { width: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--bg-card); border-right: 1px solid var(--border); font-size: 11px; font-weight: 800; }
         .row-label span.sub { font-size: 9px; color: var(--text-sub); font-weight: 600; margin-bottom: 2px; }
         
         .row-timeline { flex-grow: 1; display: flex; position: relative; background: var(--bg-card); }
         
-        /* 블록 클래스가 무조건 색상을 표시하도록 중요도 격상 */
-        .block { flex: 1; height: 100%; cursor: pointer; border-right: 1px solid rgba(0,0,0,0.03); transition: filter 0.2s;}
+        /* 모바일 최적화: 개별 칸 테두리 없애고 6시간 단위(12칸)로만 구분선 추가 */
+        .block { flex: 1; height: 100%; cursor: pointer; transition: filter 0.2s;}
+        .block:nth-child(12n) { border-right: 1px solid rgba(0,0,0,0.1); } 
         .block:active { filter: brightness(0.7); }
         .bg-work { background-color: var(--work-bg) !important; }
         .bg-free { background-color: var(--free-bg) !important; }
@@ -140,8 +141,8 @@
             
             <div class="input-group">
                 <label>🔥 내 기기 고유 코드 (다른 기기 연동시 입력)</label>
-                <div style="display: flex; gap: 8px;">
-                    <input type="text" id="userCode" placeholder="코드 로딩중..." style="flex: 1; text-transform: uppercase; font-weight: 800; color: #3B82F6; letter-spacing: 2px; text-align: center;">
+                <div style="display: flex; gap: 8px; align-items: stretch; width: 100%;">
+                    <input type="text" id="userCode" placeholder="코드 로딩중..." style="flex: 1; min-width: 0; text-transform: uppercase; font-weight: 800; color: #3B82F6; letter-spacing: 2px; text-align: center;">
                     <button class="btn-primary" id="btnSync">연동하기</button>
                 </div>
                 <div id="syncIndicator" class="sync-status">🟢 실시간 클라우드 동기화 중</div>
@@ -169,11 +170,7 @@
 
         <div class="card">
             <div class="title-row"><h2>📝 트리노트 퀵 메모 (자동저장)</h2></div>
-            <textarea id="quickMemo" placeholder="- [판례] 
-  - 핵심 포인트:
-  - 예외 지문:
-- [루틴]
-  - 런닝 페이스:"></textarea>
+            <textarea id="quickMemo" placeholder="자유롭게 메모를 작성하세요..."></textarea>
         </div>
     </div>
 
@@ -248,15 +245,13 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 타임존 버그 해결용 로컬 시간 추출
     function getLocalDateString(dateObj) {
         const offset = dateObj.getTimezoneOffset() * 60000;
         return (new Date(dateObj.getTime() - offset)).toISOString().slice(0, 10);
     }
 
-    // --- 글로벌 상태 관리 ---
     let appState = {
-        baseDate: getLocalDateString(new Date()), // 디폴트 값
+        baseDate: getLocalDateString(new Date()),
         baseShift: "0",
         memo: "",
         dailyData: {} 
@@ -277,7 +272,6 @@
         todayBadge: document.getElementById('todayShiftBadge')
     };
 
-    // 버그 원천 차단: Array.fill 대신 명시적 for 루프로 하드코딩
     const shiftPattern = {
         0: { name: '주간', blocks: [] },
         1: { name: '야간', blocks: [] },
@@ -285,25 +279,20 @@
         3: { name: '휴무', blocks: [] }
     };
     
-    // 일단 전체를 자유(2)로 채운 후 특정 구간을 덮어씌움
     for(let s=0; s<4; s++) { for(let i=0; i<48; i++) shiftPattern[s].blocks.push(2); }
     
-    // 주간: 00:00~06:30(13칸) 수면, 09:00~18:00(18칸) 업무, 23:00~24:00(2칸) 수면
     for(let i=0; i<13; i++) shiftPattern[0].blocks[i] = 3;
     for(let i=18; i<36; i++) shiftPattern[0].blocks[i] = 1;
     for(let i=46; i<48; i++) shiftPattern[0].blocks[i] = 3;
 
-    // 야간: 00:00~06:30(13칸) 수면, 14:00~15:30(3칸) 낮잠, 18:00~24:00(12칸) 업무
     for(let i=0; i<13; i++) shiftPattern[1].blocks[i] = 3;
     for(let i=28; i<31; i++) shiftPattern[1].blocks[i] = 4;
     for(let i=36; i<48; i++) shiftPattern[1].blocks[i] = 1;
 
-    // 비번: 00:00~09:00(18칸) 업무연장, 10:00~14:00(8칸) 앵커수면, 23:00~24:00(2칸) 수면
     for(let i=0; i<18; i++) shiftPattern[2].blocks[i] = 1;
     for(let i=20; i<28; i++) shiftPattern[2].blocks[i] = 4;
     for(let i=46; i<48; i++) shiftPattern[2].blocks[i] = 3;
 
-    // 휴무: 00:00~07:00(14칸) 수면, 23:00~24:00(2칸) 수면
     for(let i=0; i<14; i++) shiftPattern[3].blocks[i] = 3;
     for(let i=46; i<48; i++) shiftPattern[3].blocks[i] = 3;
 
@@ -318,7 +307,7 @@
 
     function init() {
         const todayStr = getLocalDateString(new Date());
-        els.targetDate.value = todayStr; // 달력 시작일은 오늘로 고정
+        els.targetDate.value = todayStr;
 
         let savedCode = localStorage.getItem('userCode');
         if (!savedCode) {
@@ -330,7 +319,6 @@
         
         startSync(activeUserCode);
 
-        // 연동 로직
         els.btnSync.addEventListener('click', () => {
             const inputCode = els.userCode.value.trim().toUpperCase();
             if(!inputCode) return alert("유저 코드를 입력하세요.");
@@ -345,11 +333,11 @@
             }
         });
 
-        // 설정 변경 리스너
-        els.baseDate.addEventListener('change', (e) => { appState.baseDate = e.target.value; saveToFirebase(); });
-        els.baseShift.addEventListener('change', (e) => { appState.baseShift = e.target.value; saveToFirebase(); });
-        els.memo.addEventListener('input', (e) => { appState.memo = e.target.value; saveToFirebase(); });
-        els.targetDate.addEventListener('change', renderAll);
+        // 상태 변경 시 렌더링 호출 (Firebase 저장은 별도로 처리)
+        els.baseDate.addEventListener('change', (e) => { appState.baseDate = e.target.value; saveToFirebase(true); });
+        els.baseShift.addEventListener('change', (e) => { appState.baseShift = e.target.value; saveToFirebase(true); });
+        els.memo.addEventListener('input', (e) => { appState.memo = e.target.value; saveToFirebase(false); });
+        els.targetDate.addEventListener('change', () => { renderWeekly(); });
 
         // 하단 탭 로직
         document.querySelectorAll('.nav-item').forEach(item => {
@@ -362,7 +350,6 @@
             });
         });
 
-        // 다크 모드
         const dmBtn = document.getElementById('darkModeToggle');
         if(localStorage.getItem('isDark') === 'true') toggleDark(true);
         dmBtn.addEventListener('click', () => {
@@ -381,7 +368,7 @@
         if(isDark) document.body.classList.add('dark-mode');
     }
 
-    // --- Firebase 로직 ---
+    // --- Firebase 로직 (키보드 버그 픽스 핵심) ---
     function startSync(code) {
         if(unsubscribe) unsubscribe();
         els.syncIndicator.style.display = 'flex';
@@ -394,21 +381,26 @@
                 appState = { ...appState, ...data };
                 if(!appState.dailyData) appState.dailyData = {};
                 
-                // UI 덮어쓰기 (입력 중인 폼 제외)
-                if(document.activeElement !== els.memo) els.memo.value = appState.memo || "";
-                if(document.activeElement !== els.baseDate) els.baseDate.value = appState.baseDate || getLocalDateString(new Date());
-                if(document.activeElement !== els.baseShift) els.baseShift.value = appState.baseShift || "0";
+                // 사용자가 폼에 입력 중일 때는 화면 렌더링을 멈춤 (키보드 내려감 방지)
+                const activeTag = document.activeElement ? document.activeElement.tagName : '';
+                const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
                 
-                renderAll();
+                if(!isTyping) {
+                    els.memo.value = appState.memo || "";
+                    els.baseDate.value = appState.baseDate || getLocalDateString(new Date());
+                    els.baseShift.value = appState.baseShift || "0";
+                    renderAll();
+                }
             } else {
-                saveToFirebase(); // 신규 코드 DB 생성
+                saveToFirebase(true); 
             }
         });
     }
 
     let saveTimeout;
-    function saveToFirebase() {
-        renderAll(); 
+    // forceRender가 false면 DB에 데이터만 쏘고 UI는 건드리지 않음
+    function saveToFirebase(forceRender = false) {
+        if(forceRender) renderAll(); 
         if(!activeUserCode) return;
         
         clearTimeout(saveTimeout);
@@ -439,7 +431,6 @@
         for(let i=0; i<48; i++) {
             const defaultType = shiftPattern[shiftIdx].blocks[i];
             
-            // Firebase 에러 방지: 안전하게 타입 추출
             let blockType = defaultType;
             let blockNote = '';
             if (dayData[i]) {
@@ -466,7 +457,7 @@
         els.dailyList.innerHTML = html;
     }
 
-    // 플래너 입력 시 전역 상태 반영
+    // 플래너 입력 시 전역 상태 반영 (화면 새로고침 없이 저장만 수행)
     window.updateDailyBlock = function(element) {
         const idx = element.getAttribute('data-idx');
         const todayStr = getLocalDateString(new Date());
@@ -486,7 +477,7 @@
             appState.dailyData[todayStr][idx].note = element.value;
         }
         
-        saveToFirebase(); 
+        saveToFirebase(false); // 키보드 버그 픽스: false로 전달하여 강제 새로고침 방지
     }
 
     // --- [탭 3] 일주일 전체 뷰 ---
@@ -495,7 +486,6 @@
         const targetD = new Date(targetDStr + 'T00:00:00');
         let html = '';
 
-        // 클래스명 매핑 (절대 undefined가 뜨지 않게 방어)
         const classMap = { 1: 'bg-work', 2: 'bg-free', 3: 'bg-sleep-main', 4: 'bg-sleep-strat' };
         const nameMap = { 1: '업무', 2: '자유', 3: '정상 수면', 4: '전략 수면' };
 
@@ -517,17 +507,15 @@
             html += `<div class="row-timeline">`;
             
             for(let j=0; j<48; j++) {
-                // 타입 강제 변환 및 폴백
                 let typeCode = shiftInfo.blocks[j];
                 if (customDayData[j] && customDayData[j].type !== undefined) {
                     typeCode = parseInt(customDayData[j].type);
                 }
-                if (!classMap[typeCode]) typeCode = 2; // 안전망
+                if (!classMap[typeCode]) typeCode = 2;
                 
                 const cls = classMap[typeCode];
                 const typeName = nameMap[typeCode];
                 
-                // 툴팁 구성
                 const hour = Math.floor(j / 2).toString().padStart(2, '0');
                 const min = (j % 2 === 0) ? '00' : '30';
                 let tooltipStr = `${hour}:${min} - ${typeName}`;
@@ -576,8 +564,8 @@
     }
 
     function renderAll() {
-        renderToday();
-        renderWeekly();
+        if(document.getElementById('tab-today').classList.contains('active')) renderToday();
+        if(document.getElementById('tab-weekly').classList.contains('active')) renderWeekly();
     }
 
     function updateDDay() {
