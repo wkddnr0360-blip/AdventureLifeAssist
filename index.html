@@ -2,580 +2,692 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#F8FAFC" id="themeColorMeta">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    
-    <title>Life Assist Pro</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>StudyGram</title>
     <style>
-        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        
-        :root {
-            --bg-main: #F8FAFC; --bg-card: #FFFFFF; --bg-panel: #F1F5F9;
-            --text-main: #1E293B; --text-sub: #64748B; --border: #E2E8F0;
-            --input-bg: #FFFFFF; --nav-bg: #FFFFFF;
+        /* 인스타그램 오리지널 컬러 & 플랫 디자인 */
+        :root { 
+            --bg: #fafafa; --card: #ffffff; --text: #262626; --border: #dbdbdb; 
+            --primary: #0095f6; --primary-light: #e0f1ff; --light-gray: #8e8e8e; 
+            --success: #4cd964; --danger: #ed4956;
             
-            --work-bg: #1E3A8A; --free-bg: #DBEAFE; 
-            --sleep-main: #7C3AED; --sleep-strat: #C4B5FD;
+            --color-criminal: #ed4956; /* 인스타 레드 */
+            --color-police: #3897f0;   /* 인스타 블루 */
+            --color-const: #a307ba;    /* 인스타 퍼플 */
         }
-
-        body.dark-mode {
-            --bg-main: #0F172A; --bg-card: #1E293B; --bg-panel: #334155;
-            --text-main: #F8FAFC; --text-sub: #94A3B8; --border: #475569;
-            --input-bg: #0F172A; --nav-bg: #1E293B;
-            
-            --work-bg: #3B82F6; --free-bg: #1E3A8A; 
-            --sleep-main: #A78BFA; --sleep-strat: #6D28D9;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: "Pretendard", -apple-system, sans-serif;
-            background-color: var(--bg-main); color: var(--text-main);
-            display: flex; justify-content: center;
-            padding-bottom: 70px; 
-            -webkit-font-smoothing: antialiased;
-        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        .app-container { width: 100%; max-width: 900px; padding: 20px 15px; }
-
-        .card { background: var(--bg-card); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); padding: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
-        .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;}
-        .title-row h2 { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        /* 💡 높이 고정 및 외부 스크롤 완벽 차단 (화면 좁아짐 현상 해결) */
+        html, body { width: 100%; height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #000; color: var(--text); }
         
-        .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
-        .input-group label { font-size: 12px; font-weight: 700; color: var(--text-sub); }
-        input, select, button { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; background: var(--input-bg); color: var(--text-main); transition: border-color 0.2s;}
-        input:focus, select:focus { border-color: #3B82F6; }
+        /* 앱 컨테이너 내부에서만 스크롤이 발생하도록 구조화 */
+        .app-container { width: 100%; max-width: 500px; height: 100%; margin: 0 auto; background: var(--bg); display: flex; flex-direction: column; position: relative; border-left: 1px solid var(--border); border-right: 1px solid var(--border); box-sizing: border-box; }
         
-        .btn-primary { background: #3B82F6; color: white; border: none; font-weight: 700; cursor: pointer; padding: 10px 16px; flex-shrink: 0; white-space: nowrap; }
-        .btn-toggle { background: transparent; border: 1px solid var(--border); cursor: pointer; font-weight: 600; width: 100%; }
-
-        .d-day-badge { background: #EF4444; color: white; padding: 6px 12px; border-radius: 20px; font-weight: 800; font-size: 13px; }
-
-        textarea { width: 100%; height: 160px; padding: 15px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); font-family: inherit; font-size: 14px; resize: vertical; outline: none; line-height: 1.6; }
-
-        /* 하단 네비게이션 탭 */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 65px;
-            background: var(--nav-bg); border-top: 1px solid var(--border);
-            display: flex; justify-content: space-around; align-items: center;
-            z-index: 1000; box-shadow: 0 -4px 15px rgba(0,0,0,0.03);
-        }
-        .nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-            color: var(--text-sub); font-size: 11px; font-weight: 700; cursor: pointer; transition: color 0.2s;
-        }
-        .nav-item.active { color: #3B82F6; }
-        .nav-icon { font-size: 20px; }
-
-        .tab-content { display: none; animation: fadeIn 0.3s; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* [오늘 하루] 플래너 */
-        .daily-list { display: flex; flex-direction: column; gap: 6px; }
-        .daily-row {
-            display: flex; align-items: center; gap: 8px;
-            background: var(--bg-panel); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border);
-        }
-        .time-badge { width: 40px; font-size: 11px; font-weight: 800; color: var(--text-sub); text-align: center; }
-        .type-select { width: 70px; padding: 6px 4px; font-size: 11px; font-weight: 800; border: none; border-radius: 6px; text-align: center;}
+        /* 로그인 오버레이 */
+        #login-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; transition: opacity 0.3s; }
+        .login-box { width: 100%; max-width: 300px; text-align: center; }
+        .login-box h1 { font-family: 'Brush Script MT', cursive; font-size: 3.5rem; margin-bottom: 20px; color: var(--text); }
+        .login-box input { width: 100%; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 4px; background: #fafafa; font-size: 0.95rem; }
+        .login-box input:focus { outline: none; border-color: var(--light-gray); }
+        .login-box button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 1rem; cursor: pointer; margin-top: 10px; }
         
-        .t-1 { background-color: var(--work-bg); color: white; }
-        .t-2 { background-color: var(--free-bg); color: var(--work-bg); }
-        .t-3 { background-color: var(--sleep-main); color: white; }
-        .t-4 { background-color: var(--sleep-strat); color: #4C1D95; }
+        /* 헤더 (상단 고정) */
+        header { padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0; height: 60px; }
+        .logo-text { font-family: 'Brush Script MT', cursive; font-size: 1.8rem; color: var(--text); letter-spacing: 1px; }
+        .icon-btn { background: none; border: none; cursor: pointer; color: var(--text); padding: 0; display: flex; align-items: center; }
 
-        .note-input { flex: 1; border: none; background: transparent; border-bottom: 1px solid var(--border); border-radius: 0; padding: 4px; font-size: 13px; min-width: 0;}
-        .note-input:focus { border-bottom: 1px solid #3B82F6; }
+        /* 토스트 알림 */
+        #toast { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(38,38,38,0.9); color: white; padding: 12px 24px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 1500; white-space: nowrap; }
+        #toast.show { opacity: 1; }
+        
+        /* 💡 탭 컨텐츠 영역 (하단 바에 절대 안 가려지는 스크롤 영역) */
+        .content-area { flex: 1; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; background: var(--bg); position: relative; padding-bottom: 20px; }
+        .tab-content { display: none; min-height: 100%; }
+        .tab-content.active { display: block; animation: fadeIn 0.2s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* [일주일 전체] 와이드 보드 모바일 최적화 */
-        .schedule-board { width: 100%; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--bg-card); margin-bottom: 15px;}
-        .board-header { display: flex; background: var(--bg-panel); border-bottom: 1px solid var(--border); }
-        .board-left { width: 65px; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: 700; color: var(--text-sub); border-right: 1px solid var(--border); padding: 8px 0; }
-        .board-right-axis { flex-grow: 1; display: flex; justify-content: space-between; padding: 8px 5px; font-size: 10px; font-weight: 700; color: var(--text-sub); }
-        .board-row { display: flex; height: 50px; border-bottom: 1px solid var(--border); position: relative; }
-        .board-row:last-child { border-bottom: none; }
-        .row-label { width: 65px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: var(--bg-card); border-right: 1px solid var(--border); font-size: 11px; font-weight: 800; }
-        .row-label span.sub { font-size: 9px; color: var(--text-sub); font-weight: 600; margin-bottom: 2px; }
+        /* --- [탭 1] 홈 화면 --- */
+        .home-dashboard { background: white; padding: 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+        .profile-top { display: flex; align-items: center; margin-bottom: 20px; }
+        .avatar-container { width: 85px; height: 85px; border-radius: 50%; padding: 3px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); margin-right: 25px; flex-shrink: 0; }
+        .avatar-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; overflow: hidden; padding: 5px; }
+        .avatar-inner img { width: 100%; height: 100%; object-fit: contain; }
         
-        .row-timeline { flex-grow: 1; display: flex; position: relative; background: var(--bg-card); }
-        
-        /* 모바일 최적화: 개별 칸 테두리 없애고 6시간 단위(12칸)로만 구분선 추가 */
-        .block { flex: 1; height: 100%; cursor: pointer; transition: filter 0.2s;}
-        .block:nth-child(12n) { border-right: 1px solid rgba(0,0,0,0.1); } 
-        .block:active { filter: brightness(0.7); }
-        .bg-work { background-color: var(--work-bg) !important; }
-        .bg-free { background-color: var(--free-bg) !important; }
-        .bg-sleep-main { background-color: var(--sleep-main) !important; }
-        .bg-sleep-strat { background-color: var(--sleep-strat) !important; }
-        
-        .now-marker { position: absolute; top: 0; bottom: 0; width: 2px; background-color: #EF4444; z-index: 10; box-shadow: 0 0 4px rgba(239, 68, 68, 0.5); pointer-events: none; }
-        .now-marker::after { content: 'NOW'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #EF4444; color: white; font-size: 9px; padding: 2px 4px; border-radius: 4px; font-weight: 800; }
-        
-        .sync-status { font-size: 12px; font-weight: 800; color: #10B981; display: none; align-items: center; gap: 6px; margin-top: 5px;}
+        .profile-stats { flex: 1; display: flex; justify-content: space-between; text-align: center; }
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-num { font-size: 1.15rem; font-weight: 700; }
+        .stat-label { font-size: 0.8rem; color: var(--text); margin-top: 2px; }
 
-        /* 일주일 달력 툴팁 */
-        .tooltip {
-            position: fixed; background: #0F172A; color: #FFFFFF; padding: 8px 12px;
-            border-radius: 8px; font-size: 12px; font-weight: 600; pointer-events: none;
-            opacity: 0; transition: opacity 0.15s; z-index: 999; text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); line-height: 1.4;
-        }
-        .tooltip-note { color: #FBBF24; margin-top: 4px; font-size: 11px; display: block;}
+        .today-info { font-size: 0.95rem; line-height: 1.5; margin-top: 10px; }
+        .subject-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; color: white; font-weight: bold; font-size: 0.9rem; margin-top: 10px; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        
+        .progress-wrap { margin-top: 25px; }
+        .progress-text { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
+        .progress-bar-bg { width: 100%; height: 6px; background: #efefef; border-radius: 3px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.5s ease; }
+
+        /* 💡 홈: AI 피드 섹션 */
+        .feed-section { background: white; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 300px; }
+        .feed-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.95rem; }
+        .feed-nav button { background: none; border: none; cursor: pointer; color: var(--light-gray); font-size: 1.1rem; padding: 5px; }
+        
+        .ai-generate-btn { display: block; width: calc(100% - 40px); margin: 20px auto; padding: 14px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; text-align: center; font-weight: 800; border-radius: 12px; cursor: pointer; border: none; font-size: 1rem; box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3); transition: transform 0.2s; }
+        .ai-generate-btn:active { transform: scale(0.96); }
+        .ai-generate-btn:disabled { opacity: 0.7; cursor: not-allowed; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        /* AI 피드 카드 (인스타 게시물 스타일) */
+        .feed-card { margin-bottom: 20px; padding-bottom: 20px; }
+        .feed-header { display: flex; align-items: center; padding: 12px 20px; }
+        .feed-avatar { width: 36px; height: 36px; border-radius: 50%; background: #f0f8ff; border: 1px solid var(--border); margin-right: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; padding: 2px; }
+        .feed-avatar img { width: 100%; height: 100%; object-fit: contain; }
+        .feed-title-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
+        .feed-time { font-size: 0.8rem; color: var(--light-gray); display: flex; align-items: center; gap: 10px; }
+        
+        .feed-body { padding: 0 20px; font-size: 0.95rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; margin-bottom: 15px; }
+        
+        .feed-log-box { padding: 0 20px; margin-top: 10px; }
+        .feed-task-item { display: flex; margin-bottom: 8px; align-items: flex-start; font-size: 0.9rem; }
+        .feed-task-time { font-weight: bold; width: 45px; color: var(--light-gray); flex-shrink: 0; }
+        .feed-task-text { flex: 1; color: var(--text); }
+        
+        .feed-footer { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #efefef; margin-top: 15px; font-size: 0.9rem; font-weight: 600; }
+        .btn-copy { background: #f0f8ff; border: 1px solid var(--primary); color: var(--primary); font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; transition: 0.2s; }
+        .btn-copy:active { transform: scale(0.9); background: var(--primary); color: white; }
+
+        /* --- [탭 2] 전체 달력 --- */
+        .calendar-wrap { padding: 20px; background: white; min-height: 100%; }
+        .calendar-legend { display: flex; justify-content: center; gap: 15px; font-size: 0.8rem; margin-bottom: 20px; color: var(--light-gray); }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+        .legend-color { width: 12px; height: 12px; border-radius: 2px; }
+        
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+        .cal-header { text-align: center; font-size: 0.75rem; color: var(--light-gray); font-weight: 600; padding-bottom: 5px; }
+        .cal-cell { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 0.85rem; font-weight: bold; color: white; cursor: pointer; position: relative; border-radius: 6px; }
+        .cal-cell.empty { background: transparent; cursor: default; }
+        .cal-cell.today { border: 2px solid #262626; transform: scale(1.15); z-index: 2; box-shadow: 0 3px 8px rgba(0,0,0,0.3); }
+
+        /* --- [탭 3] 플래너 --- */
+        .planner-wrap { background: white; min-height: 100%; position: relative; padding-bottom: 60px; }
+        .date-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); font-weight: 600; position: sticky; top: 0; z-index: 20; }
+        .date-nav button { font-size: 1.2rem; background: none; border: none; color: var(--light-gray); cursor: pointer; padding: 5px; }
+        
+        .timeline-wrap { padding: 15px 20px; }
+        .timeline-row { display: flex; position: relative; padding-bottom: 20px; }
+        .timeline-row:last-child { padding-bottom: 0; }
+        .timeline-row:last-child .track .line { display: none; }
+        
+        .time { width: 45px; font-size: 0.8rem; color: var(--light-gray); font-weight: 600; text-align: right; padding-right: 12px; padding-top: 8px; }
+        
+        .track { position: relative; width: 20px; display: flex; justify-content: center; }
+        .track .node { position: absolute; top: 12px; width: 10px; height: 10px; border-radius: 50%; background: #efefef; border: 2px solid var(--border); z-index: 2; transition: 0.2s; }
+        .track .line { position: absolute; top: 22px; width: 2px; height: calc(100% - 10px); background: #efefef; z-index: 1; }
+        
+        .timeline-row.is-target .track .node { border-color: var(--primary); background: white; }
+        .timeline-row.is-actual .track .node { border-color: var(--success); background: var(--success); }
+        
+        .content { flex: 1; padding-left: 12px; display: flex; flex-direction: column; justify-content: center; }
+        .input-box { width: 100%; border: none; outline: none; font-size: 0.95rem; padding: 8px 0; border-bottom: 1px solid #efefef; color: var(--text); background: transparent; margin-bottom: 6px; font-weight: 500; }
+        .input-box:focus { border-bottom-color: var(--light-gray); }
+        
+        .btn-group { display: flex; gap: 8px; }
+        .btn-action { padding: 5px 14px; font-size: 0.75rem; border-radius: 12px; border: 1px solid var(--border); background: white; color: var(--text); font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-action.btn-target.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+        .btn-action.btn-actual.active { background: var(--success); color: white; border-color: var(--success); }
+
+        /* 💡 퀵 이동 플로팅 버튼 */
+        .fab-now { position: fixed; bottom: 80px; right: 20px; width: 55px; height: 55px; background: var(--text); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer; z-index: 50; font-size: 0.8rem; text-align: center; line-height: 1.2; display: none; transition: transform 0.2s; }
+        .fab-now:active { transform: scale(0.9); }
+        .fab-now.show { display: flex; }
+
+        /* 💡 하단 네비게이션바 (절대 밀려 내려가지 않음) */
+        .bottom-nav { width: 100%; height: 60px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text); cursor: pointer; transition: 0.2s; opacity: 0.3; height: 100%; }
+        .nav-item.active { opacity: 1; }
+        .nav-icon { width: 24px; height: 24px; fill: currentColor; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
+    <div id="toast">저장되었습니다</div>
 
-    <div id="tab-home" class="tab-content active">
-        <div class="card">
-            <div class="title-row">
-                <h2>🏠 메인 설정</h2>
-                <div id="dDayDisplay" class="d-day-badge">D-Day 계산중</div>
-            </div>
-            
-            <div class="input-group">
-                <label>🔥 내 기기 고유 코드 (다른 기기 연동시 입력)</label>
-                <div style="display: flex; gap: 8px; align-items: stretch; width: 100%;">
-                    <input type="text" id="userCode" placeholder="코드 로딩중..." style="flex: 1; min-width: 0; text-transform: uppercase; font-weight: 800; color: #3B82F6; letter-spacing: 2px; text-align: center;">
-                    <button class="btn-primary" id="btnSync">연동하기</button>
-                </div>
-                <div id="syncIndicator" class="sync-status">🟢 실시간 클라우드 동기화 중</div>
-                <p style="font-size: 11px; color: var(--text-sub); margin-top: 4px;">※ 태블릿이나 PC에서 위 코드를 입력하면 일정이 즉시 연동됩니다.</p>
-            </div>
-
-            <div style="display: flex; gap: 10px; margin-top: 25px;">
-                <div class="input-group" style="flex: 1;">
-                    <label>기준 날짜 (주기 세팅)</label>
-                    <input type="date" id="baseDate">
-                </div>
-                <div class="input-group" style="flex: 1;">
-                    <label>기준 근무</label>
-                    <select id="baseShift">
-                        <option value="0">주간 근무</option>
-                        <option value="1">야간 근무</option>
-                        <option value="2">비번 (퇴근)</option>
-                        <option value="3">휴무 (휴식)</option>
-                    </select>
-                </div>
-            </div>
-
-            <button id="darkModeToggle" class="btn-toggle" style="margin-top: 15px;">🌙 야간 모드 전환</button>
-        </div>
-
-        <div class="card">
-            <div class="title-row"><h2>📝 트리노트 퀵 메모 (자동저장)</h2></div>
-            <textarea id="quickMemo" placeholder="자유롭게 메모를 작성하세요..."></textarea>
+    <div id="login-overlay">
+        <div class="login-box">
+            <h1>StudyGram</h1>
+            <p style="color: var(--light-gray); font-size:0.85rem; margin-bottom:30px;">Pacemaker 데이터 연동</p>
+            <input type="text" id="userid" placeholder="아이디" autocomplete="off">
+            <input type="password" id="userpw" placeholder="비밀번호">
+            <button id="login-btn" onclick="handleLogin()">로그인</button>
+            <div id="login-msg" style="color: var(--danger); margin-top: 15px; font-size: 0.85rem; font-weight:bold;"></div>
         </div>
     </div>
 
-    <div id="tab-today" class="tab-content">
-        <div class="card" style="padding: 15px;">
-            <div class="title-row" style="margin-bottom: 5px;">
-                <h2>📝 일일 커스텀 플래너</h2>
-                <span id="todayShiftBadge" class="d-day-badge" style="background:#3B82F6;">오늘 근무 로딩중</span>
-            </div>
-            <p style="font-size:11px; color:var(--text-sub); margin-bottom: 15px; font-weight: 600;">※ 수면/기상 시간 등 구간 변동사항을 직접 수정하고 기록하세요.</p>
-            
-            <div class="daily-list" id="dailyListContainer">
+    <header>
+        <div class="logo-text">StudyGram</div>
+        <button class="icon-btn" onclick="location.reload()">
+            <svg viewBox="0 0 24 24" width="22" height="22"><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="22" x2="9.5" y1="12" y2="12"></line><polygon fill="none" points="16 17 21 12 16 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polygon><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="9" x2="3" y1="12" y2="12"></line><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9,21H5a2,2,0,0,1-2-2V5A2,2,0,0,1,5,3H9"></path></svg>
+        </button>
+    </header>
+
+    <div class="content-area" id="main-scroll">
+        
+        <div id="tab-home" class="tab-content active">
+            <div class="home-dashboard">
+                <div class="profile-top">
+                    <div class="avatar-container">
+                        <div class="avatar-inner">
+                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif" alt="프로필">
+                        </div>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat-item"><span class="stat-num" id="dday-text">D-70</span><span class="stat-label">시험까지</span></div>
+                        <div class="stat-item"><span class="stat-num" id="today-target">0.0h</span><span class="stat-label">목표시간</span></div>
+                        <div class="stat-item"><span class="stat-num" id="today-actual">0.0h</span><span class="stat-label">완료시간</span></div>
+                    </div>
                 </div>
+                <div class="today-info">
+                    <strong>오늘의 과목</strong> <span style="font-size:0.8rem; color:var(--light-gray);">(05시 기준)</span><br>
+                    <div class="subject-badge" id="home-subject-badge">로딩중</div>
+                </div>
+                <div class="progress-wrap">
+                    <div class="progress-text">
+                        <span>오늘의 진행률</span>
+                        <span id="progress-percent" style="color: var(--success);">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="home-progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feed-section">
+                <div class="feed-nav">
+                    <button onclick="changeHomeFeedDate(-1)">◀</button>
+                    <span id="home-feed-date-display">오늘의 피드</span>
+                    <button onclick="changeHomeFeedDate(1)">▶</button>
+                </div>
+                <button class="ai-generate-btn" id="ai-btn" onclick="generateAIFeed()">✨ AI 일일 피드 생성하기</button>
+                
+                <div id="home-feed-list">
+                    </div>
+            </div>
+        </div>
+
+        <div id="tab-calendar" class="tab-content" style="padding:0;">
+            <div class="calendar-wrap">
+                <div class="calendar-legend">
+                    <div class="legend-item"><div class="legend-color" style="background: var(--color-police);"></div>경찰학</div>
+                    <div class="legend-item"><div class="legend-color" style="background: var(--color-criminal);"></div>형사법</div>
+                    <div class="legend-item"><div class="legend-color" style="background: var(--color-const);"></div>헌법</div>
+                </div>
+                <div class="calendar-grid" id="full-calendar-grid"></div>
+            </div>
+        </div>
+
+        <div id="tab-planner" class="tab-content" style="padding:0;">
+            <div class="planner-wrap">
+                <div class="date-nav">
+                    <button onclick="changePlannerDate(-1)">◀</button>
+                    <div style="text-align:center;">
+                        <div id="planner-date-display" style="font-size:0.95rem; color:var(--text);">2026-06-13</div>
+                        <div id="planner-subj-display" style="font-size:0.75rem; font-weight:normal;">과목명</div>
+                    </div>
+                    <button onclick="changePlannerDate(1)">▶</button>
+                </div>
+                
+                <div class="timeline-wrap" id="timeline-container"></div>
+            </div>
         </div>
     </div>
 
-    <div id="tab-weekly" class="tab-content">
-        <div class="card" style="padding: 15px;">
-            <div class="title-row" style="margin-bottom: 15px;">
-                <h2>📅 전체 일주일 기록</h2>
-                <input type="date" id="targetDate" style="padding: 6px 8px; font-size: 13px; border:1px solid var(--border); background:var(--bg-panel); font-weight:700; border-radius: 8px;">
-            </div>
-            
-            <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 15px; font-size: 11px; font-weight: 700;">
-                <span style="color:var(--text-main);"><span style="display:inline-block; width:12px; height:12px; background:var(--work-bg); border-radius:3px; vertical-align:-2px; margin-right: 2px;"></span> 업무</span>
-                <span style="color:var(--text-main);"><span style="display:inline-block; width:12px; height:12px; background:var(--free-bg); border-radius:3px; vertical-align:-2px; margin-right: 2px;"></span> 자유</span>
-                <span style="color:var(--text-main);"><span style="display:inline-block; width:12px; height:12px; background:var(--sleep-main); border-radius:3px; vertical-align:-2px; margin-right: 2px;"></span> 수면</span>
-                <span style="color:var(--text-main);"><span style="display:inline-block; width:12px; height:12px; background:var(--sleep-strat); border-radius:3px; vertical-align:-2px; margin-right: 2px;"></span> 전략</span>
-            </div>
+    <div class="fab-now" id="fab-now" onclick="focusCurrentTime()">📍<br>지금</div>
 
-            <div class="schedule-board">
-                <div class="board-header">
-                    <div class="board-left">날짜</div>
-                    <div class="board-right-axis"><span>00</span><span>06</span><span>12</span><span>18</span><span>24</span></div>
-                </div>
-                <div id="gridContainer"></div>
-            </div>
-            <p style="font-size:11px; color:var(--text-sub); text-align: center; font-weight: 600;">※ 달력의 블록을 누르면 일일 플래너에 적은 메모가 표시됩니다.</p>
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home')" id="nav-home">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M9.005 16.545a2.997 2.997 0 012.997-2.997h0a2.997 2.997 0 012.997 2.997v4.453h5.245V11.194l-8.245-6.8-8.245 6.8v9.804h5.25v-4.453z"></path></svg>
         </div>
-    </div>
-
+        <div class="nav-item" onclick="switchTab('calendar')" id="nav-calendar">
+            <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"></rect><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"></line><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"></line><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"></line></svg>
+        </div>
+        <div class="nav-item" onclick="switchTab('planner'); focusCurrentTime();" id="nav-planner">
+            <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle><polyline points="12 6 12 12 16 14" fill="none" stroke="currentColor" stroke-width="2"></polyline></svg>
+        </div>
+    </nav>
 </div>
 
-<nav class="bottom-nav">
-    <div class="nav-item active" data-tab="tab-home">
-        <span class="nav-icon">🏠</span><span>홈 설정</span>
-    </div>
-    <div class="nav-item" data-tab="tab-today">
-        <span class="nav-icon">📝</span><span>오늘 플래너</span>
-    </div>
-    <div class="nav-item" data-tab="tab-weekly">
-        <span class="nav-icon">📅</span><span>일주일 기록</span>
-    </div>
-</nav>
-
-<div class="tooltip" id="tooltip"></div>
-
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const GEMINI_API_KEY = "AIzaSyCyo1twmjMplyzI_fRZr4bS8UqgJG4r-lU";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyB2FQGM7RGVjFQ7fxddIiAN5O7A0bF_omM",
-      authDomain: "reader2-43b34.firebaseapp.com",
-      projectId: "reader2-43b34",
-      storageBucket: "reader2-43b34.firebasestorage.app",
-      messagingSenderId: "909397198375",
-      appId: "1:909397198375:web:bd21eb8f3731b545af7002",
-      measurementId: "G-K2RR68SPZV"
+      apiKey: "AIzaSyADD6B0zHTP1jxwCJJCfcX1g556SvYbKhU",
+      authDomain: "pacemaker-b91b2.firebaseapp.com",
+      projectId: "pacemaker-b91b2",
+      storageBucket: "pacemaker-b91b2.firebasestorage.app"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    function getLocalDateString(dateObj) {
-        const offset = dateObj.getTimezoneOffset() * 60000;
-        return (new Date(dateObj.getTime() - offset)).toISOString().slice(0, 10);
+    let currentUser = null;
+    let appData = {}; 
+    const START_DATE_STR = "2026-06-13";
+    const END_DATE_STR = "2026-08-21";
+    
+    function getAdjustedTodayStr() {
+        const now = new Date();
+        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+        const kst = new Date(utc + (9 * 3600000));
+        const adjusted = new Date(kst.getTime() - (5 * 3600000)); // 05시 기준
+        const y = adjusted.getFullYear();
+        const m = String(adjusted.getMonth() + 1).padStart(2, '0');
+        const d = String(adjusted.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
     }
 
-    let appState = {
-        baseDate: getLocalDateString(new Date()),
-        baseShift: "0",
-        memo: "",
-        dailyData: {} 
-    };
-    let activeUserCode = "";
-    let unsubscribe = null; 
+    let viewingDate = getAdjustedTodayStr();
+    let homeFeedDate = getAdjustedTodayStr();
 
-    const els = {
-        baseDate: document.getElementById('baseDate'),
-        baseShift: document.getElementById('baseShift'),
-        targetDate: document.getElementById('targetDate'),
-        memo: document.getElementById('quickMemo'),
-        userCode: document.getElementById('userCode'),
-        btnSync: document.getElementById('btnSync'),
-        syncIndicator: document.getElementById('syncIndicator'),
-        dailyList: document.getElementById('dailyListContainer'),
-        grid: document.getElementById('gridContainer'),
-        todayBadge: document.getElementById('todayShiftBadge')
-    };
+    function getSubjectForDate(dateStr) {
+        const [y, m, d] = dateStr.split('-');
+        const target = new Date(y, m - 1, d);
+        const start = new Date(2026, 5, 13);
+        const diff = Math.round((target - start) / 86400000);
 
-    const shiftPattern = {
-        0: { name: '주간', blocks: [] },
-        1: { name: '야간', blocks: [] },
-        2: { name: '비번', blocks: [] },
-        3: { name: '휴무', blocks: [] }
-    };
-    
-    for(let s=0; s<4; s++) { for(let i=0; i<48; i++) shiftPattern[s].blocks.push(2); }
-    
-    for(let i=0; i<13; i++) shiftPattern[0].blocks[i] = 3;
-    for(let i=18; i<36; i++) shiftPattern[0].blocks[i] = 1;
-    for(let i=46; i<48; i++) shiftPattern[0].blocks[i] = 3;
-
-    for(let i=0; i<13; i++) shiftPattern[1].blocks[i] = 3;
-    for(let i=28; i<31; i++) shiftPattern[1].blocks[i] = 4;
-    for(let i=36; i<48; i++) shiftPattern[1].blocks[i] = 1;
-
-    for(let i=0; i<18; i++) shiftPattern[2].blocks[i] = 1;
-    for(let i=20; i<28; i++) shiftPattern[2].blocks[i] = 4;
-    for(let i=46; i<48; i++) shiftPattern[2].blocks[i] = 3;
-
-    for(let i=0; i<14; i++) shiftPattern[3].blocks[i] = 3;
-    for(let i=46; i<48; i++) shiftPattern[3].blocks[i] = 3;
-
-    const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
-
-    function generateUserCode() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let code = '';
-        for(let i=0; i<6; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
-        return code;
-    }
-
-    function init() {
-        const todayStr = getLocalDateString(new Date());
-        els.targetDate.value = todayStr;
-
-        let savedCode = localStorage.getItem('userCode');
-        if (!savedCode) {
-            savedCode = generateUserCode();
-            localStorage.setItem('userCode', savedCode);
+        if (diff < 0) return { text: "준비기간", color: "#dbdbdb" };
+        if (diff < 42) {
+            const arr21 = [
+                {text:"경찰학", color:"var(--color-police)"}, {text:"경찰학", color:"var(--color-police)"}, {text:"경찰학", color:"var(--color-police)"},
+                {text:"경찰/형사", color:"linear-gradient(135deg, var(--color-police) 50%, var(--color-criminal) 50%)"},
+                {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"},
+                {text:"형사/헌법", color:"linear-gradient(135deg, var(--color-criminal) 50%, var(--color-const) 50%)"},
+                {text:"헌법", color:"var(--color-const)"},
+                {text:"헌법/경찰", color:"linear-gradient(135deg, var(--color-const) 50%, var(--color-police) 50%)"},
+                {text:"경찰학", color:"var(--color-police)"}, {text:"경찰학", color:"var(--color-police)"}, {text:"경찰학", color:"var(--color-police)"},
+                {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"},
+                {text:"헌법", color:"var(--color-const)"}, {text:"헌법", color:"var(--color-const)"}
+            ];
+            return arr21[diff % 21];
+        } else {
+            const arr4 = [
+                {text:"경찰학", color:"var(--color-police)"},
+                {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"},
+                {text:"헌법", color:"var(--color-const)"}
+            ];
+            return arr4[(diff - 42) % 4];
         }
-        activeUserCode = savedCode;
-        els.userCode.value = activeUserCode;
-        
-        startSync(activeUserCode);
+    }
 
-        els.btnSync.addEventListener('click', () => {
-            const inputCode = els.userCode.value.trim().toUpperCase();
-            if(!inputCode) return alert("유저 코드를 입력하세요.");
-            if(inputCode === activeUserCode) return alert("현재 기기에 이미 연동되어 있습니다.");
+    let toastTimeout;
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    window.switchTab = function(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+        document.getElementById(`nav-${tabName}`).classList.add('active');
+        
+        if(tabName === 'planner') document.getElementById('fab-now').classList.add('show');
+        else document.getElementById('fab-now').classList.remove('show');
+
+        if(tabName === 'home') {
+            homeFeedDate = getAdjustedTodayStr();
+            updateHomeTopStats(); 
+            renderHomeFeed();
+        }
+        document.getElementById('main-scroll').scrollTo({top:0, behavior:'smooth'});
+    };
+
+    window.handleLogin = async function() {
+        const id = document.getElementById('userid').value.trim();
+        const pw = document.getElementById('userpw').value.trim();
+        if(!id || !pw) return;
+        
+        document.getElementById('login-btn').innerText = "로딩 중...";
+        try {
+            const userRef = doc(db, "users", id);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists() && userSnap.data().password !== pw) {
+                document.getElementById('login-msg').innerText = "비밀번호 불일치";
+                document.getElementById('login-btn').innerText = "로그인";
+                return;
+            } else if (!userSnap.exists()) {
+                await setDoc(userRef, { password: pw, createdAt: serverTimestamp() });
+            }
+            currentUser = id;
+            document.getElementById('login-overlay').style.opacity = '0';
+            setTimeout(() => document.getElementById('login-overlay').style.display = 'none', 300);
             
-            if(confirm(`[${inputCode}] 코드로 연동하시겠습니까?\n기존 기기의 데이터로 실시간 덮어씌워집니다.`)) {
-                activeUserCode = inputCode;
-                localStorage.setItem('userCode', activeUserCode);
-                startSync(activeUserCode);
-            } else {
-                els.userCode.value = activeUserCode; 
-            }
-        });
+            const todayStr = getAdjustedTodayStr();
+            viewingDate = (todayStr >= START_DATE_STR && todayStr <= END_DATE_STR) ? todayStr : START_DATE_STR;
+            homeFeedDate = viewingDate;
+            await loadData();
+        } catch (e) { document.getElementById('login-msg').innerText = "네트워크 오류"; document.getElementById('login-btn').innerText = "로그인"; }
+    };
 
-        // 상태 변경 시 렌더링 호출 (Firebase 저장은 별도로 처리)
-        els.baseDate.addEventListener('change', (e) => { appState.baseDate = e.target.value; saveToFirebase(true); });
-        els.baseShift.addEventListener('change', (e) => { appState.baseShift = e.target.value; saveToFirebase(true); });
-        els.memo.addEventListener('input', (e) => { appState.memo = e.target.value; saveToFirebase(false); });
-        els.targetDate.addEventListener('change', () => { renderWeekly(); });
-
-        // 하단 탭 로직
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById(this.dataset.tab).classList.add('active');
-                renderAll(); 
-            });
-        });
-
-        const dmBtn = document.getElementById('darkModeToggle');
-        if(localStorage.getItem('isDark') === 'true') toggleDark(true);
-        dmBtn.addEventListener('click', () => {
-            const isDark = document.body.classList.toggle('dark-mode');
-            localStorage.setItem('isDark', isDark);
-            toggleDark(isDark);
-        });
-        
-        setInterval(updateNowMarker, 60000);
-        updateDDay();
-    }
-
-    function toggleDark(isDark) {
-        document.getElementById('darkModeToggle').innerText = isDark ? '☀️ 주간 모드 전환' : '🌙 야간 모드 전환';
-        document.getElementById('themeColorMeta').setAttribute('content', isDark ? '#0F172A' : '#F8FAFC');
-        if(isDark) document.body.classList.add('dark-mode');
-    }
-
-    // --- Firebase 로직 (키보드 버그 픽스 핵심) ---
-    function startSync(code) {
-        if(unsubscribe) unsubscribe();
-        els.syncIndicator.style.display = 'flex';
-        
-        const userRef = doc(db, "users", code);
-        
-        unsubscribe = onSnapshot(userRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                appState = { ...appState, ...data };
-                if(!appState.dailyData) appState.dailyData = {};
-                
-                // 사용자가 폼에 입력 중일 때는 화면 렌더링을 멈춤 (키보드 내려감 방지)
-                const activeTag = document.activeElement ? document.activeElement.tagName : '';
-                const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
-                
-                if(!isTyping) {
-                    els.memo.value = appState.memo || "";
-                    els.baseDate.value = appState.baseDate || getLocalDateString(new Date());
-                    els.baseShift.value = appState.baseShift || "0";
-                    renderAll();
-                }
-            } else {
-                saveToFirebase(true); 
-            }
-        });
+    async function loadData() {
+        try {
+            const dataSnap = await getDoc(doc(db, "users_data", currentUser));
+            let mainParsed = dataSnap.exists() && dataSnap.data().content ? JSON.parse(dataSnap.data().content) : {};
+            if(!mainParsed.dailyRecords) mainParsed.dailyRecords = "{}";
+            appData = JSON.parse(mainParsed.dailyRecords);
+            
+            buildCalendarGrid();
+            renderPlannerUI();
+            updateHomeTopStats();
+            renderHomeFeed();
+        } catch (e) {}
     }
 
     let saveTimeout;
-    // forceRender가 false면 DB에 데이터만 쏘고 UI는 건드리지 않음
-    function saveToFirebase(forceRender = false) {
-        if(forceRender) renderAll(); 
-        if(!activeUserCode) return;
-        
+    window.debouncedSave = function() {
+        updateHomeTopStats(); 
+        if(viewingDate === homeFeedDate) renderHomeFeed();     
         clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(async () => {
-            try { await setDoc(doc(db, "users", activeUserCode), appState); } 
-            catch(e) { console.error("Sync Error:", e); }
-        }, 800);
-    }
+        saveTimeout = setTimeout(saveToFirebase, 1000); 
+    };
 
-    function getShiftIndexForDate(targetDateStr) {
-        if(!appState.baseDate) return 0;
-        const b = new Date(appState.baseDate + 'T00:00:00');
-        const t = new Date(targetDateStr + 'T00:00:00');
-        const diffDays = Math.round((t - b) / (1000 * 60 * 60 * 24));
-        const bIdx = parseInt(appState.baseShift);
-        return ((bIdx + diffDays) % 4 + 4) % 4;
-    }
-
-    // --- [탭 2] 일일 플래너 ---
-    function renderToday() {
-        const todayStr = getLocalDateString(new Date());
-        const shiftIdx = getShiftIndexForDate(todayStr);
-        els.todayBadge.innerText = `${todayStr.slice(5)} (${dayNames[new Date().getDay()]}) ${shiftPattern[shiftIdx].name}`;
+    async function saveToFirebase() {
+        if(!currentUser) return;
+        const dateObj = appData[viewingDate] || { studygram: { timetable: {} } };
         
-        let html = '';
-        const dayData = appState.dailyData[todayStr] || {};
-        
-        for(let i=0; i<48; i++) {
-            const defaultType = shiftPattern[shiftIdx].blocks[i];
+        document.querySelectorAll('.timeline-row').forEach(slot => {
+            const time = slot.dataset.time; 
+            const input = slot.querySelector('.input-box').value.trim();
+            const isTarget = slot.querySelector('.btn-target').classList.contains('active');
+            const isActual = slot.querySelector('.btn-actual').classList.contains('active');
             
-            let blockType = defaultType;
-            let blockNote = '';
-            if (dayData[i]) {
-                if (dayData[i].type !== undefined) blockType = parseInt(dayData[i].type);
-                if (dayData[i].note !== undefined) blockNote = dayData[i].note;
+            if(input || isTarget || isActual) {
+                dateObj.studygram.timetable[time] = { text: input, target: isTarget, actual: isActual };
+            } else {
+                delete dateObj.studygram.timetable[time];
             }
+        });
+        appData[viewingDate] = dateObj;
 
-            const hour = Math.floor(i / 2).toString().padStart(2, '0');
-            const min = (i % 2 === 0) ? '00' : '30';
+        try {
+            const dataSnap = await getDoc(doc(db, "users_data", currentUser));
+            let mainParsed = dataSnap.exists() && dataSnap.data().content ? JSON.parse(dataSnap.data().content) : {};
+            mainParsed.dailyRecords = JSON.stringify(appData);
+            await setDoc(doc(db, "users_data", currentUser), { content: JSON.stringify(mainParsed) }, { merge: true });
+        } catch(e) {}
+    }
+
+    function buildCalendarGrid() {
+        const grid = document.getElementById('full-calendar-grid');
+        grid.innerHTML = "";
+        const days = ["일", "월", "화", "수", "목", "금", "토"];
+        days.forEach(w => grid.innerHTML += `<div class="cal-header">${w}</div>`);
+        for(let i=0; i<6; i++) grid.innerHTML += `<div class="cal-cell empty"></div>`; 
+        
+        const todayStr = getAdjustedTodayStr(); 
+        let d = new Date(2026, 5, 13);
+        const endD = new Date(2026, 7, 21);
+        while(d <= endD) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const dt = String(d.getDate()).padStart(2, '0');
+            const str = `${y}-${m}-${dt}`;
             
-            html += `
-                <div class="daily-row">
-                    <div class="time-badge">${hour}:${min}</div>
-                    <select class="type-select t-${blockType}" data-idx="${i}" onchange="window.updateDailyBlock(this)">
-                        <option value="1" ${blockType === 1 ? 'selected' : ''}>업무</option>
-                        <option value="2" ${blockType === 2 ? 'selected' : ''}>자유</option>
-                        <option value="3" ${blockType === 3 ? 'selected' : ''}>수면</option>
-                        <option value="4" ${blockType === 4 ? 'selected' : ''}>전략</option>
-                    </select>
-                    <input type="text" class="note-input" data-idx="${i}" placeholder="계획 및 기록 메모" value="${blockNote}" oninput="window.updateDailyBlock(this)">
+            let subject = getSubjectForDate(str);
+            grid.innerHTML += `
+                <div class="cal-cell ${str === todayStr ? 'today' : ''}" style="background: ${subject.color};" onclick="jumpToPlanner('${str}')">
+                    <span class="cal-date">${d.getDate()}</span>
+                </div>
+            `;
+            d.setDate(d.getDate() + 1);
+        }
+    }
+
+    window.jumpToPlanner = function(dateStr) {
+        viewingDate = dateStr;
+        renderPlannerUI();
+        switchTab('planner');
+    }
+
+    window.changePlannerDate = function(offset) {
+        const [y, m, d] = viewingDate.split('-');
+        let dateObj = new Date(y, m-1, d);
+        dateObj.setDate(dateObj.getDate() + offset);
+        if(dateObj >= new Date(2026, 5, 13) && dateObj <= new Date(2026, 7, 21)) {
+            viewingDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
+            renderPlannerUI();
+        }
+    };
+
+    function renderPlannerUI() {
+        const subj = getSubjectForDate(viewingDate);
+        document.getElementById('planner-date-display').innerText = viewingDate;
+        document.getElementById('planner-subj-display').innerText = subj.text;
+        document.getElementById('planner-subj-display').style.color = subj.color.includes('gradient') ? 'var(--text)' : subj.color;
+        
+        const container = document.getElementById('timeline-container');
+        container.innerHTML = "";
+        const data = (appData[viewingDate] && appData[viewingDate].studygram) ? appData[viewingDate].studygram : { timetable: {} };
+
+        for(let i=0; i<48; i++) {
+            let totalMins = (5 * 60) + (i * 30);
+            let h = Math.floor(totalMins / 60); 
+            let m = totalMins % 60;
+            let timeKey = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            let displayTime = `${String(h%24).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            
+            let slotData = data.timetable[timeKey] || { text: "", target: false, actual: false };
+            let stateClass = slotData.actual ? "is-actual" : (slotData.target ? "is-target" : "");
+
+            container.innerHTML += `
+                <div class="timeline-row ${stateClass}" id="slot-${timeKey}" data-time="${timeKey}">
+                    <div class="time">${displayTime}</div>
+                    <div class="track"><div class="node"></div><div class="line"></div></div>
+                    <div class="content">
+                        <input type="text" class="input-box" value="${slotData.text}" placeholder="계획 입력" oninput="debouncedSave()" enterkeyhint="done">
+                        <div class="btn-group">
+                            <button class="btn-action btn-target ${slotData.target ? 'active' : ''}" onclick="toggleTarget(this)">목표</button>
+                            <button class="btn-action btn-actual ${slotData.actual ? 'active' : ''}" onclick="toggleActual(this)">완료</button>
+                        </div>
+                    </div>
                 </div>
             `;
         }
-        els.dailyList.innerHTML = html;
     }
 
-    // 플래너 입력 시 전역 상태 반영 (화면 새로고침 없이 저장만 수행)
-    window.updateDailyBlock = function(element) {
-        const idx = element.getAttribute('data-idx');
-        const todayStr = getLocalDateString(new Date());
-        
-        if(!appState.dailyData[todayStr]) appState.dailyData[todayStr] = {};
-        if(!appState.dailyData[todayStr][idx]) {
-            appState.dailyData[todayStr][idx] = { 
-                type: shiftPattern[getShiftIndexForDate(todayStr)].blocks[idx], 
-                note: '' 
-            };
-        }
-        
-        if(element.tagName === 'SELECT') {
-            appState.dailyData[todayStr][idx].type = parseInt(element.value);
-            element.className = `type-select t-${element.value}`; 
-        } else {
-            appState.dailyData[todayStr][idx].note = element.value;
-        }
-        
-        saveToFirebase(false); // 키보드 버그 픽스: false로 전달하여 강제 새로고침 방지
+    window.toggleTarget = function(btn) { btn.classList.toggle('active'); updateNodeColor(btn.closest('.timeline-row')); debouncedSave(); };
+    window.toggleActual = function(btn) { btn.classList.toggle('active'); updateNodeColor(btn.closest('.timeline-row')); debouncedSave(); };
+    function updateNodeColor(row) {
+        row.classList.remove('is-target', 'is-actual');
+        if(row.querySelector('.btn-actual').classList.contains('active')) row.classList.add('is-actual');
+        else if(row.querySelector('.btn-target').classList.contains('active')) row.classList.add('is-target');
     }
 
-    // --- [탭 3] 일주일 전체 뷰 ---
-    function renderWeekly() {
-        const targetDStr = els.targetDate.value || getLocalDateString(new Date());
-        const targetD = new Date(targetDStr + 'T00:00:00');
-        let html = '';
-
-        const classMap = { 1: 'bg-work', 2: 'bg-free', 3: 'bg-sleep-main', 4: 'bg-sleep-strat' };
-        const nameMap = { 1: '업무', 2: '자유', 3: '정상 수면', 4: '전략 수면' };
-
-        for(let i=0; i<7; i++) {
-            const currentD = new Date(targetD);
-            currentD.setDate(targetD.getDate() + i);
-            const dateStr = getLocalDateString(currentD);
-            
-            const month = (currentD.getMonth() + 1).toString().padStart(2, '0');
-            const date = currentD.getDate().toString().padStart(2, '0');
-            const dayStr = dayNames[currentD.getDay()];
-            
-            const shiftIdx = getShiftIndexForDate(dateStr);
-            const shiftInfo = shiftPattern[shiftIdx];
-            const customDayData = appState.dailyData[dateStr] || {};
-
-            html += `<div class="board-row" id="board-row-${dateStr}">`;
-            html += `<div class="row-label"><span class="sub">${month}/${date}(${dayStr})</span>${shiftInfo.name}</div>`;
-            html += `<div class="row-timeline">`;
-            
-            for(let j=0; j<48; j++) {
-                let typeCode = shiftInfo.blocks[j];
-                if (customDayData[j] && customDayData[j].type !== undefined) {
-                    typeCode = parseInt(customDayData[j].type);
-                }
-                if (!classMap[typeCode]) typeCode = 2;
-                
-                const cls = classMap[typeCode];
-                const typeName = nameMap[typeCode];
-                
-                const hour = Math.floor(j / 2).toString().padStart(2, '0');
-                const min = (j % 2 === 0) ? '00' : '30';
-                let tooltipStr = `${hour}:${min} - ${typeName}`;
-                if(customDayData[j] && customDayData[j].note) {
-                    tooltipStr += `<span class="tooltip-note">📝 ${customDayData[j].note}</span>`;
-                }
-
-                html += `<div class="block ${cls}" data-tooltip='${tooltipStr}' onclick="showBoardTooltip(event)" onmouseleave="hideBoardTooltip()"></div>`;
-            }
-            html += `</div></div>`;
-        }
-        els.grid.innerHTML = html;
-        updateNowMarker();
-    }
-
-    const tooltipEl = document.getElementById('tooltip');
-    window.showBoardTooltip = function(e) {
-        const str = e.target.getAttribute('data-tooltip');
-        if(!str) return;
-        tooltipEl.innerHTML = str;
-        
-        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-        
-        tooltipEl.style.left = clientX + 'px';
-        tooltipEl.style.top = (clientY - 45) + 'px';
-        tooltipEl.style.transform = 'translate(-50%, 0)';
-        tooltipEl.style.opacity = '1';
-        
-        if (window.innerWidth <= 768) { setTimeout(hideBoardTooltip, 2500); }
-    };
-    window.hideBoardTooltip = function() { tooltipEl.style.opacity = '0'; };
-
-    function updateNowMarker() {
-        document.querySelectorAll('.now-marker').forEach(el => el.remove());
+    window.focusCurrentTime = function() {
         const now = new Date();
-        const row = document.getElementById(`board-row-${getLocalDateString(now)}`);
-        if(row) {
-            const timeline = row.querySelector('.row-timeline');
-            const nowPercent = ((now.getHours() * 60 + now.getMinutes()) / 1440) * 100;
-            const marker = document.createElement('div');
-            marker.className = 'now-marker';
-            marker.style.left = `${nowPercent}%`;
-            timeline.appendChild(marker);
+        let logicH = now.getHours() < 5 ? now.getHours() + 24 : now.getHours();
+        let timeKey = `${String(logicH).padStart(2,'0')}:${now.getMinutes() >= 30 ? '30' : '00'}`;
+        const currentSlot = document.getElementById(`slot-${timeKey}`);
+        if(currentSlot) {
+            document.getElementById('main-scroll').scrollTo({ top: currentSlot.offsetTop - 50, behavior: 'smooth' });
+            showToast("현재 시간으로 이동했습니다 📍");
         }
     }
 
-    function renderAll() {
-        if(document.getElementById('tab-today').classList.contains('active')) renderToday();
-        if(document.getElementById('tab-weekly').classList.contains('active')) renderWeekly();
+    function updateHomeTopStats() {
+        const todayStr = getAdjustedTodayStr();
+        const validToday = (todayStr >= START_DATE_STR && todayStr <= END_DATE_STR) ? todayStr : START_DATE_STR;
+        
+        const [ty, tm, td] = todayStr.split('-');
+        const dday = Math.round((new Date(2026, 7, 22) - new Date(ty, tm-1, td)) / 86400000);
+        document.getElementById('dday-text').innerText = dday >= 0 ? `D-${dday}` : `D+${Math.abs(dday)}`;
+
+        const subj = getSubjectForDate(validToday);
+        document.getElementById('home-subject-badge').innerText = subj.text;
+        document.getElementById('home-subject-badge').style.background = subj.color;
+
+        const data = (appData[validToday] && appData[validToday].studygram) ? appData[validToday].studygram : { timetable: {} };
+        let targets = 0, actuals = 0;
+        for(let key in data.timetable) {
+            if(data.timetable[key].target) targets++;
+            if(data.timetable[key].actual) actuals++;
+        }
+
+        let percent = targets > 0 ? Math.round((actuals / targets) * 100) : (actuals > 0 ? 100 : 0);
+        document.getElementById('today-target').innerText = (targets * 0.5).toFixed(1) + 'h';
+        document.getElementById('today-actual').innerText = (actuals * 0.5).toFixed(1) + 'h';
+        document.getElementById('progress-percent').innerText = Math.min(percent, 100) + '%';
+        document.getElementById('home-progress-fill').style.width = Math.min(percent, 100) + '%';
     }
 
-    function updateDDay() {
-        const target = new Date('2026-08-22T00:00:00');
-        const diff = Math.round((target - new Date()) / (1000 * 60 * 60 * 24));
-        document.getElementById('dDayDisplay').innerText = diff > 0 ? `D-${diff}` : (diff === 0 ? 'D-Day' : `D+${Math.abs(diff)}`);
+    // 💡 AI 결산 피드 시스템
+    window.changeHomeFeedDate = function(offset) {
+        const [y, m, d] = homeFeedDate.split('-');
+        let dateObj = new Date(y, m-1, d);
+        dateObj.setDate(dateObj.getDate() + offset);
+        if(dateObj >= new Date(2026, 5, 13) && dateObj <= new Date(2026, 7, 21)) {
+            homeFeedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
+            renderHomeFeed();
+        }
+    };
+
+    window.copyAIText = function() {
+        const text = appData[homeFeedDate]?.studygram?.aiFeed;
+        if(text) {
+            navigator.clipboard.writeText(text).then(() => showToast("인스타 피드 텍스트가 복사되었습니다! 📋"));
+        }
     }
 
-    init();
+    function renderHomeFeed() {
+        const isToday = (homeFeedDate === getAdjustedTodayStr());
+        document.getElementById('home-feed-date-display').innerText = isToday ? "오늘의 피드" : `${homeFeedDate.slice(5).replace('-','.')} 피드`;
+
+        const container = document.getElementById('home-feed-list');
+        const dataObj = (appData[homeFeedDate] && appData[homeFeedDate].studygram) ? appData[homeFeedDate].studygram : {};
+        const slots = dataObj.timetable || {};
+        
+        let memoList = [];
+        for(let i=0; i<48; i++) {
+            let h = Math.floor(((5 * 60) + (i * 30)) / 60);
+            let m = ((5 * 60) + (i * 30)) % 60;
+            let timeKey = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+            
+            if(slots[timeKey] && slots[timeKey].text.trim() !== '') {
+                memoList.push({ time: `${String(h%24).padStart(2,'0')}:${String(m).padStart(2,'0')}`, text: slots[timeKey].text });
+            }
+        }
+
+        if(dataObj.aiFeed) {
+            container.innerHTML = `
+                <div class="feed-card">
+                    <div class="feed-header">
+                        <div class="feed-avatar"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif"></div>
+                        <div class="feed-title-name">StudyGram_AI ✨</div>
+                        <div class="feed-time" style="display:flex; justify-content:space-between; flex:1;">
+                            일일 결산
+                            <button onclick="generateAIFeed()" style="background:none; border:none; color:var(--light-gray); font-size:0.75rem; cursor:pointer; font-weight:bold;">🔄 다시 생성</button>
+                        </div>
+                    </div>
+                    <div class="feed-body">${dataObj.aiFeed}</div>
+                    <div class="feed-footer">
+                        <div>
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:8px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            ${memoList.length}개의 기록
+                        </div>
+                        <button class="btn-copy" onclick="copyAIText()">📋 복사하기</button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('ai-btn').style.display = 'none';
+        } else if (memoList.length > 0) {
+            let listHtml = memoList.map(s => `<div class="feed-task-item"><div class="feed-task-time">${s.time}</div><div class="feed-task-text">📝 ${s.text}</div></div>`).join('');
+            container.innerHTML = `
+                <div class="feed-log-box">
+                    <div style="font-weight:bold; color:var(--primary); margin-bottom:15px; font-size:0.95rem;">작성된 메모 리스트</div>
+                    ${listHtml}
+                </div>
+            `;
+            document.getElementById('ai-btn').style.display = 'block';
+            document.getElementById('ai-btn').disabled = false;
+        } else {
+            container.innerHTML = `
+                <div style="text-align:center; padding: 50px 20px; color: var(--light-gray); font-size: 0.95rem;">
+                    <svg viewBox="0 0 24 24" width="45" height="45" stroke="currentColor" fill="none" stroke-width="1.5" style="margin-bottom:15px; opacity:0.3;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><br>
+                    메모가 작성된 플랜이 없습니다.<br>플래너에 계획을 적어보세요!
+                </div>
+            `;
+            document.getElementById('ai-btn').style.display = 'none';
+        }
+    }
+
+    // 💡 Gemini AI 호출 로직 (다중 Fallback 모델 탑재)
+    window.generateAIFeed = async function() {
+        const dataObj = appData[homeFeedDate].studygram;
+        const slots = dataObj.timetable || {};
+        let memoText = "";
+        
+        for(let key in slots) {
+            if(slots[key].text.trim() !== "") {
+                let h = parseInt(key.split(':')[0]);
+                let m = key.split(':')[1];
+                memoText += `- ${String(h%24).padStart(2,'0')}:${m} : ${slots[key].text}\n`;
+            }
+        }
+
+        if(!memoText) return showToast("작성된 메모가 없습니다.");
+
+        const btn = document.getElementById('ai-btn');
+        btn.innerText = "✨ AI가 일기를 작성 중입니다...";
+        btn.disabled = true;
+
+        const prompt = `다음은 수험생이 오늘 하루 시간대별로 공부한 메모 기록입니다:\n\n${memoText}\n\n이 기록을 바탕으로 인스타그램 피드에 올릴 법한 자연스럽고 동기부여가 되는 짧은 공부 결산 일기를 1문단으로 작성해주세요. 내용 요약과 함께 힘이 나는 멘트, 그리고 마지막엔 관련 해시태그 3~4개를 달아주세요.`;
+        const reqBody = JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] });
+
+        try {
+            // 1순위: Gemini 3.1 Flash Lite
+            let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GEMINI_API_KEY}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: reqBody
+            });
+
+            // 2순위: 모델명 변경 등으로 실패 시 2.5버전으로 자동 Fallback 재시도
+            if (!response.ok) {
+                console.warn("3.1 모델 호출 실패, 2.5 모델로 재시도합니다.");
+                response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: reqBody
+                });
+            }
+
+            // 3순위: 그래도 실패 시 1.5버전으로 최후 보루 재시도
+            if (!response.ok) {
+                console.warn("2.5 모델 호출 실패, 1.5 모델로 재시도합니다.");
+                response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: reqBody
+                });
+            }
+
+            if (!response.ok) throw new Error("API 호출 실패");
+
+            const resData = await response.json();
+            const aiText = resData.candidates[0].content.parts[0].text;
+
+            appData[homeFeedDate].studygram.aiFeed = aiText;
+            const dataSnap = await getDoc(doc(db, "users_data", currentUser));
+            let mainParsed = dataSnap.exists() && dataSnap.data().content ? JSON.parse(dataSnap.data().content) : {};
+            mainParsed.dailyRecords = JSON.stringify(appData);
+            await setDoc(doc(db, "users_data", currentUser), { content: JSON.stringify(mainParsed) }, { merge: true });
+            
+            showToast("AI 피드 작성 완료! ✨");
+            renderHomeFeed();
+        } catch(e) {
+            showToast("AI 호출 중 오류가 발생했습니다.");
+            btn.innerText = "✨ AI 일일 피드 생성하기";
+            btn.disabled = false;
+        }
+    };
 </script>
-
 </body>
 </html>
