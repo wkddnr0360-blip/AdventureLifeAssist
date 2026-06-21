@@ -37,13 +37,14 @@
         .login-box input { width: 100%; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 4px; background: #fafafa; font-size: 0.95rem; }
         .login-box button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
         
-        /* IG Header */
-        header { padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; background: white; border-bottom: 1px solid var(--border); height: 50px; flex-shrink: 0; }
-        .logo-text { font-family: 'Pacifico', cursive; font-size: 1.5rem; letter-spacing: 1px; color: var(--text); padding-top: 5px; }
-        .header-icons { display: flex; gap: 18px; align-items: center; }
+        /* IG Header (높이 및 여백 축소) */
+        header { padding: 6px 15px; display: flex; justify-content: space-between; align-items: center; background: white; border-bottom: 1px solid var(--border); height: 45px; flex-shrink: 0; }
+        .logo-text { font-family: 'Pacifico', cursive; font-size: 1.4rem; letter-spacing: 1px; color: var(--text); padding-top: 3px; }
+        .header-icons { display: flex; gap: 15px; align-items: center; }
         .icon-btn { background: none; border: none; cursor: pointer; color: var(--text); padding: 0; display: flex; align-items: center; }
+        .icon-btn svg { width: 22px; height: 22px; }
 
-        #toast { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(38,38,38,0.95); color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 1500; pointer-events: none; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        #toast { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(38,38,38,0.95); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 1500; pointer-events: none; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         #toast.show { opacity: 1; }
         
         .content-area { flex: 1; overflow-y: auto; background: var(--bg); }
@@ -51,69 +52,68 @@
         .tab-content.active { display: block; animation: fadeIn 0.2s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* IG Profile Section */
-        .ig-profile-card { background: white; padding: 15px 20px 20px 20px; border-bottom: 1px solid var(--border); }
-        .ig-profile-top { display: flex; align-items: center; margin-bottom: 15px; justify-content: space-between; }
-        .ig-avatar-ring { width: 80px; height: 80px; border-radius: 50%; padding: 3px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); margin-right: 20px; flex-shrink: 0; }
-        .ig-avatar { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; overflow: hidden; padding: 3px; }
+        /* IG Profile Section (초압축) */
+        .ig-profile-card { background: white; padding: 10px 15px 12px 15px; border-bottom: 1px solid var(--border); }
+        .ig-profile-top { display: flex; align-items: center; margin-bottom: 10px; justify-content: space-between; }
+        .ig-avatar-ring { width: 65px; height: 65px; border-radius: 50%; padding: 2px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); margin-right: 15px; flex-shrink: 0; }
+        .ig-avatar { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; overflow: hidden; padding: 2px; }
         .ig-avatar img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
         
         .ig-stats { flex: 1; display: flex; justify-content: space-around; text-align: center; }
         .stat-box { display: flex; flex-direction: column; align-items: center; }
-        .stat-num { font-size: 1.05rem; font-weight: 700; color: var(--text); }
-        .stat-label { font-size: 0.75rem; color: var(--text); margin-top: 3px; }
+        .stat-num { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .stat-label { font-size: 0.7rem; color: var(--text); margin-top: 2px; }
 
-        .ig-bio { margin-bottom: 15px; line-height: 1.4; }
-        .bio-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 2px; }
-        .bio-desc { font-size: 0.85rem; color: var(--text); }
-        .bio-link { font-size: 0.85rem; color: #00376b; font-weight: 600; }
+        .ig-bio { margin-bottom: 10px; line-height: 1.3; }
+        .bio-name { font-weight: 700; font-size: 0.85rem; margin-bottom: 2px; }
+        .bio-desc { font-size: 0.8rem; color: var(--text); }
+        .bio-link { font-size: 0.8rem; color: #00376b; font-weight: 600; }
 
         /* IG Action Buttons */
-        .ig-actions { display: flex; gap: 8px; margin-bottom: 20px; }
-        .btn-ig-action { flex: 1; background: #efefef; color: var(--text); border: none; border-radius: 8px; padding: 7px 0; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.1s; }
+        .ig-actions { display: flex; gap: 6px; margin-bottom: 12px; }
+        .btn-ig-action { flex: 1; background: #efefef; color: var(--text); border: none; border-radius: 6px; padding: 5px 0; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.1s; }
         .btn-ig-action:active { background: #dbdbdb; }
 
-        /* IG Highlights (Subjects) */
-        .ig-highlights-wrap { display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none; padding-bottom: 5px; }
+        /* IG Highlights (압축) */
+        .ig-highlights-wrap { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
         .ig-highlights-wrap::-webkit-scrollbar { display: none; }
-        .hl-item { display: flex; flex-direction: column; align-items: center; min-width: 65px; }
-        .hl-ring { width: 62px; height: 62px; border-radius: 50%; padding: 2px; border: 1px solid var(--border); display: flex; justify-content: center; align-items: center; margin-bottom: 6px; }
-        .hl-circle { width: 100%; height: 100%; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 0.9rem; }
-        .hl-text { font-size: 0.7rem; color: var(--text); font-weight: 500; text-align: center; line-height: 1.3; }
+        .hl-item { display: flex; flex-direction: column; align-items: center; min-width: 55px; }
+        .hl-ring { width: 50px; height: 50px; border-radius: 50%; padding: 2px; border: 1px solid var(--border); display: flex; justify-content: center; align-items: center; margin-bottom: 4px; }
+        .hl-circle { width: 100%; height: 100%; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 0.8rem; }
+        .hl-text { font-size: 0.65rem; color: var(--text); font-weight: 500; text-align: center; line-height: 1.2; }
         .hl-diff { font-size: 0.65rem; font-weight: 700; margin-top: 2px; }
 
-        /* IG Feed (Timeline List) */
-        .ig-feed-section { background: white; margin-top: 8px; border-top: 1px solid var(--border); min-height: 400px; }
-        .feed-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.9rem; }
-        .feed-nav button { background: none; border: none; cursor: pointer; color: var(--text); font-size: 1.1rem; }
+        /* IG Feed (Timeline List - 한 화면에 더 많이 보이게 초압축) */
+        .ig-feed-section { background: white; border-top: 1px solid var(--border); min-height: 400px; }
+        .feed-nav { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.85rem; }
+        .feed-nav button { background: none; border: none; cursor: pointer; color: var(--text); font-size: 1rem; }
         
         .ig-feed-list { padding: 0; margin: 0; list-style: none; }
-        .ig-post { display: flex; align-items: flex-start; padding: 15px 20px; border-bottom: 1px solid var(--border); }
-        .ig-post-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 0.8rem; margin-right: 14px; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .ig-post-content { flex: 1; padding-top: 2px; }
-        .ig-post-time { font-size: 0.75rem; color: var(--light-gray); margin-bottom: 4px; font-weight: 600; letter-spacing: 0.5px; }
-        .ig-post-text { font-size: 0.9rem; color: var(--text); line-height: 1.4; font-weight: 500; word-break: keep-all; }
+        .ig-post { display: flex; align-items: flex-start; padding: 8px 15px; border-bottom: 1px solid var(--border); }
+        .ig-post-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 0.7rem; margin-right: 12px; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .ig-post-content { flex: 1; padding-top: 1px; }
+        .ig-post-time { font-size: 0.7rem; color: var(--light-gray); margin-bottom: 2px; font-weight: 600; letter-spacing: 0.5px; }
+        .ig-post-text { font-size: 0.8rem; color: var(--text); line-height: 1.3; font-weight: 500; word-break: keep-all; }
 
         /* Planner & Settings */
         .planner-wrap { background: white; min-height: 100%; position: relative; }
-        .date-nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 20; font-weight: bold; }
-        .date-nav button { font-size: 1.2rem; background: none; border: none; color: var(--text); cursor: pointer; padding: 5px; }
+        .date-nav { display: flex; justify-content: space-between; align-items: center; padding: 8px 15px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 20; font-weight: bold; }
+        .date-nav button { font-size: 1.1rem; background: none; border: none; color: var(--text); cursor: pointer; padding: 5px; }
         
-        /* [수정] 루틴 세팅 줄바꿈 허용 및 폭 대응 */
-        .routine-settings { margin: 15px 20px; background: #fafafa; padding: 10px 15px; border-radius: 8px; border: 1px solid var(--border); display: flex; flex-wrap: wrap; justify-content: space-around; gap: 8px; align-items: center; }
+        /* 세팅칸 초압축 */
+        .routine-settings { margin: 8px 15px; background: #fafafa; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); display: flex; flex-wrap: wrap; justify-content: space-around; gap: 6px; align-items: center; }
         .routine-settings div { display: flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; }
-        .routine-settings label { font-size: 0.8rem; font-weight: 600; color: var(--light-gray); margin-right: 2px; }
-        .routine-settings input[type="time"] { border: 1px solid var(--border); border-radius: 4px; padding: 4px 6px; background: white; font-size: 0.85rem; font-family: inherit; font-weight: 500; color: var(--text); outline: none; }
+        .routine-settings label { font-size: 0.75rem; font-weight: 600; color: var(--light-gray); margin-right: 2px; }
+        .routine-settings input[type="time"] { border: 1px solid var(--border); border-radius: 4px; padding: 2px 4px; background: white; font-size: 0.8rem; font-family: inherit; font-weight: 500; color: var(--text); outline: none; }
 
-        .timeline-wrap { padding: 5px 15px 80px 15px; }
-        .timeline-row { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px dashed #efefef; }
+        /* 💡 타임라인 한 화면 최대화 (초압축 디자인) */
+        .timeline-wrap { padding: 2px 10px 80px 10px; }
+        .timeline-row { display: flex; align-items: center; padding: 3px 0; border-bottom: 1px dashed #efefef; }
         .timeline-row.sleep-row { background-color: #fafafa; opacity: 0.8; border-radius: 4px; }
         
-        /* [수정] 타임라인 시간 라벨 찌그러짐 방지 */
-        .time-label { width: 40px; font-size: 0.75rem; color: var(--light-gray); font-weight: 600; text-align: right; padding-right: 8px; flex-shrink: 0; }
+        .time-label { width: 36px; font-size: 0.7rem; color: var(--light-gray); font-weight: 700; text-align: right; padding-right: 6px; flex-shrink: 0; }
         
-        /* [수정] 과목 선택 박스 글자 잘림 방지 (너비 확장 및 속성 고정) */
-        .type-select { width: 76px; font-size: 0.75rem; font-weight: bold; padding: 4px 2px 4px 4px; border-radius: 6px; border: 1px solid var(--border); background: #fff; margin-right: 8px; outline: none; text-align: center; flex-shrink: 0; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+        .type-select { width: 70px; font-size: 0.7rem; font-weight: bold; padding: 2px; border-radius: 4px; border: 1px solid var(--border); background: #fff; margin-right: 6px; outline: none; text-align: center; flex-shrink: 0; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
         .type-select.sel-police { background: #e0f1ff; color: var(--cls-police); border-color: #b3d7ff; }
         .type-select.sel-criminal { background: #ffe5e5; color: var(--cls-criminal); border-color: #ffb3b3; }
         .type-select.sel-const { background: #fae6ff; color: var(--cls-const); border-color: #f3b3ff; }
@@ -122,32 +122,31 @@
         .type-select.sel-rest { background: #e8e8ff; color: var(--cls-rest); border-color: #c7c7ff; }
         .type-select.sel-sleep { background: #f1f3f5; color: var(--cls-sleep); border-color: #ced4da; }
 
-        .input-box { flex: 1; border: none; outline: none; font-size: 0.85rem; padding: 6px; border-bottom: 1px solid transparent; color: var(--text); background: transparent; font-weight: 500; min-width: 0; }
+        .input-box { flex: 1; border: none; outline: none; font-size: 0.8rem; padding: 4px; border-bottom: 1px solid transparent; color: var(--text); background: transparent; font-weight: 500; min-width: 0; }
         .input-box:focus { background: #fafafa; border-radius: 4px; }
         
-        /* [수정] 우측 버튼 그룹 찌그러짐 방지 */
-        .opt-group { display: flex; gap: 4px; margin-left: 6px; flex-shrink: 0; }
-        .opt-btn { padding: 4px 8px; font-size: 0.75rem; border-radius: 6px; border: 1px solid var(--border); background: white; color: var(--light-gray); font-weight: 700; cursor: pointer; transition: 0.1s; }
+        .opt-group { display: flex; gap: 2px; margin-left: 4px; flex-shrink: 0; }
+        .opt-btn { padding: 3px 6px; font-size: 0.7rem; border-radius: 4px; border: 1px solid var(--border); background: white; color: var(--light-gray); font-weight: 700; cursor: pointer; transition: 0.1s; }
         .opt-btn.btn-t.active { background: var(--primary); color: white; border-color: var(--primary); }
         .opt-btn.btn-a.active { background: var(--success); color: white; border-color: var(--success); }
 
         /* Calendar */
-        .calendar-wrap { padding: 20px; background: white; min-height: 100%; }
+        .calendar-wrap { padding: 15px; background: white; min-height: 100%; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
         .cal-header { text-align: center; font-size: 0.75rem; color: var(--light-gray); font-weight: 600; padding-bottom: 8px; }
-        .cal-cell { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 0.85rem; font-weight: 500; border-radius: 50%; background: transparent; cursor: pointer; }
+        .cal-cell { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 0.8rem; font-weight: 500; border-radius: 50%; background: transparent; cursor: pointer; }
         .cal-cell.empty { pointer-events: none; }
         .cal-cell:not(.empty):hover { background: #fafafa; }
         .cal-cell.today { background: var(--primary); color: white; font-weight: bold; box-shadow: 0 4px 10px rgba(0,149,246,0.3); }
 
         /* Bottom Nav - Safe Area 대응 */
-        .bottom-nav { width: 100%; height: calc(50px + env(safe-area-inset-bottom, 0px)); background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: flex-start; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 100; }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text); height: 50px; cursor: pointer; transition: 0.2s; }
-        .nav-item svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: 0.2s; }
+        .bottom-nav { width: 100%; height: calc(48px + env(safe-area-inset-bottom, 0px)); background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: flex-start; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 100; }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text); height: 48px; cursor: pointer; transition: 0.2s; }
+        .nav-item svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: 0.2s; }
         .nav-item.active svg { fill: currentColor; stroke: none; transform: scale(1.1); }
 
         /* Floating 'Now' Button */
-        .fab-now { position: fixed; bottom: calc(70px + env(safe-area-inset-bottom, 0px)); right: 20px; width: 50px; height: 50px; background: var(--text); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.25); cursor: pointer; z-index: 50; font-size: 0.75rem; text-align: center; display: none; line-height: 1.2; }
+        .fab-now { position: fixed; bottom: calc(65px + env(safe-area-inset-bottom, 0px)); right: 15px; width: 45px; height: 45px; background: var(--text); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.25); cursor: pointer; z-index: 50; font-size: 0.7rem; text-align: center; display: none; line-height: 1.2; }
         .fab-now.show { display: flex; }
         .fab-now:active { transform: scale(0.9); }
     </style>
@@ -172,10 +171,10 @@
         <div class="logo-text">StudyGram</div>
         <div class="header-icons">
             <button class="icon-btn" onclick="location.reload()">
-                <svg viewBox="0 0 24 24" width="24" height="24"><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="22" x2="9.5" y1="12" y2="12"></line><polygon fill="none" points="16 17 21 12 16 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polygon><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9,21H5a2,2,0,0,1-2-2V5A2,2,0,0,1,5,3H9"></path></svg>
+                <svg viewBox="0 0 24 24"><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="22" x2="9.5" y1="12" y2="12"></line><polygon fill="none" points="16 17 21 12 16 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polygon><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9,21H5a2,2,0,0,1-2-2V5A2,2,0,0,1,5,3H9"></path></svg>
             </button>
-            <button class="icon-btn"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path></svg></button>
-            <button class="icon-btn"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
+            <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path></svg></button>
+            <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
         </div>
     </header>
 
@@ -207,8 +206,8 @@
                 
                 <div class="ig-bio">
                     <div class="bio-name">Jang Wook <span id="home-cycle-badge" style="font-weight:normal; color:var(--light-gray); font-size:0.75rem;"></span></div>
-                    <div class="bio-desc">경찰학 마스터 62일 13회독 프로젝트 📚🔥<br>D-Day: 2026.08.22</div>
-                    <div class="bio-link">worldtimeapi.org 동기화 활성 🟢</div>
+                    <div class="bio-desc">경찰학 62일 13회독 마스터 플랜 📚🔥<br>D-Day: 2026.08.22</div>
+                    <div class="bio-link">worldtimeapi.org 서버 동기화 🟢</div>
                 </div>
 
                 <div class="ig-actions">
@@ -217,6 +216,7 @@
                     <button class="btn-ig-action" onclick="DataManager.exportBackup()">안전 추출</button>
                 </div>
 
+                <!-- IG 하이라이트 스타일 (과목별 현황) -->
                 <div class="ig-highlights-wrap">
                     <div class="hl-item">
                         <div class="hl-ring"><div class="hl-circle" style="background:var(--cls-police)">경</div></div>
@@ -236,6 +236,7 @@
                 </div>
             </div>
 
+            <!-- IG 피드 리스트 (초압축 뷰) -->
             <div class="ig-feed-section">
                 <div class="feed-nav">
                     <button onclick="UIController.changeHomeFeedDate(-1)">◀</button>
@@ -260,7 +261,7 @@
                 <div class="date-nav">
                     <button onclick="UIController.changePlannerDate(-1)">◀</button>
                     <div style="text-align:center; line-height: 1.2;">
-                        <div id="planner-date-display" style="font-size:0.95rem; font-weight:800;">2026-06-21</div>
+                        <div id="planner-date-display" style="font-size:0.9rem; font-weight:800;">2026-06-21</div>
                         <div id="planner-subj-display" style="font-size:0.7rem; color:var(--light-gray); font-weight:600;">회독 상태</div>
                     </div>
                     <button onclick="UIController.changePlannerDate(1)">▶</button>
@@ -280,18 +281,22 @@
 
     <!-- 하단 탭 내비게이션 -->
     <nav class="bottom-nav">
+        <!-- 홈 -->
         <div class="nav-item active" onclick="UIController.switchTab('home')" id="nav-home">
             <svg viewBox="0 0 24 24"><path d="M9.005 16.545a2.997 2.997 0 012.997-2.997h0a2.997 2.997 0 012.997 2.997v4.453h5.245V11.194l-8.245-6.8-8.245 6.8v9.804h5.25v-4.453z"></path></svg>
         </div>
+        <!-- 달력 (검색 모사) -->
         <div class="nav-item" onclick="UIController.switchTab('calendar')" id="nav-calendar">
             <svg viewBox="0 0 24 24"><circle cx="10" cy="10" r="7"></circle><line x1="21" y1="21" x2="15" y2="15"></line></svg>
         </div>
+        <!-- 플래너 (릴스 모사) -->
         <div class="nav-item" onclick="UIController.switchTab('planner'); UIController.focusCurrentTime();" id="nav-planner">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
         </div>
     </nav>
 </div>
 
+<!-- 서비스 워커 (PWA 자동 업데이트 기능 포함) -->
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -325,10 +330,12 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     
+    // 멀티 탭 시 오프라인 캐시 충돌 우회
     enableIndexedDbPersistence(db).catch((err) => {
         if (err.code === 'failed-precondition') console.warn("멀티 탭 감지 (온라인 전용 우회 작동)");
     });
 
+    // 서버 시간 강제 동기화 모듈 (WorldTimeAPI)
     window.TimeSync = {
         offset: 0,
         async init() {
@@ -404,7 +411,7 @@
 
     window.TimeEngine = {
         activityMeta: {
-            none: { label: "선택 안됨", css: "", short: "•" },
+            none: { label: "선택 없음", css: "", short: "•" },
             police: { label: "경찰학", css: "sel-police", short: "경" },
             criminal: { label: "형사법", css: "sel-criminal", short: "형" },
             const: { label: "헌법", css: "sel-const", short: "헌" },
@@ -561,6 +568,7 @@
                 let isSleep = TimeEngine.isSleepTime(timeKey, AppState.viewingDate);
                 let slot = slots[timeKey] || { text: "", target: false, actual: false, actType: "none" };
                 
+                // 오토 코렉트: 수면 시간이 아니게 되었는데 과거에 수면으로 자동지정되었던 빈칸 초기화
                 if (slot.actType === 'sleep' && !isSleep && !slot.text && !slot.target && !slot.actual) slot.actType = 'none';
                 if (slot.actType === 'none' && isSleep && !slot.text && !slot.target && !slot.actual) slot.actType = 'sleep';
 
@@ -786,13 +794,6 @@
                 grid.innerHTML += `<div class="cal-cell ${str === todayStr ? 'today' : ''}" onclick="window.UIController.jumpToPlanner('${str}')"><span>${dObj.getDate()}</span></div>`;
                 dObj.setDate(dObj.getDate() + 1); 
             }
-        },
-        
-        jumpToPlanner(dateStr) {
-            this.syncDOMToState();
-            AppState.viewingDate = dateStr;
-            this.renderPlannerUI();
-            this.switchTab('planner');
         }
     };
 
