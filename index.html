@@ -3,177 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>StudyGram</title>
+    <title>StudyGram Pro</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#ffffff">
+
     <style>
-        /* 인스타그램 오리지널 컬러 & 플랫 디자인 */
         :root { 
-            --bg: #fafafa; --card: #ffffff; --text: #262626; --border: #dbdbdb; 
+            --bg: #fafafa; --card: #ffffff; --text: #262626; --border: #ebebeb; 
             --primary: #0095f6; --primary-light: #e0f1ff; --light-gray: #8e8e8e; 
-            --success: #4cd964; --danger: #ed4956;
+            --success: #28a745; --danger: #dc3545;
             
-            --color-criminal: #ed4956; /* 인스타 레드 */
-            --color-police: #3897f0;   /* 인스타 블루 */
-            --color-const: #a307ba;    /* 인스타 퍼플 */
+            --cls-police: #3897f0;
+            --cls-criminal: #ed4956;
+            --cls-const: #a307ba;
+            --cls-exercise: #ff9500;
+            --cls-meal: #e65100;
+            --cls-rest: #5856d6;
+            --cls-sleep: #707070;
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        /* 💡 높이 고정 및 외부 스크롤 완벽 차단 (화면 좁아짐 현상 해결) */
-        html, body { width: 100%; height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #000; color: var(--text); }
+        html, body { width: 100%; height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #000; color: var(--text); }
+        .app-container { width: 100%; max-width: 500px; height: 100%; margin: 0 auto; background: var(--bg); display: flex; flex-direction: column; position: relative; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
         
-        /* 앱 컨테이너 내부에서만 스크롤이 발생하도록 구조화 */
-        .app-container { width: 100%; max-width: 500px; height: 100%; margin: 0 auto; background: var(--bg); display: flex; flex-direction: column; position: relative; border-left: 1px solid var(--border); border-right: 1px solid var(--border); box-sizing: border-box; }
-        
-        /* 로그인 오버레이 */
         #login-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; transition: opacity 0.3s; }
         .login-box { width: 100%; max-width: 300px; text-align: center; }
-        .login-box h1 { font-family: 'Brush Script MT', cursive; font-size: 3.5rem; margin-bottom: 20px; color: var(--text); }
-        .login-box input { width: 100%; padding: 14px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 4px; background: #fafafa; font-size: 0.95rem; }
-        .login-box input:focus { outline: none; border-color: var(--light-gray); }
-        .login-box button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 1rem; cursor: pointer; margin-top: 10px; }
+        .login-box h1 { font-family: 'Brush Script MT', cursive; font-size: 3.5rem; margin-bottom: 20px; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 6px; background: #fafafa; }
+        .login-box button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
         
-        /* 헤더 (상단 고정) */
-        header { padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-bottom: 1px solid var(--border); z-index: 10; flex-shrink: 0; height: 60px; }
-        .logo-text { font-family: 'Brush Script MT', cursive; font-size: 1.8rem; color: var(--text); letter-spacing: 1px; }
-        .icon-btn { background: none; border: none; cursor: pointer; color: var(--text); padding: 0; display: flex; align-items: center; }
+        header { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-bottom: 1px solid var(--border); height: 50px; flex-shrink: 0; }
+        .logo-text { font-family: 'Brush Script MT', cursive; font-size: 1.6rem; letter-spacing: 1px; }
+        .icon-btn { background: none; border: none; cursor: pointer; color: var(--text); }
 
-        /* 토스트 알림 */
-        #toast { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(38,38,38,0.9); color: white; padding: 12px 24px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 1500; white-space: nowrap; }
+        #toast { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(38,38,38,0.9); color: white; padding: 8px 18px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 1500; pointer-events: none; }
         #toast.show { opacity: 1; }
         
-        /* 💡 탭 컨텐츠 영역 (하단 바에 절대 안 가려지는 스크롤 영역) */
-        .content-area { flex: 1; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth; background: var(--bg); position: relative; padding-bottom: 20px; }
+        .content-area { flex: 1; overflow-y: auto; background: var(--bg); padding-bottom: 10px; }
         .tab-content { display: none; min-height: 100%; }
-        .tab-content.active { display: block; animation: fadeIn 0.2s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tab-content.active { display: block; }
 
-        /* --- [탭 1] 홈 화면 --- */
-        .home-dashboard { background: white; padding: 20px; border-bottom: 1px solid var(--border); margin-bottom: 10px; }
-        .profile-top { display: flex; align-items: center; margin-bottom: 20px; }
-        .avatar-container { width: 85px; height: 85px; border-radius: 50%; padding: 3px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); margin-right: 25px; flex-shrink: 0; }
-        .avatar-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; overflow: hidden; padding: 5px; }
-        .avatar-inner img { width: 100%; height: 100%; object-fit: contain; }
+        .dashboard-card { background: white; padding: 15px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+        .profile-top { display: flex; align-items: center; }
+        .avatar-container { width: 65px; height: 65px; border-radius: 50%; padding: 2px; background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); margin-right: 15px; }
+        .avatar-inner { width: 100%; height: 100%; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .avatar-inner img { width: 80%; height: 80%; object-fit: contain; }
         
-        .profile-stats { flex: 1; display: flex; justify-content: space-between; text-align: center; }
+        .profile-stats { flex: 1; display: flex; justify-content: space-around; text-align: center; }
         .stat-item { display: flex; flex-direction: column; }
-        .stat-num { font-size: 1.15rem; font-weight: 700; }
-        .stat-label { font-size: 0.8rem; color: var(--text); margin-top: 2px; }
+        .stat-num { font-size: 1.1rem; font-weight: 700; }
+        .stat-label { font-size: 0.75rem; color: var(--light-gray); }
 
-        .today-info { font-size: 0.95rem; line-height: 1.5; margin-top: 10px; }
-        .subject-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; color: white; font-weight: bold; font-size: 0.9rem; margin-top: 10px; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-        
-        .progress-wrap { margin-top: 25px; }
-        .progress-text { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
-        .progress-bar-bg { width: 100%; height: 6px; background: #efefef; border-radius: 3px; overflow: hidden; }
-        .progress-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.5s ease; }
+        .routine-settings { background: #f8f9fa; padding: 10px 15px; border-radius: 8px; font-size: 0.8rem; border: 1px solid var(--border); margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .setting-header { display: flex; justify-content: space-between; align-items: center; }
+        .setting-header strong { color: var(--text); font-size: 0.85rem; }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; }
+        .setting-row label { font-weight: 600; color: #495057; }
+        .routine-settings input[type="time"] { border: 1px solid #ced4da; border-radius: 4px; padding: 2px 4px; background: #fff; font-size: 0.8rem; font-family: inherit; }
+        .btn-save-sm { background: var(--primary); color: white; border: none; border-radius: 4px; padding: 4px 10px; font-size: 0.75rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-save-sm:active { opacity: 0.8; }
 
-        /* 💡 홈: AI 피드 섹션 */
-        .feed-section { background: white; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); min-height: 300px; }
-        .feed-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.95rem; }
-        .feed-nav button { background: none; border: none; cursor: pointer; color: var(--light-gray); font-size: 1.1rem; padding: 5px; }
-        
-        .ai-generate-btn { display: block; width: calc(100% - 40px); margin: 20px auto; padding: 14px; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; text-align: center; font-weight: 800; border-radius: 12px; cursor: pointer; border: none; font-size: 1rem; box-shadow: 0 4px 15px rgba(220, 39, 67, 0.3); transition: transform 0.2s; }
-        .ai-generate-btn:active { transform: scale(0.96); }
-        .ai-generate-btn:disabled { opacity: 0.7; cursor: not-allowed; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .daily-plan-container { display: flex; gap: 6px; margin-top: 10px; }
+        .plan-item { flex: 1; padding: 10px 4px; border-radius: 8px; text-align: center; border: 1px solid rgba(0,0,0,0.03); display: flex; flex-direction: column; gap: 3px; }
+        .p-title { font-weight: 900; margin-bottom: 4px; font-size: 0.85rem; }
+        .p-stat { font-size: 0.72rem; font-weight: 600; color: #444; }
+        .p-diff { font-size: 0.8rem; font-weight: 900; margin-top: 2px; }
 
-        /* AI 피드 카드 (인스타 게시물 스타일) */
-        .feed-card { margin-bottom: 20px; padding-bottom: 20px; }
-        .feed-header { display: flex; align-items: center; padding: 12px 20px; }
-        .feed-avatar { width: 36px; height: 36px; border-radius: 50%; background: #f0f8ff; border: 1px solid var(--border); margin-right: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; padding: 2px; }
-        .feed-avatar img { width: 100%; height: 100%; object-fit: contain; }
-        .feed-title-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
-        .feed-time { font-size: 0.8rem; color: var(--light-gray); display: flex; align-items: center; gap: 10px; }
-        
-        .feed-body { padding: 0 20px; font-size: 0.95rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; margin-bottom: 15px; }
-        
-        .feed-log-box { padding: 0 20px; margin-top: 10px; }
-        .feed-task-item { display: flex; margin-bottom: 8px; align-items: flex-start; font-size: 0.9rem; }
-        .feed-task-time { font-weight: bold; width: 45px; color: var(--light-gray); flex-shrink: 0; }
-        .feed-task-text { flex: 1; color: var(--text); }
-        
-        .feed-footer { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #efefef; margin-top: 15px; font-size: 0.9rem; font-weight: 600; }
-        .btn-copy { background: #f0f8ff; border: 1px solid var(--primary); color: var(--primary); font-weight: bold; cursor: pointer; font-size: 0.85rem; padding: 6px 12px; border-radius: 20px; transition: 0.2s; }
-        .btn-copy:active { transform: scale(0.9); background: var(--primary); color: white; }
+        .macro-plan-card { background: #f8f9fa; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin: 10px 15px; font-size: 0.8rem; }
+        .macro-title { font-weight: bold; font-size: 0.85rem; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+        .macro-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px; }
+        .macro-item { background: white; padding: 6px; border-radius: 4px; border: 1px solid #eee; }
 
-        /* --- [탭 2] 전체 달력 --- */
-        .calendar-wrap { padding: 20px; background: white; min-height: 100%; }
-        .calendar-legend { display: flex; justify-content: center; gap: 15px; font-size: 0.8rem; margin-bottom: 20px; color: var(--light-gray); }
-        .legend-item { display: flex; align-items: center; gap: 6px; font-weight: 600; }
-        .legend-color { width: 12px; height: 12px; border-radius: 2px; }
-        
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-        .cal-header { text-align: center; font-size: 0.75rem; color: var(--light-gray); font-weight: 600; padding-bottom: 5px; }
-        .cal-cell { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 0.85rem; font-weight: bold; color: white; cursor: pointer; position: relative; border-radius: 6px; }
-        .cal-cell.empty { background: transparent; cursor: default; }
-        .cal-cell.today { border: 2px solid #262626; transform: scale(1.15); z-index: 2; box-shadow: 0 3px 8px rgba(0,0,0,0.3); }
+        .feed-section { background: white; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .feed-nav { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.85rem; }
+        .feed-nav button { background: none; border: none; cursor: pointer; color: var(--light-gray); font-size: 1rem; }
+        .feed-table-wrap { padding: 12px 15px; }
+        .feed-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; box-shadow: 0 0 0 1px var(--border); border-radius: 6px; overflow: hidden; }
+        .feed-table th { background: #f8f9fa; padding: 8px; font-weight: 800; border-bottom: 1px solid var(--border); text-align: center; }
+        .feed-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+        .feed-table .time-block { font-weight: 700; color: var(--primary); text-align: center; width: 95px; background: #fdfdfd; border-right: 1px solid var(--border); }
+        .feed-table .tag-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.7rem; font-weight: bold; margin-right: 6px; }
 
-        /* --- [탭 3] 플래너 --- */
-        .planner-wrap { background: white; min-height: 100%; position: relative; padding-bottom: 60px; }
-        .date-nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); font-weight: 600; position: sticky; top: 0; z-index: 20; }
-        .date-nav button { font-size: 1.2rem; background: none; border: none; color: var(--light-gray); cursor: pointer; padding: 5px; }
+        .planner-wrap { background: white; min-height: 100%; position: relative; }
+        .date-nav { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.95); position: sticky; top: 0; z-index: 20; }
+        .date-nav button { font-size: 1rem; background: none; border: none; color: var(--light-gray); cursor: pointer; }
         
-        .timeline-wrap { padding: 15px 20px; }
-        .timeline-row { display: flex; position: relative; padding-bottom: 20px; }
-        .timeline-row:last-child { padding-bottom: 0; }
-        .timeline-row:last-child .track .line { display: none; }
+        .timeline-wrap { padding: 5px 10px; }
+        .timeline-row { display: flex; align-items: center; padding: 2px 0; border-bottom: 1px dashed #f1f1f1; }
+        .timeline-row.sleep-row { background-color: #f8f9fa; opacity: 0.7; }
         
-        .time { width: 45px; font-size: 0.8rem; color: var(--light-gray); font-weight: 600; text-align: right; padding-right: 12px; padding-top: 8px; }
+        .time-label { width: 36px; font-size: 0.72rem; color: var(--light-gray); font-weight: 700; text-align: right; padding-right: 6px; }
         
-        .track { position: relative; width: 20px; display: flex; justify-content: center; }
-        .track .node { position: absolute; top: 12px; width: 10px; height: 10px; border-radius: 50%; background: #efefef; border: 2px solid var(--border); z-index: 2; transition: 0.2s; }
-        .track .line { position: absolute; top: 22px; width: 2px; height: calc(100% - 10px); background: #efefef; z-index: 1; }
-        
-        .timeline-row.is-target .track .node { border-color: var(--primary); background: white; }
-        .timeline-row.is-actual .track .node { border-color: var(--success); background: var(--success); }
-        
-        .content { flex: 1; padding-left: 12px; display: flex; flex-direction: column; justify-content: center; }
-        .input-box { width: 100%; border: none; outline: none; font-size: 0.95rem; padding: 8px 0; border-bottom: 1px solid #efefef; color: var(--text); background: transparent; margin-bottom: 6px; font-weight: 500; }
-        .input-box:focus { border-bottom-color: var(--light-gray); }
-        
-        .btn-group { display: flex; gap: 8px; }
-        .btn-action { padding: 5px 14px; font-size: 0.75rem; border-radius: 12px; border: 1px solid var(--border); background: white; color: var(--text); font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .btn-action.btn-target.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
-        .btn-action.btn-actual.active { background: var(--success); color: white; border-color: var(--success); }
+        .type-select { font-size: 0.72rem; font-weight: bold; padding: 2px; border-radius: 4px; border: 1px solid var(--border); width: 52px; background: #fff; margin-right: 5px; outline: none; text-align: center; }
+        .type-select.sel-police { background: #e0f1ff; color: var(--cls-police); border-color: #b3d7ff; }
+        .type-select.sel-criminal { background: #ffe5e5; color: var(--cls-criminal); border-color: #ffb3b3; }
+        .type-select.sel-const { background: #fae6ff; color: var(--cls-const); border-color: #f3b3ff; }
+        .type-select.sel-exercise { background: #fff3e0; color: var(--cls-exercise); border-color: #ffe0b2; }
+        .type-select.sel-meal { background: #fff3e0; color: var(--cls-meal); border-color: #ffcc80; }
+        .type-select.sel-rest { background: #e8e8ff; color: var(--cls-rest); border-color: #c7c7ff; }
+        .type-select.sel-sleep { background: #f1f3f5; color: var(--cls-sleep); border-color: #ced4da; }
 
-        /* 💡 퀵 이동 플로팅 버튼 */
-        .fab-now { position: fixed; bottom: 80px; right: 20px; width: 55px; height: 55px; background: var(--text); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2); cursor: pointer; z-index: 50; font-size: 0.8rem; text-align: center; line-height: 1.2; display: none; transition: transform 0.2s; }
-        .fab-now:active { transform: scale(0.9); }
-        .fab-now.show { display: flex; }
+        .input-box { flex: 1; border: none; outline: none; font-size: 0.8rem; padding: 4px; border-bottom: 1px solid transparent; color: var(--text); background: transparent; font-weight: 500; min-width: 0; }
+        .input-box:focus { border-bottom-color: var(--light-gray); background: #fafafa; }
+        
+        .opt-group { display: flex; gap: 2px; margin-left: 4px; }
+        .opt-btn { padding: 3px 6px; font-size: 0.7rem; border-radius: 4px; border: 1px solid var(--border); background: white; font-weight: 700; cursor: pointer; }
+        .opt-btn.btn-t.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+        .opt-btn.btn-a.active { background: var(--success); color: white; border-color: var(--success); }
 
-        /* 💡 하단 네비게이션바 (절대 밀려 내려가지 않음) */
-        .bottom-nav { width: 100%; height: 60px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 100; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text); cursor: pointer; transition: 0.2s; opacity: 0.3; height: 100%; }
+        .calendar-wrap { padding: 15px; background: white; min-height: 100%; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+        .cal-header { text-align: center; font-size: 0.7rem; color: var(--light-gray); font-weight: 600; padding-bottom: 4px; }
+        .cal-cell { aspect-ratio: 1; display: flex; justify-content: center; align-items: center; font-size: 0.75rem; font-weight: bold; border-radius: 4px; background: #fafafa; border: 1px solid var(--border); cursor: pointer; }
+        .cal-cell.empty { background: transparent; border: none; cursor: default; }
+        .cal-cell.today { border: 2px solid var(--primary); color: var(--primary); background: white; }
+
+        .bottom-nav { width: 100%; height: 50px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text); opacity: 0.3; height: 100%; cursor: pointer; }
         .nav-item.active { opacity: 1; }
-        .nav-icon { width: 24px; height: 24px; fill: currentColor; }
+        .nav-icon { width: 20px; height: 20px; fill: currentColor; }
+        
+        .fab-now { position: fixed; bottom: 65px; right: 15px; width: 45px; height: 45px; background: var(--text); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; box-shadow: 0 3px 10px rgba(0,0,0,0.15); cursor: pointer; z-index: 50; font-size: 0.7rem; text-align: center; display: none; }
+        .fab-now.show { display: flex; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <div id="toast">저장되었습니다</div>
+    <div id="toast">저장 완료</div>
 
     <div id="login-overlay">
         <div class="login-box">
             <h1>StudyGram</h1>
-            <p style="color: var(--light-gray); font-size:0.85rem; margin-bottom:30px;">Pacemaker 데이터 연동</p>
+            <p style="color: var(--light-gray); font-size:0.8rem; margin-bottom:20px;">Pacemaker 모듈형 시스템 연동</p>
             <input type="text" id="userid" placeholder="아이디" autocomplete="off">
             <input type="password" id="userpw" placeholder="비밀번호">
-            <button id="login-btn" onclick="handleLogin()">로그인</button>
-            <div id="login-msg" style="color: var(--danger); margin-top: 15px; font-size: 0.85rem; font-weight:bold;"></div>
+            <button id="login-btn" onclick="DataManager.login()">로그인</button>
+            <div id="login-msg" style="color: var(--danger); margin-top: 12px; font-size: 0.8rem; font-weight:bold;"></div>
         </div>
     </div>
 
     <header>
         <div class="logo-text">StudyGram</div>
         <button class="icon-btn" onclick="location.reload()">
-            <svg viewBox="0 0 24 24" width="22" height="22"><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="22" x2="9.5" y1="12" y2="12"></line><polygon fill="none" points="16 17 21 12 16 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polygon><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="9" x2="3" y1="12" y2="12"></line><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9,21H5a2,2,0,0,1-2-2V5A2,2,0,0,1,5,3H9"></path></svg>
+            <svg viewBox="0 0 24 24" width="18" height="18"><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="22" x2="9.5" y1="12" y2="12"></line><polygon fill="none" points="16 17 21 12 16 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polygon><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9,21H5a2,2,0,0,1-2-2V5A2,2,0,0,1,5,3H9"></path></svg>
         </button>
     </header>
 
     <div class="content-area" id="main-scroll">
         
         <div id="tab-home" class="tab-content active">
-            <div class="home-dashboard">
+            <div class="dashboard-card">
                 <div class="profile-top">
                     <div class="avatar-container">
                         <div class="avatar-inner">
@@ -181,86 +163,127 @@
                         </div>
                     </div>
                     <div class="profile-stats">
-                        <div class="stat-item"><span class="stat-num" id="dday-text">D-70</span><span class="stat-label">시험까지</span></div>
-                        <div class="stat-item"><span class="stat-num" id="today-target">0.0h</span><span class="stat-label">목표시간</span></div>
-                        <div class="stat-item"><span class="stat-num" id="today-actual">0.0h</span><span class="stat-label">완료시간</span></div>
+                        <div class="stat-item"><span class="stat-num" id="dday-text">D-62</span><span class="stat-label">시험까지</span></div>
+                        <div class="stat-item"><span class="stat-num" id="today-target">0.0h</span><span class="stat-label">목표공부</span></div>
+                        <div class="stat-item"><span class="stat-num" id="today-actual">0.0h</span><span class="stat-label">완료공부</span></div>
                     </div>
                 </div>
-                <div class="today-info">
-                    <strong>오늘의 과목</strong> <span style="font-size:0.8rem; color:var(--light-gray);">(05시 기준)</span><br>
-                    <div class="subject-badge" id="home-subject-badge">로딩중</div>
+                
+                <div class="routine-settings">
+                    <div class="setting-header" style="margin-bottom: 5px; border-bottom: 1px solid #e0e0e0; padding-bottom: 8px;">
+                        <strong>💾 데이터 안전 백업/복구</strong>
+                        <div style="display:flex; gap: 6px;">
+                            <button class="btn-save-sm" style="background: #ff9500; color: white;" onclick="document.getElementById('file-import').click()">복구</button>
+                            <input type="file" id="file-import" style="display:none;" accept=".studygram,.json" onchange="DataManager.importBackup(event)">
+                            <button class="btn-save-sm" style="background: #34c759; color: white;" onclick="DataManager.exportBackup()">추출</button>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-header" style="margin-top: 2px;">
+                        <strong>⚙️ 전체 기본 수면 패턴 설정</strong>
+                        <button class="btn-save-sm" onclick="UIController.saveGlobalSettings()">적용</button>
+                    </div>
+                    <div class="setting-row">
+                        <div><label>🌅 기상</label> <input type="time" id="global-wake" value="17:00"></div>
+                        <div><label>🌌 수면</label> <input type="time" id="global-sleep" value="08:00"></div>
+                    </div>
                 </div>
-                <div class="progress-wrap">
-                    <div class="progress-text">
-                        <span>오늘의 진행률</span>
-                        <span id="progress-percent" style="color: var(--success);">0%</span>
+
+                <div class="today-info" style="margin-top: 15px;">
+                    <div style="font-weight:bold; font-size:0.8rem; margin-bottom: 6px;">권장 삼과목 분할 및 성과 <span style="font-size:0.75rem; color:var(--light-gray); font-weight:normal;" id="home-cycle-badge"></span></div>
+                    <div class="daily-plan-container">
+                        <div class="plan-item" style="background: #e0f1ff; color: var(--cls-police);">
+                            <div class="p-title">경찰학</div>
+                            <div class="p-stat" id="home-time-p">🎯 목표: 0.0h</div>
+                            <div class="p-stat" id="home-actual-p">✅ 완료: 0.0h</div>
+                            <div class="p-diff" id="home-diff-p">격차: 0.0h</div>
+                        </div>
+                        <div class="plan-item" style="background: #ffe5e5; color: var(--cls-criminal);">
+                            <div class="p-title">형사법</div>
+                            <div class="p-stat" id="home-time-c">🎯 목표: 0.0h</div>
+                            <div class="p-stat" id="home-actual-c">✅ 완료: 0.0h</div>
+                            <div class="p-diff" id="home-diff-c">격차: 0.0h</div>
+                        </div>
+                        <div class="plan-item" style="background: #fae6ff; color: var(--cls-const);">
+                            <div class="p-title">헌법</div>
+                            <div class="p-stat" id="home-time-k">🎯 목표: 0.0h</div>
+                            <div class="p-stat" id="home-actual-k">✅ 완료: 0.0h</div>
+                            <div class="p-diff" id="home-diff-k">격차: 0.0h</div>
+                        </div>
                     </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" id="home-progress-fill"></div>
-                    </div>
+                </div>
+            </div>
+
+            <div class="macro-plan-card">
+                <div class="macro-title">🎯 62일 고득점 단권화 마스터 스케줄 개요</div>
+                <div style="line-height: 1.4; color: #495057;">
+                    초기 기본기 회독(경3:형4:헌1.5) 비율로 시작하여, 시험 직전 극단의 단권화 무한 압축(경1:형2:헌1)까지 점진적으로 주기를 줄여 시험장 직전까지 <strong>총 13회독</strong>을 기계적으로 자동 연산해 내는 다회독 최적화 패스 플랜입니다.
                 </div>
             </div>
 
             <div class="feed-section">
                 <div class="feed-nav">
-                    <button onclick="changeHomeFeedDate(-1)">◀</button>
-                    <span id="home-feed-date-display">오늘의 피드</span>
-                    <button onclick="changeHomeFeedDate(1)">▶</button>
+                    <button onclick="UIController.changeHomeFeedDate(-1)">◀</button>
+                    <span id="home-feed-date-display">오늘의 피드 로그</span>
+                    <button onclick="UIController.changeHomeFeedDate(1)">▶</button>
                 </div>
-                <button class="ai-generate-btn" id="ai-btn" onclick="generateAIFeed()">✨ AI 일일 피드 생성하기</button>
-                
-                <div id="home-feed-list">
-                    </div>
+                <div id="home-feed-list" class="feed-table-wrap"></div>
             </div>
         </div>
 
-        <div id="tab-calendar" class="tab-content" style="padding:0;">
+        <div id="tab-calendar" class="tab-content">
             <div class="calendar-wrap">
-                <div class="calendar-legend">
-                    <div class="legend-item"><div class="legend-color" style="background: var(--color-police);"></div>경찰학</div>
-                    <div class="legend-item"><div class="legend-color" style="background: var(--color-criminal);"></div>형사법</div>
-                    <div class="legend-item"><div class="legend-color" style="background: var(--color-const);"></div>헌법</div>
-                </div>
                 <div class="calendar-grid" id="full-calendar-grid"></div>
             </div>
         </div>
 
-        <div id="tab-planner" class="tab-content" style="padding:0;">
+        <div id="tab-planner" class="tab-content">
             <div class="planner-wrap">
                 <div class="date-nav">
-                    <button onclick="changePlannerDate(-1)">◀</button>
+                    <button onclick="UIController.changePlannerDate(-1)">◀</button>
                     <div style="text-align:center;">
-                        <div id="planner-date-display" style="font-size:0.95rem; color:var(--text);">2026-06-13</div>
-                        <div id="planner-subj-display" style="font-size:0.75rem; font-weight:normal;">과목명</div>
+                        <div id="planner-date-display" style="font-size:0.9rem; font-weight:bold;">2026-06-21</div>
+                        <div id="planner-subj-display" style="font-size:0.7rem; color:var(--light-gray);">회독 상태</div>
                     </div>
-                    <button onclick="changePlannerDate(1)">▶</button>
+                    <button onclick="UIController.changePlannerDate(1)">▶</button>
                 </div>
                 
+                <div class="routine-settings" style="margin: 10px; flex-direction: row; align-items: center; justify-content: space-between;">
+                    <div><label>🌅 해당일 기상</label> <input type="time" id="planner-wake" onchange="UIController.updateDailySettings()"></div>
+                    <div><label>🌌 해당일 수면</label> <input type="time" id="planner-sleep" onchange="UIController.updateDailySettings()"></div>
+                </div>
+
                 <div class="timeline-wrap" id="timeline-container"></div>
             </div>
         </div>
     </div>
 
-    <div class="fab-now" id="fab-now" onclick="focusCurrentTime()">📍<br>지금</div>
+    <div class="fab-now" id="fab-now" onclick="UIController.focusCurrentTime()">📍<br>지금</div>
 
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('home')" id="nav-home">
+        <div class="nav-item active" onclick="UIController.switchTab('home')" id="nav-home">
             <svg class="nav-icon" viewBox="0 0 24 24"><path d="M9.005 16.545a2.997 2.997 0 012.997-2.997h0a2.997 2.997 0 012.997 2.997v4.453h5.245V11.194l-8.245-6.8-8.245 6.8v9.804h5.25v-4.453z"></path></svg>
         </div>
-        <div class="nav-item" onclick="switchTab('calendar')" id="nav-calendar">
+        <div class="nav-item" onclick="UIController.switchTab('calendar')" id="nav-calendar">
             <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"></rect><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"></line><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"></line><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"></line></svg>
         </div>
-        <div class="nav-item" onclick="switchTab('planner'); focusCurrentTime();" id="nav-planner">
+        <div class="nav-item" onclick="UIController.switchTab('planner'); UIController.focusCurrentTime();" id="nav-planner">
             <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle><polyline points="12 6 12 12 16 14" fill="none" stroke="currentColor" stroke-width="2"></polyline></svg>
         </div>
     </nav>
 </div>
 
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('PWA SW Fail', err));
+        });
+    }
+</script>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const GEMINI_API_KEY = "AIzaSyCyo1twmjMplyzI_fRZr4bS8UqgJG4r-lU";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADD6B0zHTP1jxwCJJCfcX1g556SvYbKhU",
@@ -271,421 +294,517 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let currentUser = null;
-    let appData = {}; 
-    const START_DATE_STR = "2026-06-13";
-    const END_DATE_STR = "2026-08-21";
-    
-    function getAdjustedTodayStr() {
-        const now = new Date();
-        const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-        const kst = new Date(utc + (9 * 3600000));
-        const adjusted = new Date(kst.getTime() - (5 * 3600000)); // 05시 기준
-        const y = adjusted.getFullYear();
-        const m = String(adjusted.getMonth() + 1).padStart(2, '0');
-        const d = String(adjusted.getDate()).padStart(2, '0');
-        return `${y}-${m}-${d}`;
-    }
+    // 1. App State Module
+    window.AppState = {
+        currentUser: null,
+        records: {},
+        globalSettings: { defaultWake: "17:00", defaultSleep: "08:00" },
+        START_DATE: "2026-06-21",
+        END_DATE: "2026-08-22",
+        viewingDate: "2026-06-21",
+        homeFeedDate: "2026-06-21",
+        saveTimeout: null,
 
-    let viewingDate = getAdjustedTodayStr();
-    let homeFeedDate = getAdjustedTodayStr();
+        getAdjustedToday() {
+            const now = new Date();
+            const kst = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (9 * 3600000));
+            const adjusted = new Date(kst.getTime() - (5 * 3600000)); 
+            return `${adjusted.getFullYear()}-${String(adjusted.getMonth() + 1).padStart(2, '0')}-${String(adjusted.getDate()).padStart(2, '0')}`;
+        },
 
-    function getSubjectForDate(dateStr) {
-        const [y, m, d] = dateStr.split('-');
-        const target = new Date(y, m - 1, d);
-        const start = new Date(2026, 5, 13);
-        const diff = Math.round((target - start) / 86400000);
-
-        if (diff < 0) return { text: "준비기간", color: "#dbdbdb" };
-        if (diff < 42) {
-            const arr21 = [
-                {text:"경찰학", color:"var(--color-police)"}, {text:"경찰학", color:"var(--color-police)"}, {text:"경찰학", color:"var(--color-police)"},
-                {text:"경찰/형사", color:"linear-gradient(135deg, var(--color-police) 50%, var(--color-criminal) 50%)"},
-                {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"},
-                {text:"형사/헌법", color:"linear-gradient(135deg, var(--color-criminal) 50%, var(--color-const) 50%)"},
-                {text:"헌법", color:"var(--color-const)"},
-                {text:"헌법/경찰", color:"linear-gradient(135deg, var(--color-const) 50%, var(--color-police) 50%)"},
-                {text:"경찰학", color:"var(--color-police)"}, {text:"경찰학", color:"var(--color-police)"}, {text:"경찰학", color:"var(--color-police)"},
-                {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"},
-                {text:"헌법", color:"var(--color-const)"}, {text:"헌법", color:"var(--color-const)"}
-            ];
-            return arr21[diff % 21];
-        } else {
-            const arr4 = [
-                {text:"경찰학", color:"var(--color-police)"},
-                {text:"형사법", color:"var(--color-criminal)"}, {text:"형사법", color:"var(--color-criminal)"},
-                {text:"헌법", color:"var(--color-const)"}
-            ];
-            return arr4[(diff - 42) % 4];
-        }
-    }
-
-    let toastTimeout;
-    function showToast(msg) {
-        const toast = document.getElementById('toast');
-        toast.innerText = msg;
-        toast.classList.add('show');
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
-    }
-
-    window.switchTab = function(tabName) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        document.getElementById(`tab-${tabName}`).classList.add('active');
-        document.getElementById(`nav-${tabName}`).classList.add('active');
-        
-        if(tabName === 'planner') document.getElementById('fab-now').classList.add('show');
-        else document.getElementById('fab-now').classList.remove('show');
-
-        if(tabName === 'home') {
-            homeFeedDate = getAdjustedTodayStr();
-            updateHomeTopStats(); 
-            renderHomeFeed();
-        }
-        document.getElementById('main-scroll').scrollTo({top:0, behavior:'smooth'});
-    };
-
-    window.handleLogin = async function() {
-        const id = document.getElementById('userid').value.trim();
-        const pw = document.getElementById('userpw').value.trim();
-        if(!id || !pw) return;
-        
-        document.getElementById('login-btn').innerText = "로딩 중...";
-        try {
-            const userRef = doc(db, "users", id);
-            const userSnap = await getDoc(userRef);
-            if (userSnap.exists() && userSnap.data().password !== pw) {
-                document.getElementById('login-msg').innerText = "비밀번호 불일치";
-                document.getElementById('login-btn').innerText = "로그인";
-                return;
-            } else if (!userSnap.exists()) {
-                await setDoc(userRef, { password: pw, createdAt: serverTimestamp() });
+        getDailySettings(dateStr) {
+            if (this.records[dateStr] && this.records[dateStr].settings) {
+                return this.records[dateStr].settings;
             }
-            currentUser = id;
-            document.getElementById('login-overlay').style.opacity = '0';
-            setTimeout(() => document.getElementById('login-overlay').style.display = 'none', 300);
-            
-            const todayStr = getAdjustedTodayStr();
-            viewingDate = (todayStr >= START_DATE_STR && todayStr <= END_DATE_STR) ? todayStr : START_DATE_STR;
-            homeFeedDate = viewingDate;
-            await loadData();
-        } catch (e) { document.getElementById('login-msg').innerText = "네트워크 오류"; document.getElementById('login-btn').innerText = "로그인"; }
-    };
-
-    async function loadData() {
-        try {
-            const dataSnap = await getDoc(doc(db, "users_data", currentUser));
-            let mainParsed = dataSnap.exists() && dataSnap.data().content ? JSON.parse(dataSnap.data().content) : {};
-            if(!mainParsed.dailyRecords) mainParsed.dailyRecords = "{}";
-            appData = JSON.parse(mainParsed.dailyRecords);
-            
-            buildCalendarGrid();
-            renderPlannerUI();
-            updateHomeTopStats();
-            renderHomeFeed();
-        } catch (e) {}
-    }
-
-    let saveTimeout;
-    window.debouncedSave = function() {
-        updateHomeTopStats(); 
-        if(viewingDate === homeFeedDate) renderHomeFeed();     
-        clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(saveToFirebase, 1000); 
-    };
-
-    async function saveToFirebase() {
-        if(!currentUser) return;
-        const dateObj = appData[viewingDate] || { studygram: { timetable: {} } };
-        
-        document.querySelectorAll('.timeline-row').forEach(slot => {
-            const time = slot.dataset.time; 
-            const input = slot.querySelector('.input-box').value.trim();
-            const isTarget = slot.querySelector('.btn-target').classList.contains('active');
-            const isActual = slot.querySelector('.btn-actual').classList.contains('active');
-            
-            if(input || isTarget || isActual) {
-                dateObj.studygram.timetable[time] = { text: input, target: isTarget, actual: isActual };
-            } else {
-                delete dateObj.studygram.timetable[time];
+            if (dateStr < this.getAdjustedToday()) {
+                return { wake: "17:00", sleep: "08:00" };
             }
-        });
-        appData[viewingDate] = dateObj;
+            return { wake: this.globalSettings.defaultWake || "17:00", sleep: this.globalSettings.defaultSleep || "08:00" };
+        },
 
-        try {
-            const dataSnap = await getDoc(doc(db, "users_data", currentUser));
-            let mainParsed = dataSnap.exists() && dataSnap.data().content ? JSON.parse(dataSnap.data().content) : {};
-            mainParsed.dailyRecords = JSON.stringify(appData);
-            await setDoc(doc(db, "users_data", currentUser), { content: JSON.stringify(mainParsed) }, { merge: true });
-        } catch(e) {}
-    }
-
-    function buildCalendarGrid() {
-        const grid = document.getElementById('full-calendar-grid');
-        grid.innerHTML = "";
-        const days = ["일", "월", "화", "수", "목", "금", "토"];
-        days.forEach(w => grid.innerHTML += `<div class="cal-header">${w}</div>`);
-        for(let i=0; i<6; i++) grid.innerHTML += `<div class="cal-cell empty"></div>`; 
-        
-        const todayStr = getAdjustedTodayStr(); 
-        let d = new Date(2026, 5, 13);
-        const endD = new Date(2026, 7, 21);
-        while(d <= endD) {
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const dt = String(d.getDate()).padStart(2, '0');
-            const str = `${y}-${m}-${dt}`;
-            
-            let subject = getSubjectForDate(str);
-            grid.innerHTML += `
-                <div class="cal-cell ${str === todayStr ? 'today' : ''}" style="background: ${subject.color};" onclick="jumpToPlanner('${str}')">
-                    <span class="cal-date">${d.getDate()}</span>
-                </div>
-            `;
-            d.setDate(d.getDate() + 1);
-        }
-    }
-
-    window.jumpToPlanner = function(dateStr) {
-        viewingDate = dateStr;
-        renderPlannerUI();
-        switchTab('planner');
-    }
-
-    window.changePlannerDate = function(offset) {
-        const [y, m, d] = viewingDate.split('-');
-        let dateObj = new Date(y, m-1, d);
-        dateObj.setDate(dateObj.getDate() + offset);
-        if(dateObj >= new Date(2026, 5, 13) && dateObj <= new Date(2026, 7, 21)) {
-            viewingDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
-            renderPlannerUI();
+        debouncedSave() {
+            clearTimeout(this.saveTimeout);
+            this.saveTimeout = setTimeout(() => DataManager.saveToFirebase(), 800);
         }
     };
 
-    function renderPlannerUI() {
-        const subj = getSubjectForDate(viewingDate);
-        document.getElementById('planner-date-display').innerText = viewingDate;
-        document.getElementById('planner-subj-display').innerText = subj.text;
-        document.getElementById('planner-subj-display').style.color = subj.color.includes('gradient') ? 'var(--text)' : subj.color;
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden" && AppState.currentUser) {
+            clearTimeout(AppState.saveTimeout);
+            UIController.syncDOMToState(); 
+            DataManager.saveToFirebase(); 
+        }
+    });
+
+    // 2. Time Engine Module
+    window.TimeEngine = {
+        activityMeta: {
+            none: { label: "선택 없음", css: "" },
+            police: { label: "경찰학", css: "sel-police" },
+            criminal: { label: "형사법", css: "sel-criminal" },
+            const: { label: "헌법", css: "sel-const" },
+            exercise: { label: "운동", css: "sel-exercise" },
+            meal: { label: "식사", css: "sel-meal" },
+            rest: { label: "휴식", css: "sel-rest" },
+            sleep: { label: "수면", css: "sel-sleep" }
+        },
+
+        getPlan(dateStr) {
+            const target = new Date(dateStr);
+            const start = new Date(AppState.START_DATE);
+            const diff = Math.floor((target - start) / 86400000);
+
+            if (diff < 0 || diff > 62) return { cycle: "시즌 종료", p_time: "0.0", c_time: "0.0", k_time: "0.0" };
+
+            let cycleText = "", p, c, k;
+            if (diff <= 8) { cycleText = "(1회독 구간 / 8.5일 주기)"; p = 3; c = 4; k = 1.5; }
+            else if (diff <= 15) { cycleText = "(2회독 구간 / 7일 주기)"; p = 2.5; c = 3.5; k = 1; }
+            else if (diff <= 21) { cycleText = "(3회독 구간 / 5.5일 주기)"; p = 2; c = 2.5; k = 1; }
+            else {
+                let n = 4 + Math.floor((diff - 22) / 4);
+                cycleText = `(${n}회독 고속 반복 / 4일 주기)`; p = 1; c = 2; k = 1;
+            }
+
+            const total = p + c + k;
+            return { cycle: cycleText, p_time: ((p / total) * 10).toFixed(1), c_time: ((c / total) * 10).toFixed(1), k_time: ((k / total) * 10).toFixed(1) };
+        },
+
+        isSleepTime(timeKey, dateStr) {
+            const { wake, sleep } = AppState.getDailySettings(dateStr);
+            const [h, m] = timeKey.split(':').map(Number);
+            const [wh, wm] = wake.split(':').map(Number);
+            const [sh, sm] = sleep.split(':').map(Number);
+
+            const curVal = h * 60 + m;
+            const wakeVal = wh * 60 + wm;
+            const sleepVal = sh * 60 + sm;
+
+            if (sleepVal < wakeVal) return curVal >= sleepVal && curVal < wakeVal;
+            else return curVal >= sleepVal || curVal < wakeVal;
+        }
+    };
+
+    // 3. UI Controller Module
+    window.UIController = {
+        toastTimeout: null,
         
-        const container = document.getElementById('timeline-container');
-        container.innerHTML = "";
-        const data = (appData[viewingDate] && appData[viewingDate].studygram) ? appData[viewingDate].studygram : { timetable: {} };
+        showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.classList.add('show');
+            clearTimeout(this.toastTimeout);
+            this.toastTimeout = setTimeout(() => t.classList.remove('show'), 2000);
+        },
 
-        for(let i=0; i<48; i++) {
-            let totalMins = (5 * 60) + (i * 30);
-            let h = Math.floor(totalMins / 60); 
-            let m = totalMins % 60;
-            let timeKey = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
-            let displayTime = `${String(h%24).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+        saveGlobalSettings() {
+            AppState.globalSettings.defaultWake = document.getElementById('global-wake').value;
+            AppState.globalSettings.defaultSleep = document.getElementById('global-sleep').value;
+            AppState.debouncedSave();
+            this.showToast("기본 수면 패턴 설정 완료 ⚙️");
+        },
+
+        switchTab(tab) {
+            this.syncDOMToState();
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            document.getElementById(`nav-${tab}`).classList.add('active');
             
-            let slotData = data.timetable[timeKey] || { text: "", target: false, actual: false };
-            let stateClass = slotData.actual ? "is-actual" : (slotData.target ? "is-target" : "");
+            document.getElementById('fab-now').classList.toggle('show', tab === 'planner');
 
-            container.innerHTML += `
-                <div class="timeline-row ${stateClass}" id="slot-${timeKey}" data-time="${timeKey}">
-                    <div class="time">${displayTime}</div>
-                    <div class="track"><div class="node"></div><div class="line"></div></div>
-                    <div class="content">
-                        <input type="text" class="input-box" value="${slotData.text}" placeholder="계획 입력" oninput="debouncedSave()" enterkeyhint="done">
-                        <div class="btn-group">
-                            <button class="btn-action btn-target ${slotData.target ? 'active' : ''}" onclick="toggleTarget(this)">목표</button>
-                            <button class="btn-action btn-actual ${slotData.actual ? 'active' : ''}" onclick="toggleActual(this)">완료</button>
+            if (tab === 'home') {
+                AppState.homeFeedDate = AppState.getAdjustedToday();
+                this.updateHomeTopStats();
+                this.renderHomeFeed();
+            }
+            document.getElementById('main-scroll').scrollTo({ top: 0 });
+        },
+
+        changePlannerDate(offset) {
+            this.syncDOMToState();
+
+            const d = new Date(AppState.viewingDate);
+            d.setDate(d.getDate() + offset);
+            const nextStr = d.toISOString().split('T')[0];
+            if (nextStr >= AppState.START_DATE && nextStr <= AppState.END_DATE) {
+                AppState.viewingDate = nextStr;
+                this.renderPlannerUI();
+            }
+        },
+
+        changeHomeFeedDate(offset) {
+            const d = new Date(AppState.homeFeedDate);
+            d.setDate(d.getDate() + offset);
+            const nextStr = d.toISOString().split('T')[0];
+            if (nextStr >= AppState.START_DATE && nextStr <= AppState.END_DATE) {
+                AppState.homeFeedDate = nextStr;
+                this.renderHomeFeed();
+            }
+        },
+
+        syncDOMToState() {
+            if (!document.getElementById('tab-planner').classList.contains('active')) return;
+            
+            const date = AppState.viewingDate;
+            if (!AppState.records[date]) AppState.records[date] = {};
+            const dayObj = AppState.records[date];
+            if (!dayObj.studygram) dayObj.studygram = { timetable: {} };
+
+            dayObj.settings = {
+                wake: document.getElementById('planner-wake').value,
+                sleep: document.getElementById('planner-sleep').value
+            };
+
+            document.querySelectorAll('.timeline-row').forEach(row => {
+                const time = row.dataset.time;
+                if(!time) return;
+                const text = row.querySelector('.input-box').value.trim();
+                const actType = row.querySelector('.type-select').value;
+                const target = row.querySelector('.btn-t').classList.contains('active');
+                const actual = row.querySelector('.btn-a').classList.contains('active');
+                
+                if (text || actType !== 'none' || target || actual) {
+                    dayObj.studygram.timetable[time] = { text, actType, target, actual };
+                } else {
+                    delete dayObj.studygram.timetable[time];
+                }
+            });
+        },
+
+        updateDailySettings() {
+            this.syncDOMToState();
+            this.renderPlannerUI(); 
+            AppState.debouncedSave();
+        },
+
+        renderPlannerUI() {
+            const plan = TimeEngine.getPlan(AppState.viewingDate);
+            document.getElementById('planner-date-display').innerText = AppState.viewingDate;
+            document.getElementById('planner-subj-display').innerText = plan.cycle;
+            
+            const settings = AppState.getDailySettings(AppState.viewingDate);
+            document.getElementById('planner-wake').value = settings.wake;
+            document.getElementById('planner-sleep').value = settings.sleep;
+
+            const container = document.getElementById('timeline-container');
+            
+            const dayData = AppState.records[AppState.viewingDate] || { timetable: {} };
+            const slots = dayData.studygram?.timetable || {};
+
+            let htmlArray = [];
+
+            for (let i = 0; i < 48; i++) {
+                let totalMins = (5 * 60) + (i * 30);
+                let h = Math.floor(totalMins / 60);
+                let m = totalMins % 60;
+                let timeKey = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                let displayTime = `${String(h % 24).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                
+                let isSleep = TimeEngine.isSleepTime(timeKey, AppState.viewingDate);
+                let slot = slots[timeKey] || { text: "", target: false, actual: false, actType: isSleep ? "sleep" : "none" };
+                
+                let optionOptions = "";
+                for (let type in TimeEngine.activityMeta) {
+                    let selected = slot.actType === type ? 'selected' : '';
+                    optionOptions += `<option value="${type}" ${selected}>${TimeEngine.activityMeta[type].label[0]}</option>`;
+                }
+
+                let currentMetaClass = TimeEngine.activityMeta[slot.actType]?.css || "";
+
+                htmlArray.push(`
+                    <div class="timeline-row ${isSleep ? 'sleep-row' : ''}" data-time="${timeKey}">
+                        <div class="time-label">${displayTime}</div>
+                        <select class="type-select ${currentMetaClass}" onchange="UIController.handleTypeChange(this)">
+                            ${optionOptions}
+                        </select>
+                        <input type="text" class="input-box" value="${slot.text}" placeholder="${isSleep ? '수면 구간' : '계획 및 성과'}" oninput="AppState.debouncedSave()" enterkeyhint="done">
+                        <div class="opt-group">
+                            <button class="opt-btn btn-t ${slot.target ? 'active' : ''}" onclick="UIController.toggleTarget(this)">목</button>
+                            <button class="opt-btn btn-a ${slot.actual ? 'active' : ''}" onclick="UIController.toggleActual(this)">완</button>
                         </div>
                     </div>
-                </div>
-            `;
-        }
-    }
+                `);
+            }
+            container.innerHTML = htmlArray.join('');
+        },
 
-    window.toggleTarget = function(btn) { btn.classList.toggle('active'); updateNodeColor(btn.closest('.timeline-row')); debouncedSave(); };
-    window.toggleActual = function(btn) { btn.classList.toggle('active'); updateNodeColor(btn.closest('.timeline-row')); debouncedSave(); };
-    function updateNodeColor(row) {
-        row.classList.remove('is-target', 'is-actual');
-        if(row.querySelector('.btn-actual').classList.contains('active')) row.classList.add('is-actual');
-        else if(row.querySelector('.btn-target').classList.contains('active')) row.classList.add('is-target');
-    }
-
-    window.focusCurrentTime = function() {
-        const now = new Date();
-        let logicH = now.getHours() < 5 ? now.getHours() + 24 : now.getHours();
-        let timeKey = `${String(logicH).padStart(2,'0')}:${now.getMinutes() >= 30 ? '30' : '00'}`;
-        const currentSlot = document.getElementById(`slot-${timeKey}`);
-        if(currentSlot) {
-            document.getElementById('main-scroll').scrollTo({ top: currentSlot.offsetTop - 50, behavior: 'smooth' });
-            showToast("현재 시간으로 이동했습니다 📍");
-        }
-    }
-
-    function updateHomeTopStats() {
-        const todayStr = getAdjustedTodayStr();
-        const validToday = (todayStr >= START_DATE_STR && todayStr <= END_DATE_STR) ? todayStr : START_DATE_STR;
-        
-        const [ty, tm, td] = todayStr.split('-');
-        const dday = Math.round((new Date(2026, 7, 22) - new Date(ty, tm-1, td)) / 86400000);
-        document.getElementById('dday-text').innerText = dday >= 0 ? `D-${dday}` : `D+${Math.abs(dday)}`;
-
-        const subj = getSubjectForDate(validToday);
-        document.getElementById('home-subject-badge').innerText = subj.text;
-        document.getElementById('home-subject-badge').style.background = subj.color;
-
-        const data = (appData[validToday] && appData[validToday].studygram) ? appData[validToday].studygram : { timetable: {} };
-        let targets = 0, actuals = 0;
-        for(let key in data.timetable) {
-            if(data.timetable[key].target) targets++;
-            if(data.timetable[key].actual) actuals++;
-        }
-
-        let percent = targets > 0 ? Math.round((actuals / targets) * 100) : (actuals > 0 ? 100 : 0);
-        document.getElementById('today-target').innerText = (targets * 0.5).toFixed(1) + 'h';
-        document.getElementById('today-actual').innerText = (actuals * 0.5).toFixed(1) + 'h';
-        document.getElementById('progress-percent').innerText = Math.min(percent, 100) + '%';
-        document.getElementById('home-progress-fill').style.width = Math.min(percent, 100) + '%';
-    }
-
-    // 💡 AI 결산 피드 시스템
-    window.changeHomeFeedDate = function(offset) {
-        const [y, m, d] = homeFeedDate.split('-');
-        let dateObj = new Date(y, m-1, d);
-        dateObj.setDate(dateObj.getDate() + offset);
-        if(dateObj >= new Date(2026, 5, 13) && dateObj <= new Date(2026, 7, 21)) {
-            homeFeedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
-            renderHomeFeed();
-        }
-    };
-
-    window.copyAIText = function() {
-        const text = appData[homeFeedDate]?.studygram?.aiFeed;
-        if(text) {
-            navigator.clipboard.writeText(text).then(() => showToast("인스타 피드 텍스트가 복사되었습니다! 📋"));
-        }
-    }
-
-    function renderHomeFeed() {
-        const isToday = (homeFeedDate === getAdjustedTodayStr());
-        document.getElementById('home-feed-date-display').innerText = isToday ? "오늘의 피드" : `${homeFeedDate.slice(5).replace('-','.')} 피드`;
-
-        const container = document.getElementById('home-feed-list');
-        const dataObj = (appData[homeFeedDate] && appData[homeFeedDate].studygram) ? appData[homeFeedDate].studygram : {};
-        const slots = dataObj.timetable || {};
-        
-        let memoList = [];
-        for(let i=0; i<48; i++) {
-            let h = Math.floor(((5 * 60) + (i * 30)) / 60);
-            let m = ((5 * 60) + (i * 30)) % 60;
-            let timeKey = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+        handleTypeChange(selectEl) {
+            const val = selectEl.value;
+            selectEl.className = "type-select " + (TimeEngine.activityMeta[val]?.css || "");
             
-            if(slots[timeKey] && slots[timeKey].text.trim() !== '') {
-                memoList.push({ time: `${String(h%24).padStart(2,'0')}:${String(m).padStart(2,'0')}`, text: slots[timeKey].text });
+            const row = selectEl.closest('.timeline-row');
+            const targetBtn = row.querySelector('.btn-t');
+            
+            if (['police', 'criminal', 'const'].includes(val)) {
+                targetBtn.classList.add('active');
+            } else if (['rest', 'meal', 'sleep', 'none'].includes(val)) {
+                targetBtn.classList.remove('active');
             }
-        }
-
-        if(dataObj.aiFeed) {
-            container.innerHTML = `
-                <div class="feed-card">
-                    <div class="feed-header">
-                        <div class="feed-avatar"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif"></div>
-                        <div class="feed-title-name">StudyGram_AI ✨</div>
-                        <div class="feed-time" style="display:flex; justify-content:space-between; flex:1;">
-                            일일 결산
-                            <button onclick="generateAIFeed()" style="background:none; border:none; color:var(--light-gray); font-size:0.75rem; cursor:pointer; font-weight:bold;">🔄 다시 생성</button>
-                        </div>
-                    </div>
-                    <div class="feed-body">${dataObj.aiFeed}</div>
-                    <div class="feed-footer">
-                        <div>
-                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:8px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                            ${memoList.length}개의 기록
-                        </div>
-                        <button class="btn-copy" onclick="copyAIText()">📋 복사하기</button>
-                    </div>
-                </div>
-            `;
-            document.getElementById('ai-btn').style.display = 'none';
-        } else if (memoList.length > 0) {
-            let listHtml = memoList.map(s => `<div class="feed-task-item"><div class="feed-task-time">${s.time}</div><div class="feed-task-text">📝 ${s.text}</div></div>`).join('');
-            container.innerHTML = `
-                <div class="feed-log-box">
-                    <div style="font-weight:bold; color:var(--primary); margin-bottom:15px; font-size:0.95rem;">작성된 메모 리스트</div>
-                    ${listHtml}
-                </div>
-            `;
-            document.getElementById('ai-btn').style.display = 'block';
-            document.getElementById('ai-btn').disabled = false;
-        } else {
-            container.innerHTML = `
-                <div style="text-align:center; padding: 50px 20px; color: var(--light-gray); font-size: 0.95rem;">
-                    <svg viewBox="0 0 24 24" width="45" height="45" stroke="currentColor" fill="none" stroke-width="1.5" style="margin-bottom:15px; opacity:0.3;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><br>
-                    메모가 작성된 플랜이 없습니다.<br>플래너에 계획을 적어보세요!
-                </div>
-            `;
-            document.getElementById('ai-btn').style.display = 'none';
-        }
-    }
-
-    // 💡 Gemini AI 호출 로직 (다중 Fallback 모델 탑재)
-    window.generateAIFeed = async function() {
-        const dataObj = appData[homeFeedDate].studygram;
-        const slots = dataObj.timetable || {};
-        let memoText = "";
+            
+            AppState.debouncedSave();
+        },
         
-        for(let key in slots) {
-            if(slots[key].text.trim() !== "") {
-                let h = parseInt(key.split(':')[0]);
-                let m = key.split(':')[1];
-                memoText += `- ${String(h%24).padStart(2,'0')}:${m} : ${slots[key].text}\n`;
+        toggleTarget(btn) { btn.classList.toggle('active'); AppState.debouncedSave(); },
+        toggleActual(btn) { btn.classList.toggle('active'); AppState.debouncedSave(); },
+
+        focusCurrentTime() {
+            const now = new Date();
+            let logicH = now.getHours() < 5 ? now.getHours() + 24 : now.getHours();
+            let timeKey = `${String(logicH).padStart(2, '0')}:${now.getMinutes() >= 30 ? '30' : '00'}`;
+            const targetEl = document.querySelector(`[data-time="${timeKey}"]`);
+            if (targetEl) {
+                document.getElementById('main-scroll').scrollTo({ top: targetEl.offsetTop - 80, behavior: 'smooth' });
+                this.showToast("현재 시간 동기화 📍");
             }
-        }
+        },
 
-        if(!memoText) return showToast("작성된 메모가 없습니다.");
+        // 과목별 정밀 시간 계산 및 UI 렌더링
+        updateHomeTopStats() {
+            const todayStr = AppState.getAdjustedToday();
+            const validDay = (todayStr >= AppState.START_DATE && todayStr <= AppState.END_DATE) ? todayStr : AppState.START_DATE;
+            
+            const dday = Math.round((new Date(AppState.END_DATE) - new Date(todayStr)) / 86400000);
+            document.getElementById('dday-text').innerText = dday >= 0 ? `D-${dday}` : `D+${Math.abs(dday)}`;
 
-        const btn = document.getElementById('ai-btn');
-        btn.innerText = "✨ AI가 일기를 작성 중입니다...";
-        btn.disabled = true;
+            const plan = TimeEngine.getPlan(validDay);
+            document.getElementById('home-cycle-badge').innerText = plan.cycle;
 
-        const prompt = `다음은 수험생이 오늘 하루 시간대별로 공부한 메모 기록입니다:\n\n${memoText}\n\n이 기록을 바탕으로 인스타그램 피드에 올릴 법한 자연스럽고 동기부여가 되는 짧은 공부 결산 일기를 1문단으로 작성해주세요. 내용 요약과 함께 힘이 나는 멘트, 그리고 마지막엔 관련 해시태그 3~4개를 달아주세요.`;
-        const reqBody = JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] });
+            const data = (AppState.records[validDay] && AppState.records[validDay].studygram) ? AppState.records[validDay].studygram : { timetable: {} };
+            let tCount = 0, aCount = 0;
+            let p_act = 0, c_act = 0, k_act = 0;
 
-        try {
-            // 1순위: Gemini 3.1 Flash Lite
-            let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GEMINI_API_KEY}`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: reqBody
+            for (let k in data.timetable) {
+                const isStudy = ['police','criminal','const'].includes(data.timetable[k].actType);
+                if (isStudy) {
+                    if (data.timetable[k].target) tCount++;
+                    if (data.timetable[k].actual) {
+                        aCount++;
+                        if (data.timetable[k].actType === 'police') p_act += 0.5;
+                        if (data.timetable[k].actType === 'criminal') c_act += 0.5;
+                        if (data.timetable[k].actType === 'const') k_act += 0.5;
+                    }
+                }
+            }
+            
+            document.getElementById('today-target').innerText = (tCount * 0.5).toFixed(1) + 'h';
+            document.getElementById('today-actual').innerText = (aCount * 0.5).toFixed(1) + 'h';
+
+            const updateSubj = (id, targetStr, actual) => {
+                const tar = parseFloat(targetStr);
+                const diff = actual - tar;
+                document.getElementById(`home-time-${id}`).innerText = `🎯 목표: ${tar.toFixed(1)}h`;
+                document.getElementById(`home-actual-${id}`).innerText = `✅ 완료: ${actual.toFixed(1)}h`;
+                
+                const diffEl = document.getElementById(`home-diff-${id}`);
+                diffEl.innerText = `격차: ${diff > 0 ? '+' : ''}${diff.toFixed(1)}h`;
+                diffEl.style.color = diff >= 0 ? "var(--success)" : "var(--danger)";
+            };
+
+            updateSubj('p', plan.p_time, p_act);
+            updateSubj('c', plan.c_time, c_act);
+            updateSubj('k', plan.k_time, k_act);
+        },
+
+        renderHomeFeed() {
+            const isToday = (AppState.homeFeedDate === AppState.getAdjustedToday());
+            document.getElementById('home-feed-date-display').innerText = isToday ? "오늘의 요약 피드" : `${AppState.homeFeedDate.slice(5)} 요약 피드`;
+
+            const container = document.getElementById('home-feed-list');
+            const dataObj = AppState.records[AppState.homeFeedDate]?.studygram || {};
+            const slots = dataObj.timetable || {};
+            
+            let timelineArray = [];
+            for (let i = 0; i < 48; i++) {
+                let totalMins = (5 * 60) + (i * 30);
+                let h = Math.floor(totalMins / 60);
+                let m = totalMins % 60;
+                let timeKey = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                let slot = slots[timeKey] || { text: "", actType: TimeEngine.isSleepTime(timeKey, AppState.homeFeedDate) ? "sleep" : "none" };
+                timelineArray.push({ h: h % 24, m: m, text: slot.text, type: slot.actType });
+            }
+
+            let mergedBlocks = [];
+            let currentBlock = null;
+
+            timelineArray.forEach((slot, idx) => {
+                let timeStr = `${String(slot.h).padStart(2,'0')}:${String(slot.m).padStart(2,'0')}`;
+                
+                if (!currentBlock) {
+                    currentBlock = { start: timeStr, type: slot.type, text: slot.text ? [slot.text] : [] };
+                } else if (currentBlock.type === slot.type && (!slot.text || currentBlock.text.includes(slot.text) || currentBlock.text.length === 0 || slot.text === currentBlock.text[currentBlock.text.length-1])) {
+                    if (slot.text && !currentBlock.text.includes(slot.text)) currentBlock.text.push(slot.text);
+                } else {
+                    currentBlock.end = timeStr;
+                    mergedBlocks.push(currentBlock);
+                    currentBlock = { start: timeStr, type: slot.type, text: slot.text ? [slot.text] : [] };
+                }
+                
+                if (idx === timelineArray.length - 1) {
+                    let nextMins = (5 * 60) + ((idx + 1) * 30);
+                    let endH = Math.floor(nextMins / 60) % 24;
+                    let endM = nextMins % 60;
+                    currentBlock.end = `${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`;
+                    mergedBlocks.push(currentBlock);
+                }
             });
 
-            // 2순위: 모델명 변경 등으로 실패 시 2.5버전으로 자동 Fallback 재시도
-            if (!response.ok) {
-                console.warn("3.1 모델 호출 실패, 2.5 모델로 재시도합니다.");
-                response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: reqBody
-                });
+            let activeBlocks = mergedBlocks.filter(b => b.type !== 'none' || b.text.length > 0);
+
+            if (activeBlocks.length > 0) {
+                let rowsHtml = activeBlocks.map(b => {
+                    let meta = TimeEngine.activityMeta[b.type] || { label: "기타", css: "" };
+                    let badgeColor = `var(--cls-${b.type})`;
+                    let displayBadge = b.type !== 'none' ? `<span class="tag-badge" style="background:${badgeColor}">${meta.label}</span>` : '';
+                    let memoText = b.text.join(', ') || (b.type === 'sleep' ? '수면 패턴 통제 구간' : '기록 없음');
+                    return `<tr><td class="time-block">${b.start} ~ ${b.end}</td><td>${displayBadge} <span>${memoText}</span></td></tr>`;
+                }).join('');
+
+                container.innerHTML = `<table class="feed-table"><thead><tr><th colspan="2">🗓️ 오늘의 축약 타임라인 테이블</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
+            } else {
+                container.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--light-gray); font-size:0.8rem;">플래너에 기록된 활동 흐름이 없습니다.<br>플래너에 오늘의 시간대를 채워보세요!</div>`;
             }
+        },
 
-            // 3순위: 그래도 실패 시 1.5버전으로 최후 보루 재시도
-            if (!response.ok) {
-                console.warn("2.5 모델 호출 실패, 1.5 모델로 재시도합니다.");
-                response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: reqBody
-                });
-            }
-
-            if (!response.ok) throw new Error("API 호출 실패");
-
-            const resData = await response.json();
-            const aiText = resData.candidates[0].content.parts[0].text;
-
-            appData[homeFeedDate].studygram.aiFeed = aiText;
-            const dataSnap = await getDoc(doc(db, "users_data", currentUser));
-            let mainParsed = dataSnap.exists() && dataSnap.data().content ? JSON.parse(dataSnap.data().content) : {};
-            mainParsed.dailyRecords = JSON.stringify(appData);
-            await setDoc(doc(db, "users_data", currentUser), { content: JSON.stringify(mainParsed) }, { merge: true });
+        buildCalendar() {
+            const grid = document.getElementById('full-calendar-grid');
+            grid.innerHTML = "";
+            ["일", "월", "화", "수", "목", "금", "토"].forEach(w => grid.innerHTML += `<div class="cal-header">${w}</div>`);
+            for (let i = 0; i < 6; i++) grid.innerHTML += `<div class="cal-cell empty"></div>`;
             
-            showToast("AI 피드 작성 완료! ✨");
-            renderHomeFeed();
-        } catch(e) {
-            showToast("AI 호출 중 오류가 발생했습니다.");
-            btn.innerText = "✨ AI 일일 피드 생성하기";
-            btn.disabled = false;
+            let d = new Date(AppState.START_DATE);
+            const endD = new Date(AppState.END_DATE);
+            const todayStr = AppState.getAdjustedToday();
+
+            while (d <= endD) {
+                const str = d.toISOString().split('T')[0];
+                grid.innerHTML += `<div class="cal-cell ${str === todayStr ? 'today' : ''}" onclick="UIController.jumpToPlanner('${str}')"><span>${d.getDate()}</span></div>`;
+                d.setDate(d.getDate() + 1);
+            }
+        },
+        jumpToPlanner(dateStr) {
+            this.syncDOMToState();
+            AppState.viewingDate = dateStr;
+            this.renderPlannerUI();
+            this.switchTab('planner');
+        }
+    };
+
+    // 4. Data Manager Module
+    window.DataManager = {
+        async login() {
+            const id = document.getElementById('userid').value.trim();
+            const pw = document.getElementById('userpw').value.trim();
+            if (!id || !pw) return;
+            
+            document.getElementById('login-btn').innerText = "보안 인증 중...";
+            try {
+                const userRef = doc(db, "users", id);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists() && userSnap.data().password !== pw) {
+                    document.getElementById('login-msg').innerText = "인증 실패: 패스워드 불일치";
+                    document.getElementById('login-btn').innerText = "로그인";
+                    return;
+                } else if (!userSnap.exists()) {
+                    await setDoc(userRef, { password: pw, createdAt: serverTimestamp() });
+                }
+                AppState.currentUser = id;
+                document.getElementById('login-overlay').style.opacity = '0';
+                setTimeout(() => document.getElementById('login-overlay').style.display = 'none', 300);
+                
+                AppState.viewingDate = AppState.getAdjustedToday();
+                if (AppState.viewingDate < AppState.START_DATE || AppState.viewingDate > AppState.END_DATE) {
+                    AppState.viewingDate = AppState.START_DATE;
+                }
+                AppState.homeFeedDate = AppState.viewingDate;
+                await this.loadFromFirebase();
+            } catch (e) { 
+                document.getElementById('login-msg').innerText = "네트워크 통신 오류"; 
+                document.getElementById('login-btn').innerText = "로그인"; 
+            }
+        },
+
+        async loadFromFirebase() {
+            try {
+                const snap = await getDoc(doc(db, "users_data", AppState.currentUser));
+                let mainData = snap.exists() && snap.data().content ? JSON.parse(snap.data().content) : {};
+                
+                AppState.records = mainData.dailyRecords ? JSON.parse(mainData.dailyRecords) : {};
+                AppState.globalSettings = mainData.globalSettings ? JSON.parse(mainData.globalSettings) : { defaultWake: "17:00", defaultSleep: "08:00" };
+                
+                document.getElementById('global-wake').value = AppState.globalSettings.defaultWake;
+                document.getElementById('global-sleep').value = AppState.globalSettings.defaultSleep;
+
+                UIController.buildCalendar();
+                UIController.renderPlannerUI();
+                UIController.updateHomeTopStats();
+                UIController.renderHomeFeed();
+            } catch (e) { console.error("Data loading fail", e); }
+        },
+
+        async saveToFirebase() {
+            if (!AppState.currentUser) return;
+            
+            if (document.getElementById('tab-planner').classList.contains('active')) {
+                 UIController.syncDOMToState();
+            }
+            
+            try {
+                const snap = await getDoc(doc(db, "users_data", AppState.currentUser));
+                let mainData = snap.exists() && snap.data().content ? JSON.parse(snap.data().content) : {};
+                
+                mainData.dailyRecords = JSON.stringify(AppState.records);
+                mainData.globalSettings = JSON.stringify(AppState.globalSettings);
+                
+                await setDoc(doc(db, "users_data", AppState.currentUser), { content: JSON.stringify(mainData) }, { merge: true });
+                UIController.showToast("실시간 클라우드 저장 완료 ✓");
+            } catch (e) { console.error("Cloud saving fail", e); }
+        },
+        
+        // 커스텀 확장자로 백업 파일 다운로드 (추출)
+        exportBackup() {
+            UIController.syncDOMToState();
+            const dataStr = JSON.stringify({ records: AppState.records, globalSettings: AppState.globalSettings });
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `StudyGram_Backup_${AppState.getAdjustedToday()}.studygram`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            UIController.showToast("안전 백업 파일 추출 완료 💾");
+        },
+
+        // 백업 파일 업로드 및 복구
+        async importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.records) {
+                        AppState.records = importedData.records;
+                        if(importedData.globalSettings) AppState.globalSettings = importedData.globalSettings;
+                        
+                        document.getElementById('global-wake').value = AppState.globalSettings.defaultWake;
+                        document.getElementById('global-sleep').value = AppState.globalSettings.defaultSleep;
+                        
+                        await this.saveToFirebase(); 
+                        UIController.renderPlannerUI();
+                        UIController.updateHomeTopStats();
+                        UIController.renderHomeFeed();
+                        UIController.showToast("데이터 완전 복구 성공! ♻️");
+                    } else {
+                        throw new Error("Invalid Format");
+                    }
+                } catch(err) {
+                    UIController.showToast("복구 실패: 올바르지 않은 파일입니다 ❌");
+                }
+                event.target.value = ""; // 초기화
+            };
+            reader.readAsText(file);
         }
     };
 </script>
