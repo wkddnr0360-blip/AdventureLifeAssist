@@ -10,6 +10,8 @@
     <meta name="theme-color" content="#ffffff">
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
         :root { 
             --bg: #fafafa; --card: #ffffff; --text: #262626; --border: #ebebeb; 
             --primary: #0095f6; --primary-light: #e0f1ff; --light-gray: #8e8e8e; 
@@ -30,15 +32,16 @@
         
         #login-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; transition: opacity 0.3s; }
         .login-box { width: 100%; max-width: 300px; text-align: center; }
-        .login-box h1 { font-family: 'Brush Script MT', cursive; font-size: 3.5rem; margin-bottom: 20px; }
+        .login-box h1 { font-family: 'Pacifico', cursive; font-size: 3.5rem; margin-bottom: 20px; color: var(--primary); }
         .login-box input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 6px; background: #fafafa; }
         .login-box button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
         
         header { padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; background: white; border-bottom: 1px solid var(--border); height: 50px; flex-shrink: 0; }
-        .logo-text { font-family: 'Brush Script MT', cursive; font-size: 1.6rem; letter-spacing: 1px; }
+        /* 인스타 폰트 적용 */
+        .logo-text { font-family: 'Pacifico', cursive; font-size: 1.6rem; letter-spacing: 1px; color: var(--text); }
         .icon-btn { background: none; border: none; cursor: pointer; color: var(--text); }
 
-        #toast { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(38,38,38,0.9); color: white; padding: 8px 18px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 1500; pointer-events: none; }
+        #toast { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); background: rgba(38,38,38,0.9); color: white; padding: 8px 18px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; opacity: 0; transition: opacity 0.3s; z-index: 1500; pointer-events: none; white-space: nowrap; }
         #toast.show { opacity: 1; }
         
         .content-area { flex: 1; overflow-y: auto; background: var(--bg); padding-bottom: 10px; }
@@ -73,8 +76,6 @@
 
         .macro-plan-card { background: #f8f9fa; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin: 10px 15px; font-size: 0.8rem; }
         .macro-title { font-weight: bold; font-size: 0.85rem; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
-        .macro-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px; }
-        .macro-item { background: white; padding: 6px; border-radius: 4px; border: 1px solid #eee; }
 
         .feed-section { background: white; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
         .feed-nav { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.85rem; }
@@ -120,12 +121,14 @@
         .cal-cell.empty { background: transparent; border: none; cursor: default; }
         .cal-cell.today { border: 2px solid var(--primary); color: var(--primary); background: white; }
 
-        .bottom-nav { width: 100%; height: 50px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text); opacity: 0.3; height: 100%; cursor: pointer; }
+        /* [버그수정 1] 아이폰 X 이상 하단 홈 인디케이터(Safe Area) 영역 침범 방지 */
+        .bottom-nav { width: 100%; height: calc(50px + env(safe-area-inset-bottom, 0px)); background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: flex-start; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text); opacity: 0.3; height: 50px; cursor: pointer; }
         .nav-item.active { opacity: 1; }
         .nav-icon { width: 20px; height: 20px; fill: currentColor; }
         
-        .fab-now { position: fixed; bottom: 65px; right: 15px; width: 45px; height: 45px; background: var(--text); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; box-shadow: 0 3px 10px rgba(0,0,0,0.15); cursor: pointer; z-index: 50; font-size: 0.7rem; text-align: center; display: none; }
+        /* 📍지금 버튼도 홈 바(Safe Area) 영역만큼 더 위로 올림 */
+        .fab-now { position: fixed; bottom: calc(65px + env(safe-area-inset-bottom, 0px)); right: 15px; width: 45px; height: 45px; background: var(--text); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; box-shadow: 0 3px 10px rgba(0,0,0,0.15); cursor: pointer; z-index: 50; font-size: 0.7rem; text-align: center; display: none; }
         .fab-now.show { display: flex; }
     </style>
 </head>
@@ -153,7 +156,6 @@
     </header>
 
     <div class="content-area" id="main-scroll">
-        
         <div id="tab-home" class="tab-content active">
             <div class="dashboard-card">
                 <div class="profile-top">
@@ -178,7 +180,6 @@
                             <button class="btn-save-sm" style="background: #34c759; color: white;" onclick="DataManager.exportBackup()">추출</button>
                         </div>
                     </div>
-                    
                     <div class="setting-header" style="margin-top: 2px;">
                         <strong>⚙️ 전체 기본 수면 패턴 설정</strong>
                         <button class="btn-save-sm" onclick="UIController.saveGlobalSettings()">적용</button>
@@ -276,14 +277,31 @@
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('PWA SW Fail', err));
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                // 백그라운드에서 변경된 새 버전을 감지
+                reg.onupdatefound = () => {
+                    const installingWorker = reg.installing;
+                    installingWorker.onstatechange = () => {
+                        // 새 코드가 다운로드(설치) 완료된 경우
+                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            const t = document.getElementById('toast');
+                            t.innerText = "새 버전(업데이트)이 감지되었습니다. 3초 후 재시작합니다. 🔄";
+                            t.classList.add('show');
+                            // 3초 후 강제로 캐시를 비우고 브라우저 새로고침
+                            setTimeout(() => {
+                                window.location.reload(true);
+                            }, 3000);
+                        }
+                    };
+                };
+            }).catch(err => console.log('PWA SW Fail', err));
         });
     }
 </script>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyADD6B0zHTP1jxwCJJCfcX1g556SvYbKhU",
@@ -293,8 +311,28 @@
     };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    
+    // 다중 탭 실행 시 DB 충돌 에러 핸들링 추가
+    enableIndexedDbPersistence(db).catch((err) => {
+        if (err.code === 'failed-precondition') console.warn("멀티 탭 감지 (온라인 전용 우회)");
+    });
 
-    // 1. App State Module
+    // 특수문자 및 타임존 버그 해결을 위한 유틸리티
+    window.Utils = {
+        escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag]));
+        },
+        // [버그수정 2] 타임존에 구애받지 않는 절대 일자 연산 엔진 (UTC 시차로 날짜가 어긋나는 것 차단)
+        addDays(dateStr, offset) {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            const target = new Date(y, m - 1, d + offset);
+            return `${target.getFullYear()}-${String(target.getMonth() + 1).padStart(2, '0')}-${String(target.getDate()).padStart(2, '0')}`;
+        }
+    };
+
     window.AppState = {
         currentUser: null,
         records: {},
@@ -324,7 +362,10 @@
 
         debouncedSave() {
             clearTimeout(this.saveTimeout);
-            this.saveTimeout = setTimeout(() => DataManager.saveToFirebase(), 800);
+            this.saveTimeout = setTimeout(() => {
+                UIController.syncDOMToState(); 
+                DataManager.saveToFirebase();
+            }, 800);
         }
     };
 
@@ -336,7 +377,6 @@
         }
     });
 
-    // 2. Time Engine Module
     window.TimeEngine = {
         activityMeta: {
             none: { label: "선택 없음", css: "" },
@@ -350,8 +390,11 @@
         },
 
         getPlan(dateStr) {
-            const target = new Date(dateStr);
-            const start = new Date(AppState.START_DATE);
+            // [버그수정 2] 정확한 KST 날짜 일수 차이 계산 알고리즘으로 개선
+            const [ty, tm, td] = dateStr.split('-').map(Number);
+            const target = new Date(ty, tm - 1, td);
+            const [sy, sm, sd] = AppState.START_DATE.split('-').map(Number);
+            const start = new Date(sy, sm - 1, sd);
             const diff = Math.floor((target - start) / 86400000);
 
             if (diff < 0 || diff > 62) return { cycle: "시즌 종료", p_time: "0.0", c_time: "0.0", k_time: "0.0" };
@@ -384,7 +427,6 @@
         }
     };
 
-    // 3. UI Controller Module
     window.UIController = {
         toastTimeout: null,
         
@@ -422,10 +464,8 @@
 
         changePlannerDate(offset) {
             this.syncDOMToState();
-
-            const d = new Date(AppState.viewingDate);
-            d.setDate(d.getDate() + offset);
-            const nextStr = d.toISOString().split('T')[0];
+            const nextStr = Utils.addDays(AppState.viewingDate, offset);
+            
             if (nextStr >= AppState.START_DATE && nextStr <= AppState.END_DATE) {
                 AppState.viewingDate = nextStr;
                 this.renderPlannerUI();
@@ -433,9 +473,7 @@
         },
 
         changeHomeFeedDate(offset) {
-            const d = new Date(AppState.homeFeedDate);
-            d.setDate(d.getDate() + offset);
-            const nextStr = d.toISOString().split('T')[0];
+            const nextStr = Utils.addDays(AppState.homeFeedDate, offset);
             if (nextStr >= AppState.START_DATE && nextStr <= AppState.END_DATE) {
                 AppState.homeFeedDate = nextStr;
                 this.renderHomeFeed();
@@ -487,7 +525,6 @@
             document.getElementById('planner-sleep').value = settings.sleep;
 
             const container = document.getElementById('timeline-container');
-            
             const dayData = AppState.records[AppState.viewingDate] || { timetable: {} };
             const slots = dayData.studygram?.timetable || {};
 
@@ -510,6 +547,7 @@
                 }
 
                 let currentMetaClass = TimeEngine.activityMeta[slot.actType]?.css || "";
+                let safeText = Utils.escapeHTML(slot.text);
 
                 htmlArray.push(`
                     <div class="timeline-row ${isSleep ? 'sleep-row' : ''}" data-time="${timeKey}">
@@ -517,7 +555,7 @@
                         <select class="type-select ${currentMetaClass}" onchange="UIController.handleTypeChange(this)">
                             ${optionOptions}
                         </select>
-                        <input type="text" class="input-box" value="${slot.text}" placeholder="${isSleep ? '수면 구간' : '계획 및 성과'}" oninput="AppState.debouncedSave()" enterkeyhint="done">
+                        <input type="text" class="input-box" value="${safeText}" placeholder="${isSleep ? '수면 구간' : '계획 및 성과'}" oninput="AppState.debouncedSave()" enterkeyhint="done">
                         <div class="opt-group">
                             <button class="opt-btn btn-t ${slot.target ? 'active' : ''}" onclick="UIController.toggleTarget(this)">목</button>
                             <button class="opt-btn btn-a ${slot.actual ? 'active' : ''}" onclick="UIController.toggleActual(this)">완</button>
@@ -525,6 +563,7 @@
                     </div>
                 `);
             }
+            // DOM Reflow 최적화
             container.innerHTML = htmlArray.join('');
         },
 
@@ -558,7 +597,6 @@
             }
         },
 
-        // 과목별 정밀 시간 계산 및 UI 렌더링
         updateHomeTopStats() {
             const todayStr = AppState.getAdjustedToday();
             const validDay = (todayStr >= AppState.START_DATE && todayStr <= AppState.END_DATE) ? todayStr : AppState.START_DATE;
@@ -656,7 +694,7 @@
                     let badgeColor = `var(--cls-${b.type})`;
                     let displayBadge = b.type !== 'none' ? `<span class="tag-badge" style="background:${badgeColor}">${meta.label}</span>` : '';
                     let memoText = b.text.join(', ') || (b.type === 'sleep' ? '수면 패턴 통제 구간' : '기록 없음');
-                    return `<tr><td class="time-block">${b.start} ~ ${b.end}</td><td>${displayBadge} <span>${memoText}</span></td></tr>`;
+                    return `<tr><td class="time-block">${b.start} ~ ${b.end}</td><td>${displayBadge} <span>${Utils.escapeHTML(memoText)}</span></td></tr>`;
                 }).join('');
 
                 container.innerHTML = `<table class="feed-table"><thead><tr><th colspan="2">🗓️ 오늘의 축약 타임라인 테이블</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
@@ -680,16 +718,9 @@
                 grid.innerHTML += `<div class="cal-cell ${str === todayStr ? 'today' : ''}" onclick="UIController.jumpToPlanner('${str}')"><span>${d.getDate()}</span></div>`;
                 d.setDate(d.getDate() + 1);
             }
-        },
-        jumpToPlanner(dateStr) {
-            this.syncDOMToState();
-            AppState.viewingDate = dateStr;
-            this.renderPlannerUI();
-            this.switchTab('planner');
         }
     };
 
-    // 4. Data Manager Module
     window.DataManager = {
         async login() {
             const id = document.getElementById('userid').value.trim();
@@ -703,10 +734,16 @@
                 if (userSnap.exists() && userSnap.data().password !== pw) {
                     document.getElementById('login-msg').innerText = "인증 실패: 패스워드 불일치";
                     document.getElementById('login-btn').innerText = "로그인";
+                    localStorage.removeItem('studygram_id');
+                    localStorage.removeItem('studygram_pw');
                     return;
                 } else if (!userSnap.exists()) {
                     await setDoc(userRef, { password: pw, createdAt: serverTimestamp() });
                 }
+                
+                localStorage.setItem('studygram_id', id);
+                localStorage.setItem('studygram_pw', pw);
+
                 AppState.currentUser = id;
                 document.getElementById('login-overlay').style.opacity = '0';
                 setTimeout(() => document.getElementById('login-overlay').style.display = 'none', 300);
@@ -718,7 +755,7 @@
                 AppState.homeFeedDate = AppState.viewingDate;
                 await this.loadFromFirebase();
             } catch (e) { 
-                document.getElementById('login-msg').innerText = "네트워크 통신 오류"; 
+                document.getElementById('login-msg').innerText = "네트워크 오류 혹은 오프라인 상태입니다."; 
                 document.getElementById('login-btn').innerText = "로그인"; 
             }
         },
@@ -760,7 +797,6 @@
             } catch (e) { console.error("Cloud saving fail", e); }
         },
         
-        // 커스텀 확장자로 백업 파일 다운로드 (추출)
         exportBackup() {
             UIController.syncDOMToState();
             const dataStr = JSON.stringify({ records: AppState.records, globalSettings: AppState.globalSettings });
@@ -776,7 +812,6 @@
             UIController.showToast("안전 백업 파일 추출 완료 💾");
         },
 
-        // 백업 파일 업로드 및 복구
         async importBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -802,11 +837,22 @@
                 } catch(err) {
                     UIController.showToast("복구 실패: 올바르지 않은 파일입니다 ❌");
                 }
-                event.target.value = ""; // 초기화
+                event.target.value = ""; 
             };
             reader.readAsText(file);
         }
     };
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedId = localStorage.getItem('studygram_id');
+        const savedPw = localStorage.getItem('studygram_pw');
+        if (savedId && savedPw) {
+            document.getElementById('userid').value = savedId;
+            document.getElementById('userpw').value = savedPw;
+            document.getElementById('login-btn').innerText = "자동 접속 중...";
+            DataManager.login(); 
+        }
+    });
 </script>
 </body>
 </html>
