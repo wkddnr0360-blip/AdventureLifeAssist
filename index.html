@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>StudyGram Pro</title>
+    <title>StudyGram Clean Rebuild</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -149,6 +149,28 @@
         .fab-now { position: fixed; bottom: calc(65px + env(safe-area-inset-bottom, 0px)); right: 15px; width: 45px; height: 45px; background: var(--text); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.25); cursor: pointer; z-index: 50; font-size: 0.7rem; text-align: center; display: none; line-height: 1.2; }
         .fab-now.show { display: flex; }
         .fab-now:active { transform: scale(0.9); }
+    
+
+        /* Clean rebuild controls */
+        .clean-toolbar { margin: 8px 15px 10px; display:flex; gap:8px; flex-wrap:wrap; }
+        .quick-btn { border:1px solid var(--border); background:#fff; color:var(--text); border-radius:999px; padding:8px 13px; font-weight:800; font-size:.8rem; cursor:pointer; }
+        .quick-btn.primary-auto { background:var(--primary); border-color:var(--primary); color:#fff; }
+        .quick-btn.danger-lite { color:var(--danger); }
+        .compact-routine { margin-bottom:6px; }
+        .plan-sheet-backdrop { position:absolute; inset:0; background:rgba(0,0,0,.18); z-index:1200; display:none; align-items:flex-end; }
+        .plan-sheet-backdrop.show { display:flex; }
+        .plan-sheet { width:100%; max-height:78dvh; background:#fff; border-radius:20px 20px 0 0; overflow:hidden; box-shadow:0 -8px 25px rgba(0,0,0,.18); }
+        .plan-sheet-head { padding:14px 16px 10px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+        .plan-sheet-title { font-weight:900; font-size:1rem; }
+        .plan-sheet-sub { color:var(--light-gray); font-weight:700; font-size:.75rem; margin-top:3px; line-height:1.3; }
+        .plan-close { border:none; background:#efefef; border-radius:999px; padding:6px 10px; font-weight:900; }
+        .plan-list { max-height:calc(78dvh - 64px); overflow:auto; padding:6px 14px 18px; }
+        .plan-row { display:grid; grid-template-columns:58px 1fr 42px; gap:8px; align-items:center; padding:9px 0; border-bottom:1px solid #f1f1f1; }
+        .plan-date { font-weight:900; font-size:.8rem; }
+        .plan-focus { font-weight:850; font-size:.82rem; }
+        .plan-hours { color:var(--light-gray); font-size:.72rem; font-weight:700; margin-top:2px; }
+        .plan-total { color:var(--primary); font-weight:900; text-align:right; font-size:.82rem; }
+
     </style>
 </head>
 <body>
@@ -206,7 +228,7 @@
                 
                 <div class="ig-bio">
                     <div class="bio-name">Jang Wook <span id="home-cycle-badge" style="font-weight:normal; color:var(--light-gray); font-size:0.75rem;"></span></div>
-                    <div class="bio-desc">경찰학 62일 13회독 마스터 플랜 📚🔥<br>D-Day: 2026.08.22</div>
+                    <div class="bio-desc">경찰간부 46일 회독 리셋 플랜 📚🔥<br>D-Day: 2026.08.22 · 7/7 리셋</div>
                     <div class="bio-link">worldtimeapi.org 서버 동기화 🟢</div>
                 </div>
 
@@ -267,9 +289,16 @@
                     <button onclick="UIController.changePlannerDate(1)">▶</button>
                 </div>
                 
-                <div class="routine-settings">
+                <div class="routine-settings compact-routine">
                     <div><label>🌅 기상</label> <input type="time" id="planner-wake" onchange="UIController.updateDailySettings()"></div>
                     <div><label>🌌 수면</label> <input type="time" id="planner-sleep" onchange="UIController.updateDailySettings()"></div>
+                </div>
+
+                <div class="quick-toolbar clean-toolbar">
+                    <button class="quick-btn" onclick="UIController.goTodayPlanner()">오늘</button>
+                    <button class="quick-btn primary-auto" onclick="UIController.autoFillTargetPlan()">자동배치</button>
+                    <button class="quick-btn" onclick="UIController.openFullPlan()">전체계획</button>
+                    <button class="quick-btn danger-lite" onclick="UIController.resetAutoLayout()">리셋</button>
                 </div>
 
                 <div class="timeline-wrap" id="timeline-container"></div>
@@ -278,6 +307,20 @@
     </div>
 
     <div class="fab-now" id="fab-now" onclick="UIController.focusCurrentTime()">📍<br>지금</div>
+
+
+    <div class="plan-sheet-backdrop" id="full-plan-sheet" onclick="UIController.closeFullPlan(event)">
+        <div class="plan-sheet" onclick="event.stopPropagation()">
+            <div class="plan-sheet-head">
+                <div>
+                    <div class="plan-sheet-title">46일 전체계획</div>
+                    <div class="plan-sheet-sub">90분 공부 + 30분 휴식 · 경찰학 오전 우선 · 05:30/19:30 준비 제외</div>
+                </div>
+                <button class="plan-close" onclick="UIController.closeFullPlan()">닫기</button>
+            </div>
+            <div class="plan-list" id="full-plan-list"></div>
+        </div>
+    </div>
 
     <!-- 하단 탭 내비게이션 -->
     <nav class="bottom-nav">
@@ -373,8 +416,8 @@
     window.AppState = {
         currentUser: null,
         records: {},
-        START_DATE: "2026-06-21",
-        END_DATE: "2026-08-22",
+        START_DATE: "2026-07-07",
+        END_DATE: "2026-08-21",
         viewingDate: "",
         homeFeedDate: "",
         saveTimeout: null,
@@ -908,6 +951,134 @@
             reader.readAsText(file);
         }
     };
+
+
+
+    /* Clean Schedule Rebuild: single source of truth */
+    window.CleanSchedule = (() => {
+        const START = '2026-07-07';
+        const END = '2026-08-21';
+        const SPECIAL_FRIDAY = '2026-07-10';
+        const TARGET_STUDY_SLOTS = 20;
+        const GENERATED_TEXTS = new Set(['','계획 및 성과 메모','수면','준비','기상스터디','점심','식사','운동 준비','운동','체력측정 운동','휴식','수면 및 휴식 구간']);
+        const phases = [
+            { cycle:1, p:2, c:4, k:0.5 },
+            { cycle:2, p:2.5, c:3, k:1 },
+            { cycle:3, p:2, c:2, k:0.5 },
+            { cycle:4, p:1.5, c:1.5, k:0.5 }
+        ];
+        const finalPhase = { p:1, c:1.5, k:0.3 };
+        function addDays(dateStr, offset){ return Utils.addDays(dateStr, offset); }
+        function diffDays(dateStr){ const [y,m,d]=dateStr.split('-').map(Number); const [sy,sm,sd]=START.split('-').map(Number); return Math.round((new Date(y,m-1,d)-new Date(sy,sm-1,sd))/86400000); }
+        function toMin(time){ const [h,m]=String(time).split(':').map(Number); return h*60+m; }
+        function inRange(v,s,e){ return v>=s && v<e; }
+        function timelineSlots(){ const arr=[]; for(let i=0;i<48;i++){ const total=5*60+i*30; const h=Math.floor(total/60),m=total%60; arr.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`); } return arr; }
+        function normalizeDay(dateStr){ if(!AppState.records[dateStr]) AppState.records[dateStr]={}; const day=AppState.records[dateStr]; day.settings={...(day.settings||{}), wake:'05:30', sleep:'01:30'}; if(!day.studygram) day.studygram={timetable:{}}; if(!day.studygram.timetable) day.studygram.timetable={}; return day; }
+        function fixedBlock(dateStr,timeKey){
+            const v=toMin(timeKey);
+            if(inRange(v,25*60+30,29*60+30) || inRange(v,5*60,5*60+30)) return {actType:'sleep', text:'수면', target:false, actual:false, auto:true};
+            if(timeKey==='05:30') return {actType:'rest', text:'준비', target:false, actual:false, auto:true};
+            if(inRange(v,6*60,7*60)) return {actType:'rest', text:'기상스터디', target:false, actual:false, auto:true};
+            if(inRange(v,13*60+30,14*60+30)) return {actType:'meal', text:'점심', target:false, actual:false, auto:true};
+            if(timeKey==='19:30') return {actType:'rest', text:'운동 준비', target:false, actual:false, auto:true};
+            if(dateStr===SPECIAL_FRIDAY && inRange(v,16*60+30,19*60+30)) return {actType:'exercise', text:'체력측정 운동', target:false, actual:false, auto:true};
+            if(dateStr!==SPECIAL_FRIDAY && inRange(v,20*60,22*60+30)) return {actType:'exercise', text:'운동', target:false, actual:false, auto:true};
+            return null;
+        }
+        function blankSlot(){ return {actType:'none', text:'', target:false, actual:false}; }
+        function phaseDay(ph, localDay){
+            let focus='criminal'; if(localDay < ph.p) focus='police'; else if(localDay < ph.p+ph.c) focus='criminal'; else focus='const';
+            let p=0,c=0,k=0,pair='';
+            if(focus==='const'){ p=4; k=6; pair='헌+경'; } else if(focus==='police'){ p=6; c=4; pair='경+형'; } else { p=3; c=7; pair='형+경'; }
+            return {cycle:`${ph.cycle}회독 · ${pair}`, focus, p_time:p.toFixed(1), c_time:c.toFixed(1), k_time:k.toFixed(1), label:`${ph.cycle}회독 · ${pair}`};
+        }
+        function getPlan(dateStr){
+            if(dateStr===START) return {cycle:'1회독 · 형+헌', focus:'special', p_time:'0.0', c_time:'6.0', k_time:'4.0', label:'1회독 · 형+헌'};
+            if(dateStr<START || dateStr>END) return {cycle:'계획 외', focus:'none', p_time:'0.0', c_time:'0.0', k_time:'0.0', label:'계획 외'};
+            const day=diffDays(dateStr); let cursor=0;
+            for(const ph of phases){ const len=Math.ceil(ph.p+ph.c+ph.k); if(day<cursor+len) return phaseDay(ph, day-cursor); cursor+=len; }
+            const finalLen=Math.ceil(finalPhase.p+finalPhase.c+finalPhase.k); const n=Math.floor((day-cursor)/finalLen); return phaseDay({cycle:5+n, ...finalPhase}, (day-cursor)%finalLen);
+        }
+        function makeStudyBlocks(dateStr){
+            const plan=getPlan(dateStr); let counts={police:Math.round(parseFloat(plan.p_time)*2), criminal:Math.round(parseFloat(plan.c_time)*2), const:Math.round(parseFloat(plan.k_time)*2)};
+            let total=counts.police+counts.criminal+counts.const;
+            while(total>TARGET_STUDY_SLOTS){ const key=counts.criminal>=counts.police && counts.criminal>=counts.const?'criminal':(counts.police>=counts.const?'police':'const'); if(counts[key]>0){counts[key]--; total--;} else break; }
+            while(total<TARGET_STUDY_SLOTS){ const key=plan.focus==='const'?'const':'criminal'; counts[key]++; total++; }
+            const blocks=[]; function pushBlock(type,n){ if(n<=0)return; if(blocks.length&&blocks[blocks.length-1].type===type)blocks[blocks.length-1].n+=n; else blocks.push({type,n}); }
+            function take(type){ const n=Math.min(3, counts[type]); counts[type]-=n; pushBlock(type,n); }
+            if(plan.focus==='special'){ while(counts.criminal>0||counts.const>0){ if(counts.criminal>0)take('criminal'); if(counts.const>0)take('const'); } }
+            else { while(counts.police>0||counts.criminal>0||counts.const>0){ if(counts.police>0)take('police'); const sec=counts.const>0?'const':'criminal'; if(counts[sec]>0)take(sec); } }
+            for(let i=blocks.length-1;i>0;i--){ if(blocks[i].n<3){ blocks[i-1].n+=blocks[i].n; blocks.splice(i,1); } }
+            return blocks;
+        }
+        function resetDate(dateStr){ const day=normalizeDay(dateStr); const tt={}; for(const time of timelineSlots()){ const fixed=fixedBlock(dateStr,time); tt[time]=fixed && fixed.actType==='sleep' ? {...fixed} : blankSlot(); } day.studygram.timetable=tt; day.settings.autoStudyPaused=true; }
+        function applyAuto(dateStr){
+            const day=normalizeDay(dateStr);
+            const tt={};
+            // 1) 고정 루틴 먼저 입력
+            for(const time of timelineSlots()){
+                const fixed=fixedBlock(dateStr,time);
+                if(fixed) tt[time]={...fixed};
+            }
+            const blocks=makeStudyBlocks(dateStr);
+            let bi=0, remain=blocks[0]?.n||0, current=blocks[0]?.type||null;
+            let filled=0;
+            const all=timelineSlots();
+            let i=0;
+            while(i<all.length){
+                const time=all[i];
+                if(tt[time]){ i++; continue; }
+                // 현재 free segment 찾기
+                let j=i;
+                while(j<all.length && !tt[all[j]]) j++;
+                const segment=all.slice(i,j);
+                let pos=0;
+                while(pos<segment.length){
+                    if(!current || filled>=TARGET_STUDY_SLOTS){
+                        tt[segment[pos++]]={actType:'rest', text:'휴식', target:false, actual:false, auto:true};
+                        continue;
+                    }
+                    const leftInSegment=segment.length-pos;
+                    const leftStudy=TARGET_STUDY_SLOTS-filled;
+                    // 90분을 못 채우고 곧 고정루틴이 오면, 마지막 밤 구간이 아닌 이상 휴식으로 넘긴다.
+                    const isLastSegment = j>=all.length || all.slice(j).every(t=>!!tt[t] && tt[t].actType==='sleep');
+                    if(leftInSegment<3 && leftStudy>leftInSegment && !isLastSegment){
+                        tt[segment[pos++]]={actType:'rest', text:'휴식', target:false, actual:false, auto:true};
+                        continue;
+                    }
+                    const studyNow=Math.min(3, remain, leftStudy, leftInSegment);
+                    for(let n=0;n<studyNow;n++){
+                        tt[segment[pos++]]={actType:current, text:'', target:true, actual:false, auto:true};
+                        filled++; remain--;
+                    }
+                    if(remain<=0){ bi++; current=blocks[bi]?.type||null; remain=blocks[bi]?.n||0; }
+                    // 공부 후 같은 free segment 안에 여유가 있으면 30분 휴식. 고정루틴이 바로 오면 그 고정루틴을 휴식으로 본다.
+                    if(pos<segment.length && filled<TARGET_STUDY_SLOTS){
+                        tt[segment[pos++]]={actType:'rest', text:'휴식', target:false, actual:false, auto:true};
+                    }
+                }
+                i=j;
+            }
+            // 혹시 비어 있는 칸이 있으면 휴식 처리
+            for(const time of all){ if(!tt[time]) tt[time]={actType:'rest', text:'휴식', target:false, actual:false, auto:true}; }
+            day.studygram.timetable=tt;
+            day.settings.autoStudyPaused=false;
+            return filled*0.5;
+        }
+        function planRows(){ const rows=[]; let d=START; while(d<=END){ const p=getPlan(d); rows.push({date:d,label:p.label,p:p.p_time,c:p.c_time,k:p.k_time,total:(parseFloat(p.p_time)+parseFloat(p.c_time)+parseFloat(p.k_time)).toFixed(1)}); d=addDays(d,1); } return rows; }
+        return {START,END,getPlan,applyAuto,resetDate,planRows,timelineSlots,fixedBlock};
+    })();
+
+    TimeEngine.getPlan = CleanSchedule.getPlan;
+    TimeEngine.isSleepTime = function(timeKey,dateStr){ return CleanSchedule.fixedBlock(dateStr,timeKey)?.actType === 'sleep'; };
+    UIController.goTodayPlanner = function(){ this.syncDOMToState?.(); let today=AppState.getAdjustedToday(); if(today<AppState.START_DATE)today=AppState.START_DATE; if(today>AppState.END_DATE)today=AppState.END_DATE; AppState.viewingDate=today; this.switchTab('planner'); this.renderPlannerUI(); };
+    UIController.autoFillTargetPlan = function(){ if(!document.getElementById('tab-planner').classList.contains('active')) this.switchTab('planner'); const h=CleanSchedule.applyAuto(AppState.viewingDate); this.renderPlannerUI(); this.updateHomeTopStats?.(); this.buildCalendar?.(); AppState.debouncedSave(); this.showToast(`자동배치 완료 · ${h.toFixed(1)}h`); };
+    UIController.applyDefaultPlanRange = function(){ let d=AppState.START_DATE, days=0; while(d<=AppState.END_DATE){ CleanSchedule.applyAuto(d); days++; d=Utils.addDays(d,1); } this.renderPlannerUI(); this.updateHomeTopStats?.(); this.buildCalendar?.(); AppState.debouncedSave(); this.showToast(`${days}일 전체 자동배치 완료`); };
+    UIController.resetAutoLayout = function(){ CleanSchedule.resetDate(AppState.viewingDate); this.renderPlannerUI(); this.updateHomeTopStats?.(); this.buildCalendar?.(); AppState.debouncedSave(); this.showToast('리셋 완료 · 수면 외 선택 없음'); };
+    UIController.openFullPlan = function(){ const sheet=document.getElementById('full-plan-sheet'), list=document.getElementById('full-plan-list'); if(!sheet||!list)return; const routine=`<div class="plan-row"><div class="plan-date">원칙</div><div><div class="plan-focus">05:30 준비 · 06~07 기상스터디 · 13:30~14:30 점심 · 19:30 운동준비</div><div class="plan-hours">20~22:30 운동 · 공부는 90분 후 30분 휴식 · 자동배치 10h</div></div><div class="plan-total">10h</div></div>`; const rows=CleanSchedule.planRows().map(r=>`<div class="plan-row"><div class="plan-date">${r.date.slice(5).replace('-', '/')}</div><div><div class="plan-focus">${r.label}</div><div class="plan-hours">경 ${r.p}h · 형 ${r.c}h · 헌 ${r.k}h</div></div><div class="plan-total">${r.total}h</div></div>`).join(''); list.innerHTML=routine+rows; sheet.classList.add('show'); };
+    UIController.closeFullPlan = function(event){ if(event && event.target !== document.getElementById('full-plan-sheet')) return; document.getElementById('full-plan-sheet')?.classList.remove('show'); };
+    const originalRenderPlannerUI = UIController.renderPlannerUI.bind(UIController);
+    UIController.renderPlannerUI = function(){ originalRenderPlannerUI(); const plan=CleanSchedule.getPlan(AppState.viewingDate); const subj=document.getElementById('planner-subj-display'); if(subj) subj.innerText=plan.label||plan.cycle; };
 
     window.addEventListener('DOMContentLoaded', async () => {
         await TimeSync.init(); 
