@@ -137,7 +137,18 @@
     .focus-active-lite{padding:12px!important;border-radius:18px!important}.focus-active-time{font-size:1.55rem!important}.focus-active-meta{font-size:.72rem!important}.focus-mission{font-size:.76rem!important;padding:9px!important;margin-top:8px!important}
     .focus-log-head{font-size:.84rem!important;margin:12px 0 7px!important}.focus-log{border-radius:13px!important;padding:9px 10px!important;margin-bottom:6px!important}.focus-log-title{font-size:.76rem!important}.focus-log-meta{font-size:.66rem!important}
 
-  </style>
+  
+
+    /* EditableControls module: 모바일 select 미작동 방지용 커스텀 과목 선택기 */
+    .sel{appearance:none;-webkit-appearance:none;display:flex!important;align-items:center;justify-content:center;cursor:pointer;line-height:1;border:1px solid var(--border)}
+    button.sel{font:inherit;font-weight:950;touch-action:manipulation;user-select:none;-webkit-user-select:none;position:relative;z-index:2}
+    button.sel:active{transform:scale(.97)}
+    .type-pick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:8px}
+    .type-pick{height:48px;border:1px solid var(--border);border-radius:14px;background:#fff;font-weight:950;font-size:.9rem;display:flex;align-items:center;justify-content:center}
+    .type-pick.police{background:#e8f4ff;color:var(--police);border-color:#bde2ff}.type-pick.criminal{background:#fff0f1;color:var(--criminal);border-color:#ffcbd0}.type-pick.const{background:#f3edff;color:var(--const);border-color:#dbcafe}.type-pick.meal{background:#fff7ed;color:var(--meal);border-color:#fed7aa}.type-pick.rest{background:#f1f0ff;color:var(--rest);border-color:#d8d6ff}.type-pick.sleep{background:#f1f3f5;color:var(--sleep);border-color:#d6d6d6}.type-pick.exercise{background:#fff7ed;color:var(--exercise);border-color:#fed7aa}.type-pick.prep{background:#f8fafc;color:var(--prep);border-color:#cbd5e1}
+    .edit-hint{font-size:.72rem;color:var(--muted);font-weight:850;line-height:1.4;margin-top:8px}
+
+</style>
 </head>
 <body>
 <div class="app">
@@ -281,6 +292,13 @@
     <div id="focusLogs" class="log-list"></div>
   </div></div>
 
+
+
+  <div id="typePickerSheet" class="sheet"><div class="sheet-bg" data-close="typePickerSheet"></div><div class="sheet-panel"><div class="sheet-handle"></div><div class="sheet-title"><div><h3>과목/상태 선택</h3><div class="mini">선택한 시간대를 바로 바꿉니다. 기존 드롭다운 대신 모바일에서 안정적으로 작동하는 선택창입니다.</div></div><button data-close="typePickerSheet">×</button></div>
+    <div id="typePickGrid" class="type-pick-grid"></div>
+    <div class="edit-hint">공부 과목을 고르면 자동으로 목표 체크가 켜지고, 식사·휴식·수면·운동·준비·없음을 고르면 목표 체크가 꺼집니다.</div>
+  </div></div>
+
   <div id="pageQuestSheet" class="sheet"><div class="sheet-bg" data-close="pageQuestSheet"></div><div class="sheet-panel"><div class="sheet-handle"></div><div class="sheet-title"><div><h3>페이지퀘스트</h3><div class="mini">30분 단위로 페이지 목표를 클리어합니다.</div></div><button data-close="pageQuestSheet">×</button></div>
     <div id="activePQ"></div>
     <div class="pq-stats"><div class="pq-stat"><b id="avgPolice">0p/h</b><span>경찰학</span></div><div class="pq-stat"><b id="avgCriminal">0p/h</b><span>형사법</span></div><div class="pq-stat"><b id="avgConst">0p/h</b><span>헌법</span></div></div>
@@ -302,7 +320,7 @@
   import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const CFG = Object.freeze({
-    VERSION: 'plan-editable-2026-07-11',
+    VERSION: 'editable-controls-fixed-2026-07-11',
     START: '2026-07-07', END: '2026-08-21', EXAM: '2026-08-22', DAILY_TARGET_H: 10,
     firebase: { apiKey: "AIzaSyADD6B0zHTP1jxwCJJCfcX1g556SvYbKhU", authDomain: "pacemaker-b91b2.firebaseapp.com", projectId: "pacemaker-b91b2", storageBucket: "pacemaker-b91b2.firebasestorage.app" },
     fixed: {
@@ -641,15 +659,41 @@
       const day=State.getDay(State.viewingDate); const st=Stats.day(State.viewingDate); const info=PlanEngine.cycleInfo(State.viewingDate); $('#dateMain').textContent=State.viewingDate; $('#dateSub').textContent=info.label;
       $('#sumTitle').textContent=`완료 ${st.actual.total.toFixed(1)}h / 목표 ${st.target.total.toFixed(1)}h`; $('#sumSub').textContent=`경 ${st.actual.police.toFixed(1)} · 형 ${st.actual.criminal.toFixed(1)} · 헌 ${st.actual.const.toFixed(1)}`; $('#sumPct').textContent=`${st.rate}%`; $('#sumBar').style.width=`${Math.min(100,st.rate)}%`;
       const q=BlockQuest.current(State.viewingDate); if(q){ const bs=BlockQuest.blocks(State.viewingDate); const idx=bs.findIndex(b=>b.start===q.start && b.end===q.end && b.type===q.type); const pct=q.total?Math.round(q.done/q.total*100):0; $('#blockQuestCard').classList.remove('idle'); $('#blockQuestTitle').textContent=`🎮 다음 구간 · ${Meta[q.type].label}`; $('#blockQuestBadge').textContent=`${q.done}/${q.total}`; $('#blockQuestInfo').innerHTML=`${TimeUtil.display(q.start)}~${TimeUtil.display(q.end)} · ${(q.total*0.5).toFixed(1)}h · ${idx>=0?`Q${idx+1}`:'Q'}<div class="quest-mini-bar"><span style="width:${pct}%"></span></div>`; } else { $('#blockQuestCard').classList.add('idle'); $('#blockQuestTitle').textContent='🎮 다음 구간 없음'; $('#blockQuestBadge').textContent='완료'; $('#blockQuestInfo').textContent='미완료 목표 구간이 없습니다.'; }
-      let html=''; const nowKey=TimeUtil.nowKey(); TimeUtil.mins().forEach(m=>{ const k=TimeUtil.key(m); const s=Cleaner.slot(day.timetable[k]||{}); const meta=Meta[s.actType]||Meta.none; let opts=''; Object.keys(Meta).forEach(t=>opts+=`<option value="${t}" ${t===s.actType?'selected':''}>${UICompact.optionLabel(t)}</option>`); html+=`<div class="row ${s.fixed?'locked':''} ${k===nowKey?'now':''}" data-time="${k}"><div class="time">${TimeUtil.display(m)}</div><select class="sel ${meta.css}" data-role="type">${opts}</select><input class="memo" data-role="memo" placeholder="계획 및 성과 메모" value="${esc(s.text)}"><div class="checks"><button class="chk ${s.target?'active':''}" data-role="target">목</button><button class="chk ${s.actual?'active':''}" data-role="actual">완</button></div></div>`; });
+      let html=''; const nowKey=TimeUtil.nowKey(); TimeUtil.mins().forEach(m=>{ const k=TimeUtil.key(m); const s=Cleaner.slot(day.timetable[k]||{}); const meta=Meta[s.actType]||Meta.none; html+=`<div class="row ${s.fixed?'locked':''} ${k===nowKey?'now':''}" data-time="${k}"><div class="time">${TimeUtil.display(m)}</div><button type="button" class="sel ${meta.css}" data-role="type" aria-label="${TimeUtil.display(m)} 과목 선택">${UICompact.optionLabel(s.actType)}</button><input class="memo" data-role="memo" placeholder="계획 및 성과 메모" value="${esc(s.text)}"><div class="checks"><button class="chk ${s.target?'active':''}" data-role="target">목</button><button class="chk ${s.actual?'active':''}" data-role="actual">완</button></div></div>`; });
       $('#timeline').innerHTML=html; this.bindTimeline();
     },
     bindTimeline(){ $$('#timeline .row').forEach(row=>{ const key=row.dataset.time; const day=State.getDay(State.viewingDate); const get=()=>day.timetable[key]=Cleaner.slot(day.timetable[key]||{});
-      row.querySelector('[data-role="type"]').onchange=e=>{ const s=get(); s.actType=e.target.value; s.auto=false; s.fixed=false; if(Meta[s.actType]?.study) s.target=true; if(['none','meal','rest','sleep','exercise','prep'].includes(s.actType)) s.target=false; State.scheduleSave(); this.renderPlanner(); };
+      row.querySelector('[data-role="type"]').onclick=e=>{ e.preventDefault(); this.openTypePicker(key); };
       row.querySelector('[data-role="memo"]').oninput=e=>{ const s=get(); s.text=e.target.value; s.auto=false; State.scheduleSave(); };
       row.querySelector('[data-role="target"]').onclick=e=>{ const s=get(); s.target=!s.target; s.auto=false; e.currentTarget.classList.toggle('active',s.target); State.scheduleSave(); this.renderSummaryOnly(); };
       row.querySelector('[data-role="actual"]').onclick=e=>{ const s=get(); s.actual=!s.actual; s.auto=false; e.currentTarget.classList.toggle('active',s.actual); State.scheduleSave(); this.renderSummaryOnly(); };
     }); },
+    typePickKey:null,
+    openTypePicker(key){
+      this.typePickKey = key;
+      const grid=$('#typePickGrid');
+      if(grid){
+        const order=['none','police','criminal','const','meal','rest','exercise','prep','sleep'];
+        grid.innerHTML=order.map(t=>`<button type="button" class="type-pick ${Meta[t]?.css||''}" data-type-choice="${t}">${Meta[t]?.label||t}</button>`).join('');
+        grid.querySelectorAll('[data-type-choice]').forEach(btn=>btn.onclick=()=>this.applyTypeChoice(btn.dataset.typeChoice));
+      }
+      this.openSheet('typePickerSheet');
+    },
+    applyTypeChoice(type){
+      const key=this.typePickKey;
+      if(!key) return;
+      const day=State.getDay(State.viewingDate);
+      const slot=day.timetable[key]=Cleaner.slot(day.timetable[key]||{});
+      slot.actType=type;
+      slot.auto=false;
+      slot.fixed=false;
+      if(Meta[type]?.study) slot.target=true;
+      if(['none','meal','rest','sleep','exercise','prep'].includes(type)) slot.target=false;
+      State.scheduleSave();
+      this.closeSheet('typePickerSheet');
+      this.renderPlanner();
+      this.toast(`${TimeUtil.display(TimeUtil.mins().find(m=>TimeUtil.key(m)===key) || 0)} 변경 완료`);
+    },
     renderSummaryOnly(){ const st=Stats.day(State.viewingDate); $('#sumTitle').textContent=`완료 ${st.actual.total.toFixed(1)}h / 목표 ${st.target.total.toFixed(1)}h`; $('#sumSub').textContent=`경 ${st.actual.police.toFixed(1)} · 형 ${st.actual.criminal.toFixed(1)} · 헌 ${st.actual.const.toFixed(1)}`; $('#sumPct').textContent=`${st.rate}%`; $('#sumBar').style.width=`${Math.min(100,st.rate)}%`; },
     scrollToTime(key){ const el=$(`#timeline .row[data-time="${key}"]`); if(el){ $('#scroll').scrollTo({top:el.offsetTop-110,behavior:'smooth'}); } },
     renderPlanSheet(){
