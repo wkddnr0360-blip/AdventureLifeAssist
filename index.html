@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>StudyGram Focus Lite Fixed</title>
+  <title>StudyGram PageQuest Safe Hardened</title>
   <meta name="theme-color" content="#ffffff" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
@@ -114,7 +114,7 @@
   
 
     /* Quest Unified Polish: 페이지퀘스트를 집중퀘스트로 통합하고 카드 밀도를 낮춤 */
-    #pageQuestBtn, #pageQuestSheet, #pqFloating { display:none !important; }
+    #pqFloating { display:none !important; }
     .manage-grid { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
     @media(max-width:430px){ .manage-grid{ grid-template-columns:1fr !important; } }
 
@@ -147,6 +147,23 @@
     .type-pick{height:48px;border:1px solid var(--border);border-radius:14px;background:#fff;font-weight:950;font-size:.9rem;display:flex;align-items:center;justify-content:center}
     .type-pick.police{background:#e8f4ff;color:var(--police);border-color:#bde2ff}.type-pick.criminal{background:#fff0f1;color:var(--criminal);border-color:#ffcbd0}.type-pick.const{background:#f3edff;color:var(--const);border-color:#dbcafe}.type-pick.meal{background:#fff7ed;color:var(--meal);border-color:#fed7aa}.type-pick.rest{background:#f1f0ff;color:var(--rest);border-color:#d8d6ff}.type-pick.sleep{background:#f1f3f5;color:var(--sleep);border-color:#d6d6d6}.type-pick.exercise{background:#fff7ed;color:var(--exercise);border-color:#fed7aa}.type-pick.prep{background:#f8fafc;color:var(--prep);border-color:#cbd5e1}
     .edit-hint{font-size:.72rem;color:var(--muted);font-weight:850;line-height:1.4;margin-top:8px}
+
+
+    /* PageQuest Persistent Module */
+    #pageQuestSheet{display:none} #pageQuestSheet.show{display:block!important}
+    .pq-panel{max-height:86vh!important;overflow-y:auto!important;overflow-x:hidden!important;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))!important}
+    .pq-panel *{min-width:0;box-sizing:border-box}.pq-hero{border:1px solid var(--border);border-radius:18px;background:linear-gradient(180deg,#fff,#fafafa);padding:13px;margin:8px 0 10px}.pq-hero b{font-size:.9rem}.pq-hero p{margin:4px 0 0;color:var(--muted);font-size:.72rem;font-weight:850;line-height:1.35}.pq-grid.compact{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0}.pq-grid.compact .full{grid-column:1/-1}.pq-panel input,.pq-panel select{width:100%;height:40px;border:1px solid var(--border);border-radius:12px;background:#fff;padding:8px 10px;font-size:.82rem;font-weight:850;outline:none}.pq-active-card{border:1px solid #cdeaff;background:#f7fbff;border-radius:18px;padding:13px;margin:8px 0 10px}.pq-active-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.pq-time{font-size:1.7rem;font-weight:950;letter-spacing:-.03em}.pq-meta{font-size:.74rem;color:var(--muted);font-weight:850;line-height:1.38;margin-top:3px}.pq-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.pq-actions button,.pq-start{border-radius:999px;border:1px solid var(--border);height:40px;font-weight:950;background:#fff}.pq-start{width:100%;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);border:0;color:#fff}.pq-actions .finish{background:var(--primary);border-color:var(--primary);color:#fff}.pq-log-head{display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px}.pq-log-head h3{font-size:.9rem;margin:0}.pq-log-head span{font-size:.7rem;color:var(--muted);font-weight:850}.pq-log{display:grid;grid-template-columns:1fr 30px;gap:8px;align-items:center;border:1px solid var(--border);border-radius:14px;padding:9px 10px;margin-bottom:7px;background:#fff}.pq-log-title{font-size:.78rem;font-weight:950;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pq-log-meta{font-size:.68rem;color:var(--muted);font-weight:800;line-height:1.35;margin-top:2px}.pq-del{width:28px;height:28px;border:1px solid var(--border);border-radius:50%;background:#fff;font-weight:950;color:#999}.pq-mini-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:8px 0}.pq-mini-stats .pq-stat{padding:8px 4px;border-radius:14px}.pq-mini-stats b{font-size:.82rem}.pq-mini-stats span{font-size:.65rem}
+
+
+    /* Stability + readability patch */
+    .app,.scroll,.planner,.timeline,.sheet-panel{max-width:100%;overflow-x:hidden}
+    .sheet{overflow:hidden}
+    .sheet-panel,.pq-panel,.focus-panel{width:min(100%,500px);max-width:500px;overflow-x:hidden}
+    .sheet-panel *,.pq-panel *,.focus-panel *{min-width:0}
+    .row{grid-template-columns:50px 72px minmax(0,1fr) 72px;height:38px;gap:6px}
+    .time{font-size:.78rem}.sel{width:72px;min-width:72px;height:30px;padding:0 8px}.memo{min-width:0;font-size:.8rem}.checks{gap:4px}.chk{width:32px;height:32px}
+    .actions{padding-inline:14px}.act{padding:8px 12px}
+    .pq-panel input,.pq-panel select{font-size:.82rem}.pq-log{overflow:hidden}.pq-log-title,.pq-log-meta{overflow:hidden;text-overflow:ellipsis}
 
 </style>
 </head>
@@ -299,18 +316,22 @@
     <div class="edit-hint">공부 과목을 고르면 자동으로 목표 체크가 켜지고, 식사·휴식·수면·운동·준비·없음을 고르면 목표 체크가 꺼집니다.</div>
   </div></div>
 
-  <div id="pageQuestSheet" class="sheet"><div class="sheet-bg" data-close="pageQuestSheet"></div><div class="sheet-panel"><div class="sheet-handle"></div><div class="sheet-title"><div><h3>페이지퀘스트</h3><div class="mini">30분 단위로 페이지 목표를 클리어합니다.</div></div><button data-close="pageQuestSheet">×</button></div>
+  <div id="pageQuestSheet" class="sheet"><div class="sheet-bg" data-close="pageQuestSheet"></div><div class="sheet-panel pq-panel"><div class="sheet-handle"></div><div class="sheet-title"><div><h3>페이지퀘스트</h3><div class="mini">시작 페이지만 넣고 30분 스프린트. 종료 시 현재 페이지를 입력하면 구간 페이지가 자동 기록됩니다.</div></div><button data-close="pageQuestSheet">×</button></div>
     <div id="activePQ"></div>
-    <div class="pq-stats"><div class="pq-stat"><b id="avgPolice">0p/h</b><span>경찰학</span></div><div class="pq-stat"><b id="avgCriminal">0p/h</b><span>형사법</span></div><div class="pq-stat"><b id="avgConst">0p/h</b><span>헌법</span></div></div>
-    <div class="pq-grid">
-      <div class="field"><label>과목</label><select id="pqSubject"><option value="police">경찰학</option><option value="criminal">형사법</option><option value="const">헌법</option></select></div>
-      <div class="field"><label>30분 목표 페이지</label><input id="pqTarget" type="number" min="1" step="1" placeholder="예: 20"></div>
-      <div class="field full"><label>메모</label><input id="pqMemo" placeholder="예: 기출 1~20번"></div>
+    <div class="pq-mini-stats"><div class="pq-stat"><b id="avgPolice">0p/h</b><span>경찰학</span></div><div class="pq-stat"><b id="avgCriminal">0p/h</b><span>형사법</span></div><div class="pq-stat"><b id="avgConst">0p/h</b><span>헌법</span></div></div>
+    <div id="pqSetup" class="pq-hero">
+      <b>새 페이지 스프린트</b>
+      <p>브라우저 X 종료도 시작시각 기준으로 이어집니다. 즉시 기기 저장 후 Firebase와 동기화합니다.</p>
+      <div class="pq-grid compact">
+        <div class="field"><label>과목</label><select id="pqSubject"><option value="police">경찰학</option><option value="criminal">형사법</option><option value="const">헌법</option></select></div>
+        <div class="field"><label>시간</label><select id="pqMinutes"><option value="30">30분</option><option value="45">45분</option><option value="90">90분</option></select></div>
+        <div class="field"><label>시작 페이지</label><input id="pqStartPage" type="number" min="0" step="1" placeholder="예: 120" inputmode="numeric"></div>
+        <div class="field"><label>목표 페이지(선택)</label><input id="pqGoalPages" type="number" min="0" step="1" placeholder="예: 20" inputmode="numeric"></div>
+        <div class="field full"><label>범위 메모</label><input id="pqMemo" placeholder="예: 형총 책임론 기본서"></div>
+      </div>
+      <button class="pq-start" id="pqStart">시작</button>
     </div>
-    <div class="pq-btns"><button class="go" id="pqStart">퀘스트 시작</button></div>
-    <div class="field"><label>완료 페이지</label><input id="pqActual" type="number" min="0" step="1" placeholder="실제로 한 페이지"></div>
-    <div class="pq-btns"><button id="pqFinish">완료 기록</button><button id="pqGiveup">포기</button></div>
-    <h3 style="font-size:1rem;margin:18px 0 8px">퀘스트 로그</h3>
+    <div class="pq-log-head"><h3>전체 로그</h3><span id="pqLogCount">0개</span></div>
     <div id="pqLogs" class="log-list"></div>
   </div></div>
 </div>
@@ -320,7 +341,7 @@
   import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   const CFG = Object.freeze({
-    VERSION: 'editable-controls-fixed-2026-07-11',
+    VERSION: 'pagequest-safe-hardened-2026-07-11',
     START: '2026-07-07', END: '2026-08-21', EXAM: '2026-08-22', DAILY_TARGET_H: 10,
     firebase: { apiKey: "AIzaSyADD6B0zHTP1jxwCJJCfcX1g556SvYbKhU", authDomain: "pacemaker-b91b2.firebaseapp.com", projectId: "pacemaker-b91b2", storageBucket: "pacemaker-b91b2.firebasestorage.app" },
     fixed: {
@@ -343,7 +364,7 @@
 
   const UICompact = Object.freeze({
     optionLabels: { none:'없음', police:'경', criminal:'형', const:'헌', meal:'밥', rest:'휴', sleep:'잠', exercise:'운', prep:'준' },
-    actionLabels: { todayBtn:'오늘', autoBtn:'자동', focusBtn:'퀘스트', moreBtn:'더보기', resetBtn:'리셋', wholePlanBtn:'계획', wholeAutoBtn:'전체배치' },
+    actionLabels: { todayBtn:'오늘', autoBtn:'자동', focusBtn:'페이지', moreBtn:'더보기', resetBtn:'리셋', wholePlanBtn:'계획', wholeAutoBtn:'전체배치' },
     optionLabel(type){ return this.optionLabels[type] || Meta[type]?.short || Meta[type]?.label || type; },
     apply(){
       Object.entries(this.actionLabels).forEach(([id,label])=>{ const el=document.getElementById(id); if(el) el.textContent=label; });
@@ -390,7 +411,7 @@
   const State = {
     user:null, records:{}, planTargets:{}, viewingDate:DateUtil.today(), feedDate:DateUtil.today(), activeTab:'home', saveTimer:null,
     getDay(date=this.viewingDate){ if(!this.records[date]) this.records[date]=Cleaner.day({}); else this.records[date]=Cleaner.day(this.records[date]); return this.records[date]; },
-    scheduleSave(){ clearTimeout(this.saveTimer); this.saveTimer=setTimeout(()=>Store.save(), 500); }
+    scheduleSave(){ try{ Store.saveLocalNow(); }catch(e){} clearTimeout(this.saveTimer); this.saveTimer=setTimeout(()=>Store.save(), 500); }
   };
 
   const PlanEngine = {
@@ -474,7 +495,8 @@
     resetToSleepOnly(date){
       const day=State.getDay(date); day.timetable={}; FixedRules.applyFixed(date, day, {onlySleep:true}); State.scheduleSave(); UI.renderAll(); UI.toast('수면 제외 모두 비웠습니다');
     },
-    autoDay(date){
+    autoDay(date, opts={}){
+      const silent=!!opts.silent;
       const day=State.getDay(date);
       day.timetable={};
       FixedRules.applyFixed(date, day);
@@ -501,6 +523,7 @@
         const completedBlock = studyInSet===3;
         if(doneWithSubject || completedBlock){ subjIdx = this.advance(order, remaining, subjIdx); }
       }
+      if(silent) return;
       State.scheduleSave(); UI.renderAll(); UI.toast('자동배치 완료');
     },
     nextSubject(order, remaining, idx){
@@ -513,8 +536,8 @@
       for(let step=1; step<=order.length; step++){ const ni=(idx+step)%order.length; if(remaining[order[ni]]>0) return ni; }
       return idx;
     },
-    autoAll(){ for(let d=CFG.START; d<=CFG.END; d=DateUtil.add(d,1)) this.autoDayNoRender(d); State.scheduleSave(); UI.renderAll(); UI.toast('전체 자동배치 완료'); },
-    autoDayNoRender(date){ const oldScheduleSave=State.scheduleSave; State.scheduleSave=()=>{}; this.autoDay(date); State.scheduleSave=oldScheduleSave; }
+    autoAll(){ for(let d=CFG.START; d<=CFG.END; d=DateUtil.add(d,1)) this.autoDay(d,{silent:true}); State.scheduleSave(); UI.renderAll(); UI.toast('전체 자동배치 완료'); },
+    autoDayNoRender(date){ this.autoDay(date,{silent:true}); }
   };
 
   const Stats = {
@@ -525,7 +548,7 @@
       return {plan,target,actual,rate:target.total?Math.round(actual.total/target.total*100):0};
     },
     all(){ let actual=0,target=0,recordDays=0; for(let d=CFG.START; d<=CFG.END; d=DateUtil.add(d,1)){ const st=this.day(d); actual+=st.actual.total; target+=st.target.total; if(this.hasRecord(d)) recordDays++; } return {actual,target,rate:target?Math.round(actual/target*100):0,recordDays}; },
-    hasRecord(date){ const day=State.getDay(date); const slots=Object.values(day.timetable); return slots.some(s=>s.actual || (!!s.text && !s.auto)) || (day.pageQuests||[]).some(q=>q.status && q.status!=='active') || (day.focusLogs||[]).some(q=>q.status && q.status!=='active'); }
+    hasRecord(date){ const day=State.getDay(date); const slots=Object.values(day.timetable); return slots.some(s=>s.actual || (!!s.text && !s.auto)) || (day.focusLogs||[]).some(q=>q.status && q.status!=='active') || ((State.pageQuest?.logs||[]).some(q=>q.date===date)); }
   };
 
   const BlockQuest = {
@@ -544,12 +567,43 @@
   };
 
   const PageQuest = {
-    active(){ const day=State.getDay(State.viewingDate); return (day.pageQuests||[]).find(q=>q.status==='active') || null; },
-    start(){ const target=parseInt($('#pqTarget').value,10); if(!target||target<1) return UI.toast('목표 페이지를 입력하세요'); const day=State.getDay(State.viewingDate); day.pageQuests=day.pageQuests||[]; const active=this.active(); if(active) return UI.toast('진행 중인 퀘스트가 있습니다'); day.pageQuests.unshift({ id:crypto.randomUUID?crypto.randomUUID():String(Date.now()), subject:$('#pqSubject').value, target, actual:null, memo:$('#pqMemo').value.trim(), startedAtMs:Date.now(), endedAtMs:null, status:'active' }); State.scheduleSave(); UI.renderPageQuest(); UI.toast('페이지퀘스트 시작'); },
+    id(){ return Safe.uuid(); },
+    ensure(){ if(!State.pageQuest) State.pageQuest={active:null,logs:[],deletedIds:[]}; if(!Array.isArray(State.pageQuest.logs)) State.pageQuest.logs=[]; if(!Array.isArray(State.pageQuest.deletedIds)) State.pageQuest.deletedIds=[]; return State.pageQuest; },
+    active(){ const pq=this.ensure(); return pq.active && pq.active.status==='active' ? pq.active : null; },
+    start(){
+      const pq=this.ensure(); if(this.active()) return UI.toast('진행 중인 페이지퀘스트가 있습니다');
+      const startPage=Safe.int($('#pqStartPage')?.value, -1);
+      if(startPage<0) return UI.toast('시작 페이지를 입력하세요');
+      const subject=Safe.subject($('#pqSubject')?.value);
+      const minutes=Safe.clamp(Safe.int($('#pqMinutes')?.value,30), 1, 300);
+      const goalPages=Math.max(0, Safe.int($('#pqGoalPages')?.value,0));
+      pq.active={ id:this.id(), subject, minutes, startPage, goalPages, memo:($('#pqMemo')?.value||'').trim(), startedAtMs:Date.now(), startedAtISO:new Date().toISOString(), status:'active' };
+      Store.saveLocalNow(); Store.save().then(()=>{ UI.renderPageQuest(); UI.toast('페이지퀘스트 시작'); });
+    },
     finish(status='done'){
-      const q=this.active(); if(!q) return UI.toast('진행 중인 퀘스트가 없습니다'); const actual=status==='giveup'?0:parseInt($('#pqActual').value,10); if(status!=='giveup' && (isNaN(actual)||actual<0)) return UI.toast('완료 페이지를 입력하세요'); q.actual=actual; q.endedAtMs=Date.now(); q.status=status; q.diff=actual-q.target; q.minutes=Math.max(1, Math.round((q.endedAtMs-q.startedAtMs)/60000)); q.pph=Math.round((actual/q.minutes)*60*10)/10; State.scheduleSave(); UI.renderPageQuest(); UI.toast(status==='giveup'?'포기 기록됨':'완료 기록됨'); },
-    del(id){ const day=State.getDay(State.viewingDate); day.pageQuests=(day.pageQuests||[]).filter(q=>q.id!==id); State.scheduleSave(); UI.renderPageQuest(); },
-    averages(){ const sum={police:{p:0,min:0},criminal:{p:0,min:0},const:{p:0,min:0}}; Object.values(State.records).forEach(day=>{ (day.pageQuests||[]).forEach(q=>{ if(q.status==='done'&&sum[q.subject]){ sum[q.subject].p += Number(q.actual)||0; sum[q.subject].min += Number(q.minutes)||30; } }); }); const out={}; Object.keys(sum).forEach(s=>out[s]=sum[s].min?Math.round((sum[s].p/sum[s].min)*60):0); return out; }
+      const pq=this.ensure(); const q=this.active(); if(!q) return UI.toast('진행 중인 페이지퀘스트가 없습니다');
+      let endPage=0;
+      if(status==='giveup'){
+        const v=prompt('중단할까요? 현재 페이지를 입력하면 중단 로그도 남깁니다. 빈칸이면 시작 페이지로 처리됩니다.', String(q.startPage));
+        endPage = v===null ? q.startPage : Math.max(q.startPage, Safe.int(v, q.startPage));
+      } else {
+        const v=prompt('현재 몇 페이지인가요?', String(q.startPage));
+        if(v===null) return;
+        endPage=Safe.int(v, -1);
+        if(endPage<q.startPage) return UI.toast('종료 페이지는 시작 페이지 이상이어야 합니다');
+      }
+      const ended=Date.now(); const minutesUsed=Math.max(1,Math.round((ended-q.startedAtMs)/60000));
+      const pages=Math.max(0,endPage-q.startPage);
+      const goal=Safe.num(q.goalPages,0);
+      const log={...q,status,endedAtMs:ended,endedAtISO:new Date().toISOString(),date:DateUtil.fmt(new Date(ended)),time:this.timeRange(q.startedAtMs,ended),endPage,pages,pageDiff:goal?pages-goal:0,minutesUsed,pph:Math.round((pages/minutesUsed)*60*10)/10};
+      pq.logs.unshift(log); pq.active=null;
+      Store.saveLocalNow(); Store.save().then(()=>{ UI.renderPageQuest(); UI.renderHome(); UI.renderCalendar(); UI.toast(status==='giveup'?'중단 로그 저장':'페이지 로그 저장'); });
+    },
+    del(id){ const pq=this.ensure(); pq.deletedIds=Array.isArray(pq.deletedIds)?pq.deletedIds:[]; pq.deletedIds.push(id); pq.logs=pq.logs.filter(q=>q.id!==id); Store.saveLocalNow(); Store.save().then(()=>UI.renderPageQuest()); },
+    timeRange(a,b){ const f=ms=>{ const d=new Date(ms); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; }; return `${f(a)}~${f(b)}`; },
+    lastEnd(subject){ subject=Safe.subject(subject); const log=this.ensure().logs.find(q=>q.subject===subject && q.status!=='giveup' && typeof q.endPage==='number'); return log ? log.endPage : ''; },
+    prefill(){ const sub=$('#pqSubject')?.value || 'police'; const last=this.lastEnd(sub); if(last!=='' && $('#pqStartPage') && !$('#pqStartPage').value) $('#pqStartPage').value=last; },
+    averages(){ const sum={police:{p:0,min:0},criminal:{p:0,min:0},const:{p:0,min:0}}; this.ensure().logs.forEach(q=>{ if(q.status==='done'&&sum[q.subject]){ sum[q.subject].p += Number(q.pages)||0; sum[q.subject].min += Number(q.minutesUsed)||Number(q.minutes)||30; } }); const out={}; Object.keys(sum).forEach(s=>out[s]=sum[s].min?Math.round((sum[s].p/sum[s].min)*60):0); return out; }
   };
 
 
@@ -594,13 +648,88 @@
     },
     del(id){ const day=State.getDay(State.viewingDate); day.focusLogs=(day.focusLogs||[]).filter(x=>x.id!==id); State.scheduleSave(); UI.renderFocusSheet(); },
     modeLabel(m){ return {pageSprint:'페이지',readRecall:'읽고 회상',makeOx:'O/X',explain:'60초 설명',mistake:'헷갈림',compare:'비교'}[m]||m; },
-    averages(){ const sum={police:{p:0,min:0},criminal:{p:0,min:0},const:{p:0,min:0}}; Object.values(State.records).forEach(day=>{ (day.focusLogs||[]).forEach(q=>{ if(q.status==='done'&&sum[q.subject]){ sum[q.subject].p += Number(q.actualPages)||0; sum[q.subject].min += Number(q.minutesUsed)||Number(q.minutes)||30; } }); (day.pageQuests||[]).forEach(q=>{ if(q.status==='done'&&sum[q.subject]){ sum[q.subject].p += Number(q.actual)||0; sum[q.subject].min += Number(q.minutes)||30; } }); }); const out={}; Object.keys(sum).forEach(k=>out[k]=sum[k].min?Math.round((sum[k].p/sum[k].min)*60):0); return out; }
+    averages(){ const sum={police:{p:0,min:0},criminal:{p:0,min:0},const:{p:0,min:0}}; Object.values(State.records).forEach(day=>{ (day.focusLogs||[]).forEach(q=>{ if(q.status==='done'&&sum[q.subject]){ sum[q.subject].p += Number(q.actualPages)||0; sum[q.subject].min += Number(q.minutesUsed)||Number(q.minutes)||30; } }); }); (State.pageQuest?.logs||[]).forEach(q=>{ if(q.status==='done'&&sum[q.subject]){ sum[q.subject].p += Number(q.pages)||0; sum[q.subject].min += Number(q.minutesUsed)||Number(q.minutes)||30; } }); const out={}; Object.keys(sum).forEach(k=>out[k]=sum[k].min?Math.round((sum[k].p/sum[k].min)*60):0); return out; }
   };
 
   const Store = {
     db:null,
     init(){ try{ this.db=getFirestore(initializeApp(CFG.firebase)); }catch(e){ console.warn('Firebase init fail',e); } },
     localKey(){ return `studygram_modular_${State.user||'guest'}`; },
+    nowMeta(){ return { updatedAtMs: Date.now(), version: CFG.VERSION }; },
+    normalizePageQuest(raw){
+      const src=Safe.isPlainObject(raw) ? raw : {};
+      const deletedIds=Array.isArray(src.deletedIds) ? [...new Set(src.deletedIds.filter(Boolean).map(String))].slice(-500) : [];
+      const normalizeLog=(q,i=0)=>{
+        if(!Safe.isPlainObject(q)) return null;
+        const started=Safe.num(q.startedAtMs, Date.now());
+        const ended=Safe.num(q.endedAtMs, started);
+        const startPage=Math.max(0, Safe.int(q.startPage, 0));
+        const endPage=Math.max(startPage, Safe.int(q.endPage, startPage + Safe.int(q.pages, 0)));
+        const minutesUsed=Math.max(1, Safe.int(q.minutesUsed, Safe.int(q.minutes, 30)));
+        const pages=Math.max(0, Safe.int(q.pages, endPage-startPage));
+        const goalPages=Math.max(0, Safe.int(q.goalPages, 0));
+        return {
+          ...q,
+          id:String(q.id || `pq-${started}-${i}`),
+          subject:Safe.subject(q.subject),
+          status:q.status==='giveup' ? 'giveup' : 'done',
+          startedAtMs:started, endedAtMs:ended,
+          startPage, endPage, pages, goalPages,
+          pageDiff:goalPages ? pages-goalPages : 0,
+          minutesUsed,
+          pph:Safe.num(q.pph, Math.round((pages/minutesUsed)*60*10)/10),
+          date:q.date || DateUtil.fmt(new Date(ended)),
+          time:q.time || PageQuest.timeRange(started, ended),
+          memo:String(q.memo || '')
+        };
+      };
+      let active=null;
+      if(Safe.isPlainObject(src.active) && src.active.status==='active'){
+        const started=Safe.num(src.active.startedAtMs, Date.now());
+        active={...src.active, id:String(src.active.id || `active-${started}`), subject:Safe.subject(src.active.subject), minutes:Safe.clamp(Safe.int(src.active.minutes,30),1,300), startPage:Math.max(0, Safe.int(src.active.startPage,0)), goalPages:Math.max(0, Safe.int(src.active.goalPages,0)), startedAtMs:started, status:'active', memo:String(src.active.memo||'')};
+      }
+      const deleted=new Set(deletedIds);
+      const logs=(Array.isArray(src.logs)?src.logs:[]).map(normalizeLog).filter(q=>q && !deleted.has(q.id)).sort((a,b)=>(b.endedAtMs||b.startedAtMs||0)-(a.endedAtMs||a.startedAtMs||0)).slice(0,1000);
+      return { active, logs, deletedIds };
+    },
+    normalizePack(raw={}){
+      const obj = raw && typeof raw === 'object' ? raw : {};
+      return {
+        records: Cleaner.records(obj.records || obj.dailyRecords || {}),
+        planTargets: obj.planTargets || {},
+        pageQuest: this.normalizePageQuest(obj.pageQuest),
+        updatedAtMs: Number(obj.updatedAtMs || obj.meta?.updatedAtMs || 0)
+      };
+    },
+    buildPack(){
+      State.records = Cleaner.records(State.records || {});
+      State.pageQuest = this.normalizePageQuest(State.pageQuest);
+      return { records: State.records, planTargets: State.planTargets || {}, pageQuest: State.pageQuest, ...this.nowMeta() };
+    },
+    readLocalPack(){
+      try{ const raw=localStorage.getItem(this.localKey()); return raw ? this.normalizePack(JSON.parse(raw)) : this.normalizePack({}); }
+      catch(e){ console.warn('local read fail', e); return this.normalizePack({}); }
+    },
+    saveLocalNow(){
+      if(!State.user) return;
+      try{ localStorage.setItem(this.localKey(), JSON.stringify(this.buildPack())); }
+      catch(e){ console.warn('local save fail', e); }
+    },
+    mergePageQuest(primary, secondary){
+      const a=this.normalizePageQuest(primary), b=this.normalizePageQuest(secondary);
+      const deletedIds=[...(a.deletedIds||[]), ...(b.deletedIds||[])];
+      const deleted=new Set(deletedIds);
+      const map=new Map();
+      [...(a.logs||[]), ...(b.logs||[])].forEach(log=>{ if(log && log.id && !deleted.has(log.id)) map.set(log.id, {...map.get(log.id), ...log}); });
+      const logs=[...map.values()].sort((x,y)=>(y.endedAtMs||y.startedAtMs||0)-(x.endedAtMs||x.startedAtMs||0));
+      const activeCandidates=[a.active,b.active].filter(x=>x && !deleted.has(x.id)).sort((x,y)=>(y.startedAtMs||0)-(x.startedAtMs||0));
+      return { active: activeCandidates[0] || null, logs, deletedIds:[...new Set(deletedIds)].slice(-500) };
+    },
+    migrateOldPageQuests(){
+      const pq=this.normalizePageQuest(State.pageQuest); const seen=new Set(pq.logs.map(x=>x.id));
+      Object.entries(State.records||{}).forEach(([date,day])=>{ (day.pageQuests||[]).forEach(q=>{ if(q.status && q.status!=='active' && !seen.has(q.id)){ const pages=Number(q.actual)||0; pq.logs.push({ id:q.id||String(Date.now()+Math.random()), subject:q.subject||'police', status:q.status, date, time:'이전 기록', startPage:0, endPage:pages, pages, goalPages:Number(q.target)||0, pageDiff:pages-(Number(q.target)||0), minutesUsed:Number(q.minutes)||30, pph:Number(q.pph)||0, memo:q.memo||'', startedAtMs:q.startedAtMs||Date.now(), endedAtMs:q.endedAtMs||Date.now() }); } }); day.pageQuests=[]; });
+      pq.logs.sort((a,b)=>(b.endedAtMs||0)-(a.endedAtMs||0)); State.pageQuest=pq;
+    },
     async login(){
       const id=$('#userid').value.trim(), pw=$('#userpw').value.trim(); if(!id||!pw) return;
       $('#loginBtn').textContent='접속 중...'; $('#loginMsg').textContent='';
@@ -611,24 +740,78 @@
       }catch(e){ console.warn(e); await this.loadLocal(); $('#login').classList.add('hidden'); UI.renderAll(); UI.toast('오프라인 모드'); }
     },
     async load(){
-      let loaded=null, targets=null;
-      if(this.db){ try{ const snap=await getDoc(doc(this.db,'users_data',State.user)); if(snap.exists()){ const data=snap.data(); if(data.dailyRecords) loaded=typeof data.dailyRecords==='string'?JSON.parse(data.dailyRecords):data.dailyRecords; if(data.planTargets) targets=typeof data.planTargets==='string'?JSON.parse(data.planTargets):data.planTargets; if(data.content){ const c=typeof data.content==='string'?JSON.parse(data.content):data.content; if(!loaded) loaded=c.dailyRecords?JSON.parse(c.dailyRecords):c.records; if(!targets && c.planTargets) targets=c.planTargets; } } }catch(e){ console.warn('cloud load fail',e); } }
-      if(!loaded) return this.loadLocal(); State.records=Cleaner.records(loaded); State.planTargets=targets||{}; localStorage.setItem(this.localKey(), JSON.stringify({records:State.records, planTargets:State.planTargets}));
+      const local=this.readLocalPack();
+      let cloud=this.normalizePack({});
+      let cloudFound=false;
+      if(this.db){
+        try{
+          const snap=await getDoc(doc(this.db,'users_data',State.user));
+          if(snap.exists()){
+            const data=snap.data();
+            let loaded=null, targets=null, pageQuest=null, updatedAtMs=Number(data.updatedAtMs||0);
+            if(data.dailyRecords) loaded=typeof data.dailyRecords==='string'?JSON.parse(data.dailyRecords):data.dailyRecords;
+            if(data.planTargets) targets=typeof data.planTargets==='string'?JSON.parse(data.planTargets):data.planTargets;
+            if(data.pageQuest) pageQuest=typeof data.pageQuest==='string'?JSON.parse(data.pageQuest):data.pageQuest;
+            if(data.content){
+              const c=typeof data.content==='string'?JSON.parse(data.content):data.content;
+              if(!loaded) loaded=c.dailyRecords?JSON.parse(c.dailyRecords):c.records;
+              if(!targets && c.planTargets) targets=c.planTargets;
+              if(!pageQuest && c.pageQuest) pageQuest=c.pageQuest;
+              if(!updatedAtMs) updatedAtMs=Number(c.updatedAtMs||c.meta?.updatedAtMs||0);
+            }
+            cloud=this.normalizePack({records:loaded||{}, planTargets:targets||{}, pageQuest, updatedAtMs});
+            cloudFound=true;
+          }
+        }catch(e){ console.warn('cloud load fail',e); }
+      }
+      const localNewer = local.updatedAtMs && (!cloud.updatedAtMs || local.updatedAtMs > cloud.updatedAtMs);
+      const base = localNewer ? local : (cloudFound ? cloud : local);
+      State.records = Cleaner.records(base.records || {});
+      State.planTargets = base.planTargets || {};
+      State.pageQuest = this.mergePageQuest(cloud.pageQuest, local.pageQuest);
+      this.migrateOldPageQuests();
+      this.saveLocalNow();
+      if((cloudFound && JSON.stringify(State.pageQuest)!==JSON.stringify(cloud.pageQuest)) || localNewer) this.save();
     },
-    async loadLocal(){ const raw=localStorage.getItem(this.localKey()); const obj=raw?JSON.parse(raw):{}; State.records=Cleaner.records(obj.records||obj); State.planTargets=obj.planTargets||{}; },
-    async save(){ if(!State.user) return; const clean=Cleaner.records(State.records); State.records=clean; const pack={records:clean, planTargets:State.planTargets||{}}; localStorage.setItem(this.localKey(), JSON.stringify(pack)); if(!this.db) return; try{ await setDoc(doc(this.db,'users_data',State.user), { version:CFG.VERSION, planStart:CFG.START, planEnd:CFG.END, dailyRecords: clean, planTargets: State.planTargets||{}, content: JSON.stringify({dailyRecords:JSON.stringify(clean), records:clean, planTargets:State.planTargets||{}}), updatedAt:serverTimestamp() }, {merge:true}); }catch(e){ console.warn('cloud save fail',e); UI.toast('기기 저장됨'); } },
-    export(){ const blob=new Blob([JSON.stringify({version:CFG.VERSION, records:State.records, planTargets:State.planTargets||{}},null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`StudyGram_${DateUtil.today()}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+    async loadLocal(){ const local=this.readLocalPack(); State.records=Cleaner.records(local.records||{}); State.planTargets=local.planTargets||{}; State.pageQuest=this.normalizePageQuest(local.pageQuest); this.migrateOldPageQuests(); this.saveLocalNow(); },
+    async save(){
+      if(!State.user) return;
+      this.saveLocalNow();
+      if(!this.db) return;
+      const pack=this.buildPack();
+      try{
+        await setDoc(doc(this.db,'users_data',State.user), {
+          version:CFG.VERSION, planStart:CFG.START, planEnd:CFG.END,
+          dailyRecords: pack.records, planTargets: pack.planTargets, pageQuest: pack.pageQuest,
+          content: JSON.stringify({dailyRecords:JSON.stringify(pack.records), records:pack.records, planTargets:pack.planTargets, pageQuest:pack.pageQuest, updatedAtMs:pack.updatedAtMs}),
+          updatedAtMs: pack.updatedAtMs, updatedAt:serverTimestamp()
+        }, {merge:true});
+      }catch(e){ console.warn('cloud save fail',e); if(document.visibilityState!=='hidden') UI.toast('기기 저장됨'); }
+    },
+    export(){ const blob=new Blob([JSON.stringify({version:CFG.VERSION, records:State.records, planTargets:State.planTargets||{}, pageQuest:State.pageQuest, exportedAt:new Date().toISOString()},null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`StudyGram_${DateUtil.today()}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
   };
 
   const $ = sel => document.querySelector(sel);
   const $$ = sel => Array.from(document.querySelectorAll(sel));
   const esc = s => String(s||'').replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
+  const Safe = {
+    uuid(){ return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`; },
+    int(v, fallback=0){ const n=parseInt(v,10); return Number.isFinite(n) ? n : fallback; },
+    num(v, fallback=0){ const n=Number(v); return Number.isFinite(n) ? n : fallback; },
+    subject(v){ return CFG.subjects.includes(v) ? v : 'police'; },
+    clamp(n,min,max){ return Math.max(min, Math.min(max, n)); },
+    on(target, event, handler, opts){ const el=typeof target==='string' ? $(target) : target; if(el) el.addEventListener(event, handler, opts); return el; },
+    setText(sel, text){ const el=$(sel); if(el) el.textContent=text; },
+    setHTML(sel, html){ const el=$(sel); if(el) el.innerHTML=html; },
+    isPlainObject(x){ return !!x && typeof x==='object' && !Array.isArray(x); }
+  };
+
   const UI = {
     toastTimer:null,
-    toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(this.toastTimer); this.toastTimer=setTimeout(()=>t.classList.remove('show'),1800); },
+    toast(msg){ const t=$('#toast'); if(!t) return; t.textContent=msg; t.classList.add('show'); clearTimeout(this.toastTimer); this.toastTimer=setTimeout(()=>t.classList.remove('show'),1800); },
     switch(tab){ State.activeTab=tab; $$('.tab').forEach(e=>e.classList.toggle('active',e.id===`tab-${tab}`)); $$('.nav').forEach(e=>e.classList.toggle('active',e.dataset.tab===tab)); $('#nowFab').classList.toggle('show',tab==='planner'); $('#scroll').scrollTop=0; this.renderAll(); },
-    renderAll(){ this.renderHeader(); this.renderHome(); this.renderCalendar(); this.renderPlanner(); this.renderPageQuest(); this.renderFocusSheet(); },
+    renderAll(){ this.renderHeader(); this.renderHome(); this.renderCalendar(); this.renderPlanner(); this.renderPageQuest(); if($('#focusSheet')) this.renderFocusSheet(); },
     renderHeader(){ const info=PlanEngine.cycleInfo(State.viewingDate); $('#dateMain').textContent=State.viewingDate; $('#dateSub').textContent=info.label; },
     renderHome(){
       const st=Stats.day(DateUtil.today()), all=Stats.all(), info=PlanEngine.cycleInfo(DateUtil.today());
@@ -641,9 +824,9 @@
       const isToday=State.feedDate===DateUtil.today(); $('#feedTitle').textContent=isToday?'오늘의 활동 로그':`${DateUtil.short(State.feedDate)} 활동 로그`;
       const day=State.getDay(State.feedDate); const items=[]; let cur=null;
       TimeUtil.mins().forEach(m=>{ const k=TimeUtil.key(m); const s=day.timetable[k]||{actType:'none',text:''}; const active=s.actType!=='none'||s.text; if(!active){ if(cur){items.push(cur);cur=null;} return; } if(!cur||cur.type!==s.actType||cur.text!==s.text){ if(cur)items.push(cur); cur={start:m,end:m+30,type:s.actType,text:s.text}; } else cur.end=m+30; }); if(cur)items.push(cur);
-      const logs=(day.pageQuests||[]).filter(q=>q.status!=='active');
+      const logs=(State.pageQuest?.logs||[]).filter(q=>q.date===State.feedDate);
       const flog=(day.focusLogs||[]).filter(q=>q.status!=='active');
-      const html=items.slice(0,80).map(b=>{ const meta=Meta[b.type]||Meta.none; const color=this.colorFor(b.type); return `<li class="post"><div class="post-ico" style="background:${color}">${meta.short}</div><div><div class="post-time">${TimeUtil.display(b.start)} ~ ${TimeUtil.display(b.end)}</div><div class="post-text">${esc(b.text||meta.label)}</div></div></li>`; }).join('') + logs.map(q=>`<li class="post"><div class="post-ico" style="background:linear-gradient(45deg,#f09433,#dc2743)">P</div><div><div class="post-time">페이지퀘스트 · ${Meta[q.subject].label}</div><div class="post-text">${q.actual}/${q.target}p · ${q.diff>=0?'+':''}${q.diff}p · ${q.pph||0}p/h</div></div></li>`).join('') + flog.map(q=>`<li class="post"><div class="post-ico" style="background:linear-gradient(45deg,#0095f6,#bc1888)">F</div><div><div class="post-time">집중퀘스트 · ${Meta[q.subject].label}</div><div class="post-text">${FocusLab.modeLabel(q.mode)} · ${q.actualPages||0}/${q.targetPages||0}p · 회상 ${q.recallCount||0}개 · ${q.pph||0}p/h</div></div></li>`).join('');
+      const html=items.slice(0,80).map(b=>{ const meta=Meta[b.type]||Meta.none; const color=this.colorFor(b.type); return `<li class="post"><div class="post-ico" style="background:${color}">${meta.short}</div><div><div class="post-time">${TimeUtil.display(b.start)} ~ ${TimeUtil.display(b.end)}</div><div class="post-text">${esc(b.text||meta.label)}</div></div></li>`; }).join('') + logs.map(q=>`<li class="post"><div class="post-ico" style="background:linear-gradient(45deg,#f09433,#dc2743)">P</div><div><div class="post-time">페이지퀘스트 · ${Meta[q.subject].label}</div><div class="post-text">${q.startPage}→${q.endPage}p · ${q.pages||0}p · ${q.pph||0}p/h</div></div></li>`).join('') + flog.map(q=>`<li class="post"><div class="post-ico" style="background:linear-gradient(45deg,#0095f6,#bc1888)">F</div><div><div class="post-time">집중퀘스트 · ${Meta[q.subject].label}</div><div class="post-text">${FocusLab.modeLabel(q.mode)} · ${q.actualPages||0}/${q.targetPages||0}p · 회상 ${q.recallCount||0}개 · ${q.pph||0}p/h</div></div></li>`).join('');
       $('#feedList').innerHTML=html || `<li class="empty">아직 기록이 없습니다.<br>플래너나 집중퀘스트를 기록해보세요.</li>`;
     },
     colorFor(type){ return {police:'var(--police)',criminal:'var(--criminal)',const:'var(--const)',meal:'var(--meal)',rest:'var(--rest)',sleep:'var(--sleep)',exercise:'var(--exercise)',prep:'var(--prep)'}[type]||'#dbdbdb'; },
@@ -705,11 +888,21 @@
       const apply=$('#planApplyAllBtn'); if(apply) apply.onclick=()=>{ AutoScheduler.autoAll(); this.renderPlanSheet(); UI.toast('수정 목표로 전체 재배치'); };
     },
     renderPageQuest(){
-      const a=PageQuest.active(); if(a){ const elapsed=Math.floor((Date.now()-a.startedAtMs)/1000); const remain=1800-elapsed; const mm=Math.floor(Math.abs(remain)/60), ss=String(Math.abs(remain)%60).padStart(2,'0'); $('#activePQ').innerHTML=`<div class="timer-card"><div class="timer-top"><div><div class="timer-time">${remain>=0?`${mm}:${ss}`:`+${mm}:${ss}`}</div><div class="timer-sub">${Meta[a.subject].label} · 목표 ${a.target}p ${a.memo?`· ${esc(a.memo)}`:''}</div></div><div class="quest-badge">진행중</div></div><div class="bar"><span style="width:${Math.min(100,elapsed/1800*100)}%"></span></div></div>`; } else $('#activePQ').innerHTML='';
-      const avg=PageQuest.averages(); $('#avgPolice').textContent=`${avg.police}p/h`; $('#avgCriminal').textContent=`${avg.criminal}p/h`; $('#avgConst').textContent=`${avg.const}p/h`;
-      const logs=(State.getDay(State.viewingDate).pageQuests||[]).filter(q=>q.status!=='active'); $('#pqLogs').innerHTML=logs.map(q=>{ const cls=q.diff>=0?'good':'bad'; return `<div class="log"><div><div class="log-title">${Meta[q.subject].label} · <span class="${cls}">${q.status==='giveup'?'포기':(q.diff>=0?'클리어':'미달')}</span></div><div class="log-meta">실제 ${q.actual}p / 목표 ${q.target}p · ${q.diff>=0?'+':''}${q.diff}p · ${q.minutes||0}분 · ${q.pph||0}p/h${q.memo?`<br>${esc(q.memo)}`:''}</div></div><button class="del" data-del="${q.id}">×</button></div>`; }).join('') || `<div class="empty" style="padding:20px">아직 로그가 없습니다.</div>`; $$('#pqLogs [data-del]').forEach(b=>b.onclick=()=>PageQuest.del(b.dataset.del));
+      const avg=PageQuest.averages();
+      if($('#avgPolice')) $('#avgPolice').textContent=`${avg.police}p/h`;
+      if($('#avgCriminal')) $('#avgCriminal').textContent=`${avg.criminal}p/h`;
+      if($('#avgConst')) $('#avgConst').textContent=`${avg.const}p/h`;
+      const a=PageQuest.active();
+      const setup=$('#pqSetup'); if(setup) setup.style.display=a?'none':'block';
+      if(a){
+        const elapsed=Math.floor((Date.now()-a.startedAtMs)/1000); const total=(Number(a.minutes)||30)*60; const remain=total-elapsed; const mm=Math.floor(Math.abs(remain)/60), ss=String(Math.abs(remain)%60).padStart(2,'0'); const pct=Math.min(100,Math.max(0,elapsed/total*100));
+        $('#activePQ').innerHTML=`<div class="pq-active-card"><div class="pq-active-top"><div><div class="pq-time">${remain>=0?`${mm}:${ss}`:`+${mm}:${ss}`}</div><div class="pq-meta">${Meta[a.subject]?.label||'과목'} · 시작 ${a.startPage}p${a.goalPages?` · 목표 ${a.goalPages}p`:''}${a.memo?`<br>${esc(a.memo)}`:''}</div></div><div class="quest-badge">진행중</div></div><div class="bar"><span style="width:${pct}%"></span></div><div class="pq-actions"><button class="finish" id="pqFinishNow">종료 입력</button><button id="pqGiveupNow">중단</button></div></div>`;
+        $('#pqFinishNow').onclick=()=>PageQuest.finish('done'); $('#pqGiveupNow').onclick=()=>PageQuest.finish('giveup');
+      } else if($('#activePQ')) $('#activePQ').innerHTML='';
+      const logs=(State.pageQuest?.logs||[]); if($('#pqLogCount')) $('#pqLogCount').textContent=`${logs.length}개`;
+      if($('#pqLogs')) $('#pqLogs').innerHTML=logs.slice(0,120).map(q=>{ const diff=q.goalPages?` · ${q.pageDiff>=0?'+':''}${q.pageDiff}p`:''; const state=q.status==='giveup'?'중단':(q.goalPages?(q.pageDiff>=0?'클리어':'미달'):'기록'); return `<div class="pq-log"><div><div class="pq-log-title">${q.date||''} ${q.time||''} · ${Meta[q.subject]?.label||''} · ${state}</div><div class="pq-log-meta">${q.startPage}→${q.endPage}p · ${q.pages||0}p${diff} · ${q.minutesUsed||0}분 · ${q.pph||0}p/h${q.memo?`<br>${esc(q.memo)}`:''}</div></div><button class="pq-del" data-pq-del="${q.id}">×</button></div>`; }).join('') || `<div class="empty" style="padding:20px">아직 페이지 로그가 없습니다.</div>`;
+      $$('#pqLogs [data-pq-del]').forEach(b=>b.onclick=()=>PageQuest.del(b.dataset.pqDel));
     },
-
     renderFocusSheet(){
       const a=FocusLab.active();
       const avg=FocusLab.averages();
@@ -731,7 +924,7 @@
       $('#focusLogs').innerHTML=logs.map(q=>`<div class="focus-log"><div><div class="focus-log-title">${Meta[q.subject].label} · ${FocusLab.modeLabel(q.mode)} · ${q.status==='giveup'?'중단':'완료'}</div><div class="focus-log-meta">${q.actualPages||0}/${q.targetPages||0}p · ${q.pageDiff>=0?'+':''}${q.pageDiff||0}p · 회상 ${q.recallCount||0}${q.targetRecall?`/${q.targetRecall}`:''} · ${q.minutesUsed||0}분 · ${q.pph||0}p/h${q.memo?`<br>${esc(q.memo)}`:''}</div></div><button class="del" data-focus-del="${q.id}">×</button></div>`).join('') || `<div class="empty" style="padding:18px">아직 집중 로그가 없습니다.</div>`;
       $$('#focusLogs [data-focus-del]').forEach(b=>b.onclick=()=>FocusLab.del(b.dataset.focusDel));
     },
-    openSheet(id){ $$('.sheet.show').forEach(x=>x.classList.remove('show')); if(id==='planSheet') this.renderPlanSheet(); if(id==='focusSheet') this.renderFocusSheet(); const el=$(`#${id}`); if(el) el.classList.add('show'); },
+    openSheet(id){ $$('.sheet.show').forEach(x=>x.classList.remove('show')); if(id==='planSheet') this.renderPlanSheet(); if(id==='focusSheet') this.renderFocusSheet(); if(id==='pageQuestSheet') this.renderPageQuest(); const el=$(`#${id}`); if(el) el.classList.add('show'); },
     closeSheet(id){ const el=$(`#${id}`); if(el) el.classList.remove('show'); }
   };
 
@@ -743,25 +936,40 @@
     $('#todayBtn').onclick=()=>{ State.viewingDate=DateUtil.today(); UI.renderAll(); };
     $('#autoBtn').onclick=()=>AutoScheduler.autoDay(State.viewingDate);
     $('#resetBtn').onclick=()=>AutoScheduler.resetToSleepOnly(State.viewingDate);
-    $('#focusBtn').onclick=()=>UI.openSheet('focusSheet');
+    $('#focusBtn').onclick=()=>UI.openSheet('pageQuestSheet');
     $('#moreBtn').onclick=()=>UI.openSheet('manageSheet');
     $('#wholePlanBtn').onclick=()=>{ UI.closeSheet('manageSheet'); UI.openSheet('planSheet'); };
-    if($('#pageQuestBtn')) $('#pageQuestBtn').onclick=()=>UI.toast('페이지퀘스트는 집중퀘스트로 통합됐습니다'); if($('#pqFloating')) $('#pqFloating').onclick=()=>UI.openSheet('focusSheet');
+    if($('#pageQuestBtn')) $('#pageQuestBtn').onclick=()=>UI.openSheet('pageQuestSheet'); if($('#pqFloating')) $('#pqFloating').onclick=()=>UI.openSheet('pageQuestSheet');
     $('#wholeAutoBtn').onclick=()=>{ UI.closeSheet('manageSheet'); AutoScheduler.autoAll(); };
     $('#blockStartBtn').onclick=()=>BlockQuest.focus(State.viewingDate); $('#blockPlusBtn').onclick=()=>BlockQuest.plus(State.viewingDate); $('#blockDoneBtn').onclick=()=>BlockQuest.done(State.viewingDate);
     $('#nowFab').onclick=()=>{ const today=DateUtil.today(); State.viewingDate=today; UI.renderAll(); setTimeout(()=>UI.scrollToTime(TimeUtil.nowKey()),50); };
     $('#feedPrev').onclick=()=>{ State.feedDate=DateUtil.clamp(DateUtil.add(State.feedDate,-1)); UI.renderFeed(); }; $('#feedNext').onclick=()=>{ State.feedDate=DateUtil.clamp(DateUtil.add(State.feedDate,1)); UI.renderFeed(); };
     $('#backupBtn').onclick=()=>Store.export(); $('#syncBtn').onclick=()=>Store.save().then(()=>UI.toast('저장 완료')); $('#todayReportBtn').onclick=()=>{ const st=Stats.day(State.viewingDate); UI.toast(`오늘 ${st.actual.total.toFixed(1)}h / ${st.target.total.toFixed(1)}h · ${st.rate}%`); };
     $$('[data-close]').forEach(el=>el.onclick=()=>UI.closeSheet(el.dataset.close));
-    if($('#pqStart')) $('#pqStart').onclick=()=>PageQuest.start(); if($('#pqFinish')) $('#pqFinish').onclick=()=>PageQuest.finish('done'); if($('#pqGiveup')) $('#pqGiveup').onclick=()=>PageQuest.finish('giveup');
-    $('#focusStart').onclick=()=>FocusLab.start(); $('#focusFinish').onclick=()=>FocusLab.finish('done'); $('#focusGiveup').onclick=()=>FocusLab.finish('giveup');
-    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') Store.save(); });
-    setInterval(()=>{ if($('#focusSheet')?.classList.contains('show')) UI.renderFocusSheet(); },1000);
+    if($('#pqStart')) $('#pqStart').onclick=()=>PageQuest.start(); if($('#pqSubject')) $('#pqSubject').onchange=()=>PageQuest.prefill();
+    if($('#focusStart')) $('#focusStart').onclick=()=>FocusLab.start(); if($('#focusFinish')) $('#focusFinish').onclick=()=>FocusLab.finish('done'); if($('#focusGiveup')) $('#focusGiveup').onclick=()=>FocusLab.finish('giveup');
+    const flushOnExit=()=>{ try{ Store.saveLocalNow(); Promise.resolve(Store.save()).catch(e=>console.warn('exit cloud flush fail', e)); }catch(e){ console.warn('exit flush fail', e); } };
+    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') flushOnExit(); });
+    window.addEventListener('pagehide', flushOnExit, {capture:true});
+    window.addEventListener('beforeunload', ()=>{ try{ Store.saveLocalNow(); }catch(e){} }, {capture:true});
+    setInterval(()=>{ if($('#focusSheet')?.classList.contains('show')) UI.renderFocusSheet(); if($('#pageQuestSheet')?.classList.contains('show')) UI.renderPageQuest(); },1000);
   }
+
+
+  const RuntimeAudit = {
+    required:['login','toast','scroll','tab-home','tab-calendar','tab-planner','timeline','pageQuestSheet','pqStart','pqLogs'],
+    run(){
+      const missing=this.required.filter(id=>!document.getElementById(id));
+      if(missing.length) console.warn('StudyGram DOM missing:', missing);
+      const ids=[...document.querySelectorAll('[id]')].map(x=>x.id);
+      const dup=ids.filter((id,i)=>ids.indexOf(id)!==i);
+      if(dup.length) console.warn('StudyGram duplicate ids:', [...new Set(dup)]);
+    }
+  };
 
   (async function init(){
     try{ if('serviceWorker' in navigator){ const regs=await navigator.serviceWorker.getRegistrations(); regs.forEach(r=>r.unregister()); } }catch(e){}
-    Store.init(); bindEvents(); UICompact.apply();
+    Store.init(); bindEvents(); UICompact.apply(); RuntimeAudit.run();
     const id=localStorage.getItem('studygram_id'), pw=localStorage.getItem('studygram_pw'); if(id&&pw){ $('#userid').value=id; $('#userpw').value=pw; $('#loginBtn').textContent='자동 접속 중...'; Store.login(); } else { UI.renderAll(); }
   })();
 </script>
