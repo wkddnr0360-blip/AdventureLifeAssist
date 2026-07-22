@@ -1,0 +1,12 @@
+{
+  "name": "focusbell-admin-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "claim-admin": "node set-admin-claim.mjs",
+    "remove-admin": "node set-admin-claim.mjs --remove"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0"
+  }
+}
