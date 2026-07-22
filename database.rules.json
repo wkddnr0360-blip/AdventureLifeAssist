@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "focusbell_v1": {
+      "presence": {
+        ".read": "auth != null",
+        "$uid": {
+          "$deviceId": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['uid','deviceId','state','studying','subject','visible','displayName','handle','lastChanged']) && newData.child('uid').val() === auth.uid && newData.child('deviceId').val() === $deviceId && (newData.child('state').val() === 'online' || newData.child('state').val() === 'offline') && newData.child('studying').isBoolean() && newData.child('visible').isBoolean() && newData.child('subject').isString() && newData.child('subject').val().length <= 30 && newData.child('displayName').isString() && newData.child('displayName').val().length <= 24 && newData.child('handle').isString() && newData.child('handle').val().matches(/^[a-z0-9_.]{3,20}$/) && newData.child('lastChanged').isNumber()"
+          }
+        }
+      }
+    },
+    ".read": false,
+    ".write": false
+  }
+}

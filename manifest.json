@@ -1,25 +1,36 @@
 {
   "id": "./",
-  "name": "FocusBell - Study Alarm & Log",
+  "name": "FocusBell 2 · Live Study Planner",
   "short_name": "FocusBell",
-  "description": "알람으로 시작하고 학습 기록으로 끝나는 공부 루틴 PWA",
+  "description": "학습 알람, 문제 범위 로그, 실시간 공부 현황, 친구와 DM, 캘린더, 메모, 목표 달성을 한곳에 모은 PWA",
   "lang": "ko-KR",
-  "start_url": "./index.html",
+  "dir": "ltr",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
   "background_color": "#f5f5f7",
   "theme_color": "#ffffff",
   "categories": [
     "education",
-    "productivity"
+    "productivity",
+    "utilities"
   ],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "icons": [
     {
       "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "./icon-512.png",
@@ -32,22 +43,52 @@
     {
       "name": "바로 집중 시작",
       "short_name": "집중 시작",
-      "url": "./index.html#quick-start",
+      "description": "과목과 시작 문제를 입력하고 타이머를 시작합니다.",
+      "url": "./#quick-start",
       "icons": [
         {
           "src": "./icon-192.png",
-          "sizes": "192x192"
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     },
     {
-      "name": "알람 보기",
-      "short_name": "알람",
-      "url": "./index.html#alarms",
+      "name": "학습 캘린더",
+      "short_name": "캘린더",
+      "description": "날짜별 학습 로그, 메모, 할 일을 확인합니다.",
+      "url": "./#calendar",
       "icons": [
         {
           "src": "./icon-192.png",
-          "sizes": "192x192"
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "함께 공부",
+      "short_name": "실시간",
+      "description": "현재 공부 중인 사용자와 랭킹을 확인합니다.",
+      "url": "./#community",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "알람 관리",
+      "short_name": "알람",
+      "description": "예약된 학습 알람을 확인합니다.",
+      "url": "./#alarms",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
         }
       ]
     }
