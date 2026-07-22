@@ -1,0 +1,108 @@
+
+  <div id="planModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="planModalTitle">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3 id="planModalTitle">할 일 추가</h3><button class="close-btn" data-close-modal="planModal" aria-label="닫기">×</button></div>
+      <form id="planForm" class="form-stack">
+        <input id="planId" type="hidden">
+        <div class="field"><label for="planTitle">할 일</label><input id="planTitle" class="input" maxlength="80" required placeholder="예: 수학 기출 2회독"></div>
+        <div class="input-row">
+          <div class="field"><label for="planDate">날짜</label><input id="planDate" class="input" type="date" required></div>
+          <div class="field"><label for="planTime">시간(선택)</label><input id="planTime" class="input" type="time"></div>
+        </div>
+        <div class="field"><label for="planSubject">과목(선택)</label><input id="planSubject" class="input" list="subjectDatalist" maxlength="30" placeholder="예: 영어"></div>
+        <div class="field"><label for="planNote">메모(선택)</label><textarea id="planNote" class="textarea" maxlength="300" placeholder="범위, 준비물, 다음 행동"></textarea></div>
+        <label class="privacy-row" for="planReminder">
+          <span><strong>앱 내 알림</strong><span>앱이 열려 있거나 백그라운드에서 살아 있을 때 해당 시간에 알립니다.</span></span>
+          <input id="planReminder" type="checkbox" checked>
+        </label>
+        <button class="btn gradient full" type="submit">할 일 저장</button>
+        <button id="deletePlanBtn" class="btn danger full" type="button" data-action="delete-plan-modal" hidden>할 일 삭제</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="memoModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="memoModalTitle">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3 id="memoModalTitle">메모 추가</h3><button class="close-btn" data-close-modal="memoModal" aria-label="닫기">×</button></div>
+      <form id="memoForm" class="form-stack">
+        <input id="memoId" type="hidden">
+        <div class="field"><label for="memoTitle">제목</label><input id="memoTitle" class="input" maxlength="80" required placeholder="예: 내일 이어서 볼 부분"></div>
+        <div class="field"><label for="memoDate">날짜</label><input id="memoDate" class="input" type="date" required></div>
+        <div class="field"><label for="memoContent">내용</label><textarea id="memoContent" class="textarea" maxlength="2000" required placeholder="개념, 오답 포인트, 해야 할 일을 자유롭게 적어보세요."></textarea></div>
+        <label class="privacy-row" for="memoPinned">
+          <span><strong>상단 고정</strong><span>선택한 날짜의 메모 목록 맨 위에 표시합니다.</span></span>
+          <input id="memoPinned" type="checkbox">
+        </label>
+        <button class="btn primary full" type="submit">메모 저장</button>
+        <button id="deleteMemoBtn" class="btn danger full" type="button" data-action="delete-memo-modal" hidden>메모 삭제</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="goalsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="goalsModalTitle">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3 id="goalsModalTitle">목표 · 공개 범위</h3><button class="close-btn" data-close-modal="goalsModal" aria-label="닫기">×</button></div>
+      <form id="goalsForm" class="form-stack">
+        <div class="input-row">
+          <div class="field"><label for="dailyMinutesGoal">하루 집중 목표(분)</label><input id="dailyMinutesGoal" class="input" type="number" min="1" max="1440" required></div>
+          <div class="field"><label for="dailyProblemsGoal">하루 문제 목표(개)</label><input id="dailyProblemsGoal" class="input" type="number" min="1" max="9999" required></div>
+        </div>
+        <div class="privacy-grid">
+          <label class="privacy-row" for="showInRanking"><span><strong>랭킹 참여</strong><span>친구와 로그인 사용자에게 공부 시간 통계를 보여줍니다.</span></span><input id="showInRanking" type="checkbox"></label>
+          <label class="privacy-row" for="shareStudyStatus"><span><strong>현재 공부 상태 공개</strong><span>집중 중 여부와 과목을 실시간 목록에 표시합니다.</span></span><input id="shareStudyStatus" type="checkbox"></label>
+          <label class="privacy-row" for="showOnlineStatus"><span><strong>온라인 상태 공개</strong><span>접속 중 표시를 로그인 사용자와 친구에게 보여줍니다.</span></span><input id="showOnlineStatus" type="checkbox"></label>
+        </div>
+        <div class="notice">공개 통계는 앱이 계산해 올리는 값이며, 소수 사용자용 친선 랭킹입니다. 시험 성적이나 개인정보는 공개하지 않습니다.</div>
+        <button class="btn gradient full" type="submit">설정 저장</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="chatModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+    <div class="sheet chat-sheet">
+      <div class="sheet-head">
+        <div class="chat-head-profile"><div id="chatAvatar" class="avatar">F</div><div><strong id="chatTitle">메시지</strong><span id="chatStatus">상태 확인 중</span></div></div>
+        <button class="close-btn" data-close-modal="chatModal" aria-label="닫기">×</button>
+      </div>
+      <div id="messageList" class="message-list"></div>
+      <form id="messageForm" class="chat-form"><input id="messageInput" class="input" maxlength="1000" required placeholder="메시지 입력" autocomplete="off"><button class="btn primary" type="submit">전송</button></form>
+    </div>
+  </div>
+
+  <div id="gameModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="gameTitle">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3 id="gameTitle">숫자 순서 리프레시</h3><button class="close-btn" data-close-modal="gameModal" aria-label="닫기">×</button></div>
+      <div class="game-card">
+        <div class="notice">1부터 16까지 순서대로 눌러 집중 흐름을 짧게 리셋하세요. 기록 경쟁보다 1~2판 후 공부로 돌아오는 용도입니다.</div>
+        <div class="game-status"><div><span class="eyebrow">Next number</span><strong id="gameNext">1</strong></div><div style="text-align:right"><span class="eyebrow">Time</span><strong id="gameTime">0.0s</strong></div></div>
+        <div id="numberGrid" class="number-grid"></div>
+        <div id="gameResult" class="notice" style="margin-top:14px">시작 버튼을 누르면 숫자가 섞입니다.</div>
+        <button id="gameStartBtn" class="btn gradient full" type="button" data-action="game-start" style="margin-top:12px">게임 시작</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tutorialOverlay" class="tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
+    <article class="tutorial-card">
+      <div id="tutorialArt" class="tutorial-art" aria-hidden="true">⏰</div>
+      <div id="tutorialProgress" class="tutorial-progress"></div>
+      <span id="tutorialKicker" class="eyebrow">1 / 6</span>
+      <h2 id="tutorialTitle">알람에서 학습을 시작해요</h2>
+      <p id="tutorialBody">원하는 시각과 과목·시작 문제를 예약하세요. 알람이 울리면 내용을 확인한 뒤 타이머가 시작됩니다.</p>
+      <div class="tutorial-actions"><button id="tutorialSkip" class="btn" type="button">나중에</button><button id="tutorialNext" class="btn primary" type="button">다음</button></div>
+    </article>
+  </div>
+
+  <div id="celebrationOverlay" class="celebration-overlay" role="alertdialog" aria-modal="true" aria-labelledby="celebrationTitle">
+    <article class="celebration-card">
+      <div id="celebrationEmoji" class="celebration-emoji">🏆</div>
+      <span class="eyebrow">Achievement unlocked</span>
+      <h2 id="celebrationTitle">오늘의 목표 달성!</h2>
+      <p id="celebrationBody">꾸준히 기록한 결과예요.</p>
+      <button class="btn gradient full" type="button" data-action="close-celebration">확인</button>
+    </article>
+  </div>

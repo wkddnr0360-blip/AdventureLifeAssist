@@ -1,0 +1,1336 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff" id="themeColorMeta">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="알람으로 시작하고 학습 기록으로 끝나는 공부 루틴 PWA">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FocusBell">
+  <title>FocusBell · Study Alarm & Log</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="icon" href="./icon-192.png">
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --surface: rgba(255,255,255,.86);
+      --surface-solid: #ffffff;
+      --surface-2: #f2f2f7;
+      --text: #111114;
+      --muted: #73737b;
+      --line: rgba(17,17,20,.09);
+      --accent: #0a84ff;
+      --accent-2: #7c4dff;
+      --pink: #ff2d55;
+      --orange: #ff9f0a;
+      --green: #30d158;
+      --danger: #ff3b30;
+      --shadow: 0 16px 44px rgba(0,0,0,.10);
+      --shadow-soft: 0 8px 24px rgba(0,0,0,.07);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --nav-h: 78px;
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --safe-t: env(safe-area-inset-top, 0px);
+    }
+    [data-theme="dark"] {
+      --bg: #000000;
+      --surface: rgba(28,28,30,.86);
+      --surface-solid: #1c1c1e;
+      --surface-2: #2c2c2e;
+      --text: #f5f5f7;
+      --muted: #a1a1aa;
+      --line: rgba(255,255,255,.11);
+      --shadow: 0 18px 48px rgba(0,0,0,.42);
+      --shadow-soft: 0 8px 24px rgba(0,0,0,.30);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { height: 100%; background: var(--bg); }
+    body {
+      min-height: 100%; margin: 0; color: var(--text); background:
+        radial-gradient(circle at 12% -10%, rgba(255,45,85,.12), transparent 28%),
+        radial-gradient(circle at 95% 2%, rgba(10,132,255,.13), transparent 29%),
+        var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Pretendard", "Noto Sans KR", sans-serif;
+      letter-spacing: -.018em;
+      overscroll-behavior-y: none;
+    }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    button { border: 0; cursor: pointer; }
+    a { color: inherit; }
+    [hidden] { display: none !important; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .icon { width: 22px; height: 22px; display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .icon.sm { width: 18px; height: 18px; }
+    .icon.lg { width: 28px; height: 28px; }
+
+    .splash {
+      position: fixed; inset: 0; z-index: 9999; display: grid; place-items: center;
+      background: var(--bg); transition: opacity .25s ease, visibility .25s ease;
+    }
+    .splash.done { opacity: 0; visibility: hidden; }
+    .splash-mark { display: grid; gap: 16px; justify-items: center; }
+    .brand-orb {
+      width: 74px; height: 74px; border-radius: 24px; display: grid; place-items: center; color: #fff;
+      background: linear-gradient(145deg, #ff375f 0%, #bf5af2 46%, #0a84ff 100%);
+      box-shadow: 0 20px 45px rgba(124,77,255,.28); font-size: 34px; font-weight: 900;
+    }
+    .splash-title { font-size: 22px; font-weight: 850; }
+    .spinner { width: 24px; height: 24px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .auth-screen { min-height: 100dvh; padding: calc(28px + var(--safe-t)) 20px calc(28px + var(--safe-b)); display: grid; place-items: center; }
+    .auth-wrap { width: min(100%, 430px); }
+    .auth-brand { display: flex; align-items: center; gap: 14px; margin: 0 4px 26px; }
+    .auth-brand .brand-orb { width: 58px; height: 58px; border-radius: 19px; font-size: 27px; }
+    .auth-brand h1 { margin: 0; font-size: 27px; font-weight: 900; letter-spacing: -.045em; }
+    .auth-brand p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
+    .auth-card { background: var(--surface); backdrop-filter: blur(28px) saturate(1.15); border: 1px solid var(--line); border-radius: 30px; padding: 24px; box-shadow: var(--shadow); }
+    .segmented { background: var(--surface-2); border-radius: 14px; padding: 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+    .segmented button { background: transparent; border-radius: 11px; padding: 10px; color: var(--muted); font-weight: 750; }
+    .segmented button.active { color: var(--text); background: var(--surface-solid); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .form-stack { display: grid; gap: 14px; margin-top: 22px; }
+    .field { display: grid; gap: 7px; }
+    .field label { font-size: 12px; color: var(--muted); font-weight: 720; padding-left: 3px; }
+    .input, .select, .textarea {
+      width: 100%; border: 1px solid var(--line); background: var(--surface-solid); border-radius: 15px; outline: none; padding: 14px 15px;
+      transition: border-color .18s, box-shadow .18s, transform .18s;
+    }
+    .input:focus, .select:focus, .textarea:focus { border-color: rgba(10,132,255,.6); box-shadow: 0 0 0 4px rgba(10,132,255,.12); }
+    .textarea { min-height: 96px; resize: vertical; line-height: 1.5; }
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn {
+      min-height: 46px; border-radius: 15px; padding: 12px 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-weight: 780; background: var(--surface-2); color: var(--text); transition: transform .12s, opacity .12s, background .18s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+    .btn.primary { background: var(--accent); color: #fff; box-shadow: 0 10px 22px rgba(10,132,255,.24); }
+    .btn.gradient { color: #fff; background: linear-gradient(135deg, #ff375f, #bf5af2 52%, #0a84ff); box-shadow: 0 11px 24px rgba(124,77,255,.25); }
+    .btn.danger { background: rgba(255,59,48,.12); color: var(--danger); }
+    .btn.ghost { background: transparent; color: var(--accent); min-height: 38px; padding: 8px 10px; }
+    .btn.full { width: 100%; }
+    .text-btn { background: transparent; color: var(--accent); font-weight: 720; padding: 8px; }
+    .auth-foot { margin-top: 14px; text-align: center; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .offline-auth { margin-top: 14px; padding: 12px 14px; border-radius: 14px; background: rgba(255,159,10,.11); color: #b66c00; font-size: 13px; line-height: 1.45; }
+
+    .app-shell { min-height: 100dvh; max-width: 620px; margin: 0 auto; position: relative; background: color-mix(in srgb, var(--bg) 93%, transparent); box-shadow: 0 0 60px rgba(0,0,0,.08); }
+    .topbar {
+      position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: min(100%, 620px); height: calc(62px + var(--safe-t));
+      padding: var(--safe-t) 18px 0; z-index: 50; display: flex; align-items: center; justify-content: space-between;
+      background: color-mix(in srgb, var(--bg) 76%, transparent); backdrop-filter: blur(24px) saturate(1.25); border-bottom: 1px solid var(--line);
+    }
+    .top-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .mini-orb { width: 34px; height: 34px; border-radius: 12px; display: grid; place-items: center; color: #fff; font-weight: 900; background: linear-gradient(145deg,#ff375f,#bf5af2 50%,#0a84ff); }
+    .top-title strong { font-size: 18px; font-weight: 900; letter-spacing: -.045em; }
+    .top-title small { display: block; color: var(--muted); font-size: 10px; margin-top: 1px; }
+    .top-actions { display: flex; align-items: center; gap: 9px; }
+    .status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(48,209,88,.13); }
+    .status-dot.offline { background: var(--orange); box-shadow: 0 0 0 4px rgba(255,159,10,.13); }
+    .avatar-btn, .avatar {
+      border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 850; flex: 0 0 auto; text-transform: uppercase;
+      background: linear-gradient(145deg, #ff375f, #bf5af2 55%, #0a84ff);
+    }
+    .avatar-btn { width: 35px; height: 35px; font-size: 13px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.7), 0 3px 10px rgba(0,0,0,.12); }
+    .avatar { width: 42px; height: 42px; font-size: 14px; }
+    .avatar.lg { width: 70px; height: 70px; font-size: 22px; }
+
+    .view-stack { padding: calc(76px + var(--safe-t)) 16px calc(var(--nav-h) + 28px + var(--safe-b)); }
+    .view { display: none; animation: viewIn .2s ease; }
+    .view.active { display: block; }
+    @keyframes viewIn { from { opacity: 0; transform: translateY(5px); } }
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin: 10px 2px 16px; }
+    .page-head h2 { margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -.055em; }
+    .page-head p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+    .round-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--surface-solid); color: var(--text); display: grid; place-items: center; box-shadow: var(--shadow-soft); border: 1px solid var(--line); }
+    .card { background: var(--surface); backdrop-filter: blur(24px) saturate(1.15); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-soft); }
+    .section { margin-top: 22px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; margin: 0 3px 11px; }
+    .section-head h3 { margin: 0; font-size: 17px; font-weight: 850; }
+    .section-head span { color: var(--muted); font-size: 12px; }
+    .empty { padding: 30px 18px; text-align: center; color: var(--muted); line-height: 1.55; font-size: 14px; }
+
+    .hero-card { padding: 22px; position: relative; overflow: hidden; }
+    .hero-card::after { content: ""; position: absolute; width: 190px; height: 190px; right: -90px; top: -100px; border-radius: 50%; background: radial-gradient(circle, rgba(191,90,242,.23), transparent 68%); pointer-events: none; }
+    .hero-profile { display: flex; gap: 13px; align-items: center; position: relative; z-index: 1; }
+    .story-ring { padding: 3px; border-radius: 50%; background: conic-gradient(#ff375f, #ff9f0a, #bf5af2, #0a84ff, #ff375f); }
+    .story-ring .avatar { border: 3px solid var(--surface-solid); }
+    .hero-profile h2 { margin: 0; font-size: 22px; font-weight: 900; }
+    .hero-profile p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 20px; position: relative; z-index: 1; }
+    .stat-cell { background: var(--surface-2); border-radius: 16px; padding: 13px 10px; text-align: center; }
+    .stat-cell strong { display: block; font-size: 18px; font-weight: 900; font-variant-numeric: tabular-nums; }
+    .stat-cell span { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; font-weight: 700; }
+    .quick-actions { display: grid; grid-template-columns: 1.25fr .75fr; gap: 10px; margin-top: 14px; }
+    .quick-tile { min-height: 96px; text-align: left; padding: 17px; border-radius: 20px; color: #fff; position: relative; overflow: hidden; }
+    .quick-tile.primary-tile { background: linear-gradient(145deg,#0a84ff,#5856d6); }
+    .quick-tile.secondary-tile { background: linear-gradient(145deg,#ff375f,#bf5af2); }
+    .quick-tile strong { display: block; font-size: 16px; font-weight: 850; }
+    .quick-tile span { display: block; margin-top: 5px; font-size: 11px; opacity: .85; line-height: 1.35; }
+    .quick-tile .icon { position: absolute; right: 14px; bottom: 13px; opacity: .75; width: 30px; height: 30px; }
+
+    .session-card { padding: 19px; border: 1px solid rgba(10,132,255,.22); background: linear-gradient(145deg, rgba(10,132,255,.13), rgba(124,77,255,.10)); }
+    .session-top { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; }
+    .session-badge { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-size: 11px; font-weight: 800; }
+    .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 1.4s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.75); } }
+    .session-title { margin: 8px 0 3px; font-size: 20px; font-weight: 900; }
+    .session-meta { color: var(--muted); font-size: 12px; }
+    .session-time { font-size: 35px; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -.045em; }
+    .progress { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; margin: 16px 0 13px; }
+    .progress > i { display: block; height: 100%; width: 0%; border-radius: inherit; background: linear-gradient(90deg,#0a84ff,#bf5af2,#ff375f); transition: width .4s ease; }
+    .session-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+
+    .alarm-card { padding: 17px; margin-bottom: 11px; display: grid; grid-template-columns: auto 1fr auto; gap: 13px; align-items: center; }
+    .alarm-time { min-width: 74px; font-size: 25px; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -.05em; }
+    .alarm-time small { display: block; font-size: 10px; color: var(--muted); letter-spacing: 0; margin-top: 2px; }
+    .alarm-main { min-width: 0; }
+    .alarm-main strong { display: block; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .alarm-main span { display: block; color: var(--muted); margin-top: 4px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .alarm-actions { display: flex; gap: 6px; align-items: center; }
+    .mini-btn { width: 34px; height: 34px; border-radius: 12px; background: var(--surface-2); display: grid; place-items: center; color: var(--muted); }
+    .switch { width: 47px; height: 28px; border-radius: 999px; background: #c7c7cc; padding: 3px; transition: background .2s; }
+    .switch::after { content: ""; display: block; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,.2); transition: transform .2s; }
+    .switch.on { background: var(--green); }
+    .switch.on::after { transform: translateX(19px); }
+    .notice { padding: 13px 15px; border-radius: 16px; background: rgba(10,132,255,.09); color: color-mix(in srgb, var(--accent) 80%, var(--text)); font-size: 12px; line-height: 1.5; border: 1px solid rgba(10,132,255,.12); }
+    .notice.warn { background: rgba(255,159,10,.10); color: color-mix(in srgb, var(--orange) 72%, var(--text)); border-color: rgba(255,159,10,.16); }
+
+    .week-card { padding: 18px 16px 14px; }
+    .week-bars { height: 132px; display: grid; grid-template-columns: repeat(7,1fr); gap: 8px; align-items: end; }
+    .bar-col { display: grid; gap: 7px; justify-items: center; height: 100%; align-content: end; }
+    .bar-track { width: min(28px, 80%); height: 92px; border-radius: 999px; background: var(--surface-2); display: flex; align-items: end; overflow: hidden; }
+    .bar-fill { width: 100%; min-height: 4px; border-radius: inherit; background: linear-gradient(180deg,#ff375f,#bf5af2 55%,#0a84ff); }
+    .bar-day { font-size: 10px; color: var(--muted); font-weight: 700; }
+    .bar-min { font-size: 9px; color: var(--muted); }
+
+    .filter-row { display: grid; grid-template-columns: 1.4fr .8fr; gap: 9px; margin-bottom: 13px; }
+    .log-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+    .summary-chip { padding: 13px 9px; text-align: center; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+    .summary-chip strong { display: block; font-size: 16px; font-weight: 900; }
+    .summary-chip span { display: block; margin-top: 3px; font-size: 9px; color: var(--muted); font-weight: 700; }
+    .log-card { padding: 17px; margin-bottom: 10px; }
+    .log-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .log-subject { display: inline-flex; align-items: center; gap: 7px; font-weight: 850; font-size: 15px; }
+    .subject-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+    .log-date { color: var(--muted); font-size: 10px; white-space: nowrap; }
+    .log-range { margin: 10px 0 7px; font-size: 20px; font-weight: 900; letter-spacing: -.035em; }
+    .log-meta { display: flex; flex-wrap: wrap; gap: 7px; }
+    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 6px 9px; border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 10px; font-weight: 720; }
+    .log-note { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+
+    .composer { padding: 15px; margin-bottom: 14px; }
+    .composer-head { display: flex; gap: 10px; align-items: flex-start; }
+    .composer textarea { flex: 1; min-height: 72px; border: 0; outline: 0; background: transparent; resize: none; padding: 8px 2px; line-height: 1.45; }
+    .composer-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+    .composer-foot select { border: 0; background: var(--surface-2); border-radius: 11px; padding: 8px 10px; font-size: 11px; outline: none; }
+    .char-count { color: var(--muted); font-size: 10px; margin-left: auto; }
+    .post-card { margin-bottom: 12px; overflow: hidden; }
+    .post-head { display: flex; align-items: center; gap: 10px; padding: 14px 15px 8px; }
+    .post-author { min-width: 0; flex: 1; }
+    .post-author strong { display: block; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .post-author span { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
+    .post-menu { background: transparent; color: var(--muted); width: 34px; height: 34px; border-radius: 50%; }
+    .post-content { padding: 7px 15px 14px; line-height: 1.55; font-size: 14px; white-space: pre-wrap; word-break: break-word; }
+    .post-tag { margin: 0 15px 11px; display: inline-flex; padding: 6px 10px; border-radius: 999px; background: rgba(10,132,255,.1); color: var(--accent); font-size: 10px; font-weight: 760; }
+    .post-actions { display: flex; align-items: center; gap: 4px; padding: 7px 10px 11px; border-top: 1px solid var(--line); }
+    .post-action { background: transparent; min-height: 38px; padding: 8px 9px; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); border-radius: 11px; font-size: 11px; font-weight: 720; }
+    .post-action.liked { color: var(--pink); }
+    .post-action.liked .icon { fill: currentColor; }
+
+    .settings-profile { padding: 18px; display: flex; align-items: center; gap: 14px; }
+    .settings-profile .profile-copy { min-width: 0; flex: 1; }
+    .settings-profile strong { display: block; font-size: 18px; font-weight: 900; }
+    .settings-profile span { display: block; color: var(--muted); font-size: 12px; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .settings-group { margin-top: 16px; overflow: hidden; }
+    .setting-row { width: 100%; background: transparent; display: grid; grid-template-columns: 38px 1fr auto; gap: 11px; align-items: center; padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--line); }
+    .setting-row:last-child { border-bottom: 0; }
+    .setting-icon { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; color: #fff; }
+    .setting-copy strong { display: block; font-size: 13px; }
+    .setting-copy span { display: block; color: var(--muted); font-size: 10px; margin-top: 3px; line-height: 1.3; }
+    .chevron { color: var(--muted); font-size: 18px; }
+    .version-note { text-align: center; color: var(--muted); font-size: 10px; padding: 24px 0 4px; line-height: 1.5; }
+
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: min(100%,620px); height: calc(var(--nav-h) + var(--safe-b));
+      padding: 9px 10px var(--safe-b); display: grid; grid-template-columns: repeat(5,1fr); z-index: 55;
+      background: color-mix(in srgb, var(--surface-solid) 88%, transparent); backdrop-filter: blur(26px) saturate(1.3); border-top: 1px solid var(--line);
+    }
+    .nav-btn { background: transparent; color: var(--muted); display: grid; justify-items: center; align-content: center; gap: 4px; border-radius: 16px; position: relative; }
+    .nav-btn span { font-size: 9px; font-weight: 700; }
+    .nav-btn.active { color: var(--text); }
+    .nav-btn.active::before { content: ""; position: absolute; top: 2px; width: 25px; height: 3px; border-radius: 999px; background: linear-gradient(90deg,#ff375f,#bf5af2,#0a84ff); }
+
+    .modal {
+      position: fixed; inset: 0; z-index: 200; display: none; align-items: flex-end; justify-content: center; background: rgba(0,0,0,.45); backdrop-filter: blur(7px);
+    }
+    .modal.open { display: flex; animation: modalFade .18s ease; }
+    @keyframes modalFade { from { opacity: 0; } }
+    .sheet {
+      width: min(100%,620px); max-height: min(92dvh,850px); overflow: auto; background: var(--surface-solid); border-radius: 28px 28px 0 0;
+      padding: 10px 18px calc(24px + var(--safe-b)); box-shadow: 0 -20px 50px rgba(0,0,0,.24); animation: sheetUp .24s ease;
+    }
+    @keyframes sheetUp { from { transform: translateY(35px); opacity: .6; } }
+    .sheet-handle { width: 42px; height: 5px; border-radius: 999px; background: var(--line); margin: 0 auto 13px; }
+    .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
+    .sheet-head h3 { margin: 0; font-size: 21px; font-weight: 900; }
+    .close-btn { width: 34px; height: 34px; border-radius: 50%; background: var(--surface-2); display: grid; place-items: center; color: var(--muted); font-size: 20px; }
+    .weekday-row { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
+    .weekday { display: grid; place-items: center; }
+    .weekday input { position: absolute; opacity: 0; pointer-events: none; }
+    .weekday span { width: 100%; aspect-ratio: 1; max-height: 42px; border-radius: 13px; display: grid; place-items: center; background: var(--surface-2); color: var(--muted); font-size: 11px; font-weight: 760; }
+    .weekday input:checked + span { color: #fff; background: var(--accent); }
+    .inline-check { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 2px; }
+    .inline-check label { font-size: 13px; font-weight: 720; }
+    .helper { color: var(--muted); font-size: 11px; line-height: 1.45; }
+
+    .ring-overlay { position: fixed; inset: 0; z-index: 500; display: none; place-items: center; padding: 24px; color: #fff; background: radial-gradient(circle at 50% 16%, rgba(255,255,255,.18), transparent 26%), linear-gradient(155deg,#0a84ff 0%,#5856d6 35%,#bf5af2 68%,#ff375f 100%); }
+    .ring-overlay.open { display: grid; animation: ringIn .3s ease; }
+    @keyframes ringIn { from { opacity: 0; transform: scale(1.02); } }
+    .ring-box { width: min(100%,430px); text-align: center; }
+    .ring-icon { width: 104px; height: 104px; margin: 0 auto 24px; border-radius: 34px; display: grid; place-items: center; background: rgba(255,255,255,.16); backdrop-filter: blur(18px); box-shadow: 0 25px 50px rgba(0,0,0,.18); animation: ringPulse 1.25s ease-in-out infinite; }
+    @keyframes ringPulse { 50% { transform: scale(1.06) rotate(-2deg); } }
+    .ring-icon .icon { width: 52px; height: 52px; }
+    .ring-kicker { font-size: 12px; font-weight: 780; opacity: .78; letter-spacing: .08em; text-transform: uppercase; }
+    .ring-box h2 { margin: 10px 0 7px; font-size: 34px; font-weight: 950; letter-spacing: -.055em; }
+    .ring-box p { margin: 0; opacity: .84; line-height: 1.5; }
+    .ring-actions { display: grid; gap: 10px; margin-top: 34px; }
+    .ring-actions .btn { min-height: 54px; background: #fff; color: #111; }
+    .ring-actions .btn.secondary { background: rgba(255,255,255,.16); color: #fff; border: 1px solid rgba(255,255,255,.25); }
+
+    .comments-list { display: grid; gap: 12px; max-height: 52dvh; overflow-y: auto; padding: 4px 0 14px; }
+    .comment { display: flex; gap: 9px; align-items: flex-start; }
+    .comment .avatar { width: 32px; height: 32px; font-size: 10px; }
+    .comment-body { flex: 1; min-width: 0; background: var(--surface-2); border-radius: 14px; padding: 9px 11px; }
+    .comment-body strong { font-size: 11px; }
+    .comment-body p { margin: 4px 0 0; font-size: 12px; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+    .comment-meta { color: var(--muted); font-size: 9px; margin-top: 4px; }
+    .comment-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+
+    .confirm-card { align-self: center; width: min(calc(100% - 34px),400px); background: var(--surface-solid); border-radius: 22px; padding: 22px; box-shadow: var(--shadow); text-align: center; }
+    .confirm-card h3 { margin: 0 0 8px; font-size: 19px; }
+    .confirm-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .confirm-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 18px; }
+
+    .patch-list { display: grid; gap: 16px; }
+    .patch-item { padding-left: 17px; border-left: 2px solid var(--accent); }
+    .patch-item strong { font-size: 14px; }
+    .patch-item time { color: var(--muted); font-size: 10px; margin-left: 6px; }
+    .patch-item ul { margin: 8px 0 0; padding-left: 17px; color: var(--muted); font-size: 12px; line-height: 1.65; }
+
+    .toast-host { position: fixed; left: 50%; bottom: calc(var(--nav-h) + var(--safe-b) + 15px); transform: translateX(-50%); z-index: 800; width: min(calc(100% - 28px),560px); display: grid; gap: 8px; pointer-events: none; }
+    .toast { justify-self: center; max-width: 100%; padding: 11px 15px; border-radius: 999px; color: #fff; background: rgba(20,20,22,.9); backdrop-filter: blur(18px); box-shadow: var(--shadow-soft); font-size: 12px; font-weight: 700; animation: toastIn .23s ease; }
+    .toast.error { background: rgba(205,40,36,.94); }
+    .toast.success { background: rgba(22,128,55,.94); }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(8px) scale(.97); } }
+
+    @media (min-width: 700px) {
+      body { padding: 18px 0; }
+      .app-shell { min-height: calc(100dvh - 36px); border-radius: 34px; overflow: hidden; border: 1px solid var(--line); }
+      .topbar { top: 18px; border-radius: 34px 34px 0 0; }
+      .bottom-nav { bottom: 18px; border-radius: 0 0 34px 34px; }
+      .modal { align-items: center; }
+      .sheet { border-radius: 28px; max-height: 86dvh; padding-bottom: 24px; }
+    }
+    @media (max-width: 380px) {
+      .view-stack { padding-left: 12px; padding-right: 12px; }
+      .quick-actions { grid-template-columns: 1fr; }
+      .quick-tile { min-height: 82px; }
+      .stats-grid { gap: 6px; }
+      .stat-cell { padding: 11px 6px; }
+      .input-row { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="splash" class="splash" aria-live="polite">
+    <div class="splash-mark">
+      <div class="brand-orb" aria-hidden="true">F</div>
+      <div class="splash-title">FocusBell</div>
+      <div class="spinner" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <section id="authScreen" class="auth-screen" hidden>
+    <div class="auth-wrap">
+      <div class="auth-brand">
+        <div class="brand-orb" aria-hidden="true">F</div>
+        <div><h1>FocusBell</h1><p>알람으로 시작하고, 기록으로 끝내는 공부 루틴</p></div>
+      </div>
+      <div class="auth-card">
+        <div class="segmented" role="tablist" aria-label="로그인 방식">
+          <button type="button" class="active" data-auth-mode="login" role="tab" aria-selected="true">로그인</button>
+          <button type="button" data-auth-mode="signup" role="tab" aria-selected="false">회원가입</button>
+        </div>
+        <form id="authForm" class="form-stack" novalidate>
+          <div class="field" id="authNameField" hidden>
+            <label for="authName">표시 이름</label>
+            <input id="authName" class="input" autocomplete="name" maxlength="24" placeholder="예: 장욱">
+          </div>
+          <div class="field">
+            <label for="authEmail">이메일</label>
+            <input id="authEmail" class="input" type="email" autocomplete="email" required placeholder="name@example.com">
+          </div>
+          <div class="field">
+            <label for="authPassword">비밀번호</label>
+            <input id="authPassword" class="input" type="password" autocomplete="current-password" minlength="6" required placeholder="6자 이상">
+          </div>
+          <button id="authSubmit" class="btn gradient full" type="submit">로그인</button>
+          <button id="resetPasswordBtn" class="text-btn" type="button">비밀번호 재설정 메일 보내기</button>
+        </form>
+        <div id="offlineAuthBox" class="offline-auth" hidden>
+          Firebase에 연결하지 못했습니다. 이전 로그인 정보가 이 기기에 남아 있다면 로컬 기록 모드로 입장할 수 있습니다.
+          <button id="offlineEnterBtn" class="btn full" type="button" style="margin-top:10px">오프라인 기록으로 입장</button>
+        </div>
+      </div>
+      <p class="auth-foot">공개 라운지는 로그인 사용자에게만 보입니다. 비밀번호나 개인정보를 게시물에 적지 마세요.</p>
+    </div>
+  </section>
+
+  <div id="appShell" class="app-shell" hidden>
+    <header class="topbar">
+      <div class="top-title">
+        <div class="mini-orb" aria-hidden="true">F</div>
+        <div><strong id="topViewTitle">FocusBell</strong><small id="syncLabel">연결 확인 중</small></div>
+      </div>
+      <div class="top-actions">
+        <span id="onlineDot" class="status-dot" title="온라인"></span>
+        <button class="avatar-btn" id="headerAvatar" data-action="open-profile" aria-label="프로필 열기">F</button>
+      </div>
+    </header>
+
+    <main class="view-stack" id="viewStack">
+      <section class="view active" data-view="home" aria-labelledby="homeTitle">
+        <div class="page-head">
+          <div><h2 id="homeTitle">오늘의 집중</h2><p id="todayLabel">학습을 시작할 준비가 됐어요.</p></div>
+          <button class="round-btn" data-action="open-alarm" aria-label="알람 추가">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+        <article class="card hero-card">
+          <div class="hero-profile">
+            <div class="story-ring"><div id="heroAvatar" class="avatar lg">F</div></div>
+            <div><h2 id="heroGreeting">안녕하세요</h2><p id="heroBio">오늘 한 세션이 내일의 실력이 됩니다.</p></div>
+          </div>
+          <div id="heroStats" class="stats-grid"></div>
+        </article>
+
+        <div id="activeSessionSlot" class="section"></div>
+
+        <div class="quick-actions">
+          <button class="quick-tile primary-tile" data-action="quick-start">
+            <strong>바로 집중 시작</strong><span>과목과 시작 문제를 입력하고 타이머를 켭니다.</span>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <button class="quick-tile secondary-tile" data-action="open-alarm">
+            <strong>알람 예약</strong><span>원하는 시각에 공부 알림</span>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+          </button>
+        </div>
+
+        <section class="section">
+          <div class="section-head"><h3>다음 알람</h3><button class="text-btn" data-view-go="alarms">전체 보기</button></div>
+          <div id="homeUpcoming"></div>
+        </section>
+        <section class="section">
+          <div class="section-head"><h3>최근 7일</h3><span id="weekTotalLabel">0분</span></div>
+          <div class="card week-card"><div id="weekBars" class="week-bars"></div></div>
+        </section>
+      </section>
+
+      <section class="view" data-view="alarms" aria-labelledby="alarmsTitle">
+        <div class="page-head">
+          <div><h2 id="alarmsTitle">알람</h2><p>시각이 되면 과목과 시작 문제를 확인합니다.</p></div>
+          <button class="round-btn" data-action="open-alarm" aria-label="새 알람">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+        <div id="notificationNotice" class="notice warn"></div>
+        <div class="section" id="alarmList"></div>
+      </section>
+
+      <section class="view" data-view="logs" aria-labelledby="logsTitle">
+        <div class="page-head">
+          <div><h2 id="logsTitle">학습 로그</h2><p>시작·종료 문제와 집중 시간을 한눈에 봅니다.</p></div>
+          <button class="round-btn" data-action="export-logs" aria-label="로그 내보내기">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg>
+          </button>
+        </div>
+        <div class="filter-row">
+          <input id="logSearch" class="input" placeholder="과목·문제·메모 검색" aria-label="로그 검색">
+          <select id="logSubjectFilter" class="select" aria-label="과목 필터"><option value="">전체 과목</option></select>
+        </div>
+        <div id="logSummary" class="log-summary"></div>
+        <div id="logList"></div>
+      </section>
+
+      <section class="view" data-view="lounge" aria-labelledby="loungeTitle">
+        <div class="page-head">
+          <div><h2 id="loungeTitle">라운지</h2><p>짧은 공부 기록을 서로 응원하는 공개 피드입니다.</p></div>
+          <button class="round-btn" data-action="refresh-lounge" aria-label="라운지 새로고침">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7L20 14M20 8v6h-6"/></svg>
+          </button>
+        </div>
+        <div class="notice" style="margin-bottom:12px">개인정보·학교·연락처는 올리지 마세요. 불편한 글은 신고하거나 작성자를 이 기기에서 숨길 수 있습니다.</div>
+        <form id="postForm" class="card composer">
+          <div class="composer-head">
+            <div id="composerAvatar" class="avatar">F</div>
+            <textarea id="postContent" maxlength="500" required placeholder="오늘 공부한 것, 다음 목표, 응원 한마디…"></textarea>
+          </div>
+          <div class="composer-foot">
+            <select id="postSubject" aria-label="게시물 과목 태그"><option value="">태그 없음</option></select>
+            <span id="postCharCount" class="char-count">0/500</span>
+            <button class="btn primary" type="submit" style="min-height:38px;padding:8px 14px">게시</button>
+          </div>
+        </form>
+        <div id="loungeStatus" class="notice warn" hidden></div>
+        <div id="postFeed"></div>
+      </section>
+
+      <section class="view" data-view="settings" aria-labelledby="settingsTitle">
+        <div class="page-head"><div><h2 id="settingsTitle">설정</h2><p>프로필, 알림, 데이터와 앱 정보를 관리합니다.</p></div></div>
+        <button class="card settings-profile" data-action="open-profile" style="width:100%;text-align:left">
+          <div id="settingsAvatar" class="avatar lg">F</div>
+          <div class="profile-copy"><strong id="settingsName">사용자</strong><span id="settingsHandle">@focus</span><span id="settingsBio">소개를 입력해 보세요.</span></div>
+          <span class="chevron">›</span>
+        </button>
+
+        <div class="card settings-group">
+          <button class="setting-row" data-action="request-notification">
+            <span class="setting-icon" style="background:#ff9f0a"><svg class="icon sm" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></span>
+            <span class="setting-copy"><strong>알림 권한</strong><span id="settingNotifState">상태 확인 중</span></span><span class="chevron">›</span>
+          </button>
+          <button class="setting-row" data-action="install-pwa">
+            <span class="setting-icon" style="background:#0a84ff"><svg class="icon sm" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg></span>
+            <span class="setting-copy"><strong>홈 화면에 설치</strong><span id="installState">설치 가능 여부 확인 중</span></span><span class="chevron">›</span>
+          </button>
+          <button class="setting-row" data-action="cycle-theme">
+            <span class="setting-icon" style="background:#5856d6"><svg class="icon sm" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></span>
+            <span class="setting-copy"><strong>화면 테마</strong><span id="themeState">시스템 설정</span></span><span class="chevron">›</span>
+          </button>
+          <button class="setting-row" data-action="toggle-wakelock">
+            <span class="setting-icon" style="background:#30d158"><svg class="icon sm" viewBox="0 0 24 24"><path d="M8 11V7a4 4 0 0 1 8 0v4M6 11h12v10H6z"/></svg></span>
+            <span class="setting-copy"><strong>집중 중 화면 켜두기</strong><span id="wakeState">켜짐</span></span><span class="chevron">›</span>
+          </button>
+        </div>
+
+        <div class="card settings-group">
+          <button class="setting-row" data-action="export-logs">
+            <span class="setting-icon" style="background:#34c759"><svg class="icon sm" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></svg></span>
+            <span class="setting-copy"><strong>내 데이터 내보내기</strong><span>학습 로그를 CSV와 JSON으로 저장</span></span><span class="chevron">›</span>
+          </button>
+          <button class="setting-row" data-action="clear-study-data">
+            <span class="setting-icon" style="background:#ff3b30"><svg class="icon sm" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2m-9 0 1 15h8l1-15M10 10v7M14 10v7"/></svg></span>
+            <span class="setting-copy"><strong>학습 데이터 초기화</strong><span>새 앱 영역의 내 알람과 로그만 삭제</span></span><span class="chevron">›</span>
+          </button>
+          <button class="setting-row" data-action="repair-cache">
+            <span class="setting-icon" style="background:#8e8e93"><svg class="icon sm" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7L20 14M20 8v6h-6"/></svg></span>
+            <span class="setting-copy"><strong>PWA 캐시 새로고침</strong><span>이전 AdventureLifeAssist 캐시를 정리</span></span><span class="chevron">›</span>
+          </button>
+        </div>
+
+        <div class="card settings-group">
+          <button class="setting-row" data-action="open-patchnotes">
+            <span class="setting-icon" style="background:#bf5af2"><svg class="icon sm" viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h5"/></svg></span>
+            <span class="setting-copy"><strong>패치 노트 · 개발 내역</strong><span>FocusBell 1.0.0 변경 사항</span></span><span class="chevron">›</span>
+          </button>
+          <button class="setting-row" data-action="show-runtime-info">
+            <span class="setting-icon" style="background:#0a84ff"><svg class="icon sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg></span>
+            <span class="setting-copy"><strong>연결·알람 동작 안내</strong><span id="runtimeState">Firebase 및 브라우저 상태</span></span><span class="chevron">›</span>
+          </button>
+        </div>
+
+        <button class="btn danger full" data-action="signout" style="margin-top:18px">로그아웃</button>
+        <div class="version-note">FocusBell 1.0.0 · namespace: apps/focusbell_v1<br>기존 Firebase 데이터는 삭제하지 않고 새 영역으로 분리됩니다.</div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="주요 메뉴">
+      <button class="nav-btn active" data-view-go="home" aria-label="홈">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5V21h-6v-6H9v6H3z"/></svg><span>홈</span>
+      </button>
+      <button class="nav-btn" data-view-go="alarms" aria-label="알람">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span>알람</span>
+      </button>
+      <button class="nav-btn" data-view-go="logs" aria-label="로그">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg><span>로그</span>
+      </button>
+      <button class="nav-btn" data-view-go="lounge" aria-label="라운지">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg><span>라운지</span>
+      </button>
+      <button class="nav-btn" data-view-go="settings" aria-label="설정">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9A1.7 1.7 0 0 0 21 10h.2v4H21a1.7 1.7 0 0 0-1.6 1z"/></svg><span>설정</span>
+      </button>
+    </nav>
+  </div>
+
+  <div id="alarmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="alarmModalTitle">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3 id="alarmModalTitle">새 알람</h3><button class="close-btn" data-close-modal="alarmModal" aria-label="닫기">×</button></div>
+      <form id="alarmForm" class="form-stack">
+        <input id="alarmId" type="hidden">
+        <div class="field"><label for="alarmDateTime">알림 시각</label><input id="alarmDateTime" class="input" type="datetime-local" required></div>
+        <div class="field"><label for="alarmLabel">알람 이름</label><input id="alarmLabel" class="input" maxlength="40" placeholder="예: 저녁 기출 1세트" value="공부 시작"></div>
+        <div class="input-row">
+          <div class="field"><label for="alarmSubject">기본 과목(선택)</label><input id="alarmSubject" class="input" list="subjectDatalist" maxlength="30" placeholder="알람 때 수정 가능"></div>
+          <div class="field"><label for="alarmStartProblem">기본 시작 문제(선택)</label><input id="alarmStartProblem" class="input" maxlength="30" placeholder="예: 120"></div>
+        </div>
+        <div class="field"><label for="alarmTargetMinutes">목표 집중 시간</label><select id="alarmTargetMinutes" class="select"><option value="25">25분</option><option value="30">30분</option><option value="45">45분</option><option value="50">50분</option><option value="60" selected>60분</option><option value="90">90분</option><option value="120">120분</option></select></div>
+        <div class="field"><label>반복 요일(선택하지 않으면 1회)</label>
+          <div class="weekday-row">
+            <label class="weekday"><input type="checkbox" name="repeatDay" value="0"><span>일</span></label>
+            <label class="weekday"><input type="checkbox" name="repeatDay" value="1"><span>월</span></label>
+            <label class="weekday"><input type="checkbox" name="repeatDay" value="2"><span>화</span></label>
+            <label class="weekday"><input type="checkbox" name="repeatDay" value="3"><span>수</span></label>
+            <label class="weekday"><input type="checkbox" name="repeatDay" value="4"><span>목</span></label>
+            <label class="weekday"><input type="checkbox" name="repeatDay" value="5"><span>금</span></label>
+            <label class="weekday"><input type="checkbox" name="repeatDay" value="6"><span>토</span></label>
+          </div>
+        </div>
+        <div class="field"><label for="alarmNote">메모(선택)</label><textarea id="alarmNote" class="textarea" maxlength="160" placeholder="교재, 범위, 목표 등을 적어두세요."></textarea></div>
+        <button class="btn gradient full" type="submit">알람 저장</button>
+        <button id="deleteAlarmBtn" class="btn danger full" type="button" data-action="delete-alarm-from-modal" hidden>알람 삭제</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="startModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="startModalTitle">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3 id="startModalTitle">집중 시작</h3><button class="close-btn" data-close-modal="startModal" aria-label="닫기">×</button></div>
+      <form id="startForm" class="form-stack">
+        <input id="startAlarmId" type="hidden">
+        <div class="field"><label for="startSubject">과목</label><input id="startSubject" class="input" list="subjectDatalist" maxlength="30" required placeholder="예: 수학"></div>
+        <div class="field"><label for="startProblem">시작 문제번호</label><input id="startProblem" class="input" maxlength="30" required placeholder="예: 120 또는 3-2"></div>
+        <div class="input-row">
+          <div class="field"><label for="startTargetMinutes">목표 시간</label><select id="startTargetMinutes" class="select"><option value="25">25분</option><option value="30">30분</option><option value="45">45분</option><option value="50">50분</option><option value="60" selected>60분</option><option value="90">90분</option><option value="120">120분</option></select></div>
+          <div class="field"><label for="startGoal">목표 문제 수(선택)</label><input id="startGoal" class="input" type="number" min="1" max="9999" placeholder="예: 40"></div>
+        </div>
+        <div class="field"><label for="startNote">시작 메모(선택)</label><textarea id="startNote" class="textarea" maxlength="160" placeholder="이번 세션의 목표를 적어두세요."></textarea></div>
+        <button class="btn gradient full" type="submit">타이머 시작</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="endModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="endModalTitle">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3 id="endModalTitle">집중 종료</h3><button class="close-btn" data-close-modal="endModal" aria-label="닫기">×</button></div>
+      <form id="endForm" class="form-stack">
+        <div class="notice" id="endSessionSummary">진행한 범위를 기록해 주세요.</div>
+        <div class="field"><label for="endProblem">마지막 문제번호</label><input id="endProblem" class="input" maxlength="30" required placeholder="예: 159 또는 3-18"></div>
+        <div class="input-row">
+          <div class="field"><label for="endSolved">푼 문제 수(자동 계산 가능)</label><input id="endSolved" class="input" type="number" min="0" max="99999" placeholder="비워두면 번호로 계산"></div>
+          <div class="field"><label for="endCorrect">맞힌 문제 수(선택)</label><input id="endCorrect" class="input" type="number" min="0" max="99999" placeholder="예: 32"></div>
+        </div>
+        <div class="field"><label for="endReflection">마무리 메모(선택)</label><textarea id="endReflection" class="textarea" maxlength="500" placeholder="헷갈린 개념, 다음에 이어갈 문제 등을 남겨보세요."></textarea></div>
+        <button class="btn gradient full" type="submit">로그 저장하고 종료</button>
+        <button class="btn danger full" type="button" data-action="discard-session">기록 없이 세션 취소</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="profileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3 id="profileModalTitle">프로필 편집</h3><button class="close-btn" data-close-modal="profileModal" aria-label="닫기">×</button></div>
+      <form id="profileForm" class="form-stack">
+        <div style="display:grid;place-items:center"><div id="profileModalAvatar" class="avatar lg">F</div></div>
+        <div class="field"><label for="profileName">표시 이름</label><input id="profileName" class="input" maxlength="24" required></div>
+        <div class="field"><label for="profileHandle">아이디</label><input id="profileHandle" class="input" maxlength="20" pattern="[a-z0-9_.]{3,20}" required placeholder="영문 소문자, 숫자, _, ."></div>
+        <div class="field"><label for="profileBio">한 줄 소개</label><textarea id="profileBio" class="textarea" maxlength="100" placeholder="공부 목표나 소개를 적어보세요."></textarea></div>
+        <button class="btn primary full" type="submit">프로필 저장</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="commentsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="commentsModalTitle">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3 id="commentsModalTitle">댓글</h3><button class="close-btn" data-close-modal="commentsModal" aria-label="닫기">×</button></div>
+      <div id="commentsList" class="comments-list"></div>
+      <form id="commentForm" class="comment-form"><input id="commentInput" class="input" maxlength="300" required placeholder="응원 댓글 남기기"><button class="btn primary" type="submit">등록</button></form>
+    </div>
+  </div>
+
+  <div id="patchModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="patchModalTitle">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head"><h3 id="patchModalTitle">패치 노트 · 개발 내역</h3><button class="close-btn" data-close-modal="patchModal" aria-label="닫기">×</button></div>
+      <div class="patch-list">
+        <article class="patch-item"><strong>FocusBell 1.0.0</strong><time>2026.07.23</time><ul><li>기존 화면을 완전히 분리한 새 단일 파일 앱 구조</li><li>예약 알람, 반복 요일, 미루기, 브라우저 알림과 진동</li><li>과목·시작 문제 입력 → 종료 문제 입력 → 자동 학습 로그</li><li>세션 일시정지, 목표시간 알림, 화면 켜두기, 복구 기능</li><li>이메일 로그인·회원가입·비밀번호 재설정</li><li>공개 라운지 게시물·좋아요·댓글·신고·작성자 숨김</li><li>CSV/JSON 내보내기, 다크 모드, PWA 설치 안내</li><li>Firebase 새 네임스페이스 <code>apps/focusbell_v1</code> 적용</li></ul></article>
+        <article class="patch-item"><strong>데이터 설계</strong><time>v1</time><ul><li>사용자별 alarms, logs 하위 컬렉션</li><li>라운지 posts, comments, reports 분리</li><li>기존 AdventureLifeAssist 컬렉션은 읽거나 삭제하지 않음</li><li>로컬 미러 저장으로 네트워크 단절 시 최근 기록 표시</li></ul></article>
+        <article class="patch-item"><strong>알려진 제약</strong><time>Web/PWA</time><ul><li>앱을 완전히 종료한 상태의 정확한 시각 알람은 서버 푸시 없이 보장되지 않음</li><li>알람 신뢰도를 높이려면 PWA로 설치하고, 세션 중 앱을 열어두며 알림 권한을 허용해야 함</li><li>공개 서비스 운영 전 Firestore 보안 규칙과 Authentication 제공자 설정이 필요</li></ul></article>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="confirm-card">
+      <h3 id="confirmTitle">확인</h3><p id="confirmMessage"></p>
+      <div class="confirm-actions"><button id="confirmCancel" class="btn">취소</button><button id="confirmOk" class="btn danger">확인</button></div>
+    </div>
+  </div>
+
+  <div id="ringOverlay" class="ring-overlay" role="alertdialog" aria-modal="true" aria-live="assertive">
+    <div class="ring-box">
+      <div class="ring-icon"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></div>
+      <div id="ringKicker" class="ring-kicker">Study alarm</div>
+      <h2 id="ringTitle">집중할 시간이에요</h2>
+      <p id="ringBody">과목과 시작 문제를 입력하고 세션을 시작하세요.</p>
+      <div id="ringActions" class="ring-actions"></div>
+    </div>
+  </div>
+
+  <div id="toastHost" class="toast-host" aria-live="polite"></div>
+  <datalist id="subjectDatalist"></datalist>
+
+  <script type="module">
+    const CONFIG = Object.freeze({
+      appName: 'FocusBell',
+      appId: 'focusbell_v1',
+      version: '1.0.0',
+      firebaseSdk: '12.16.0',
+      firebase: {
+        apiKey: 'AIzaSyB2FQGM7RGVjFQ7fxddIiAN5O7A0bF_omM',
+        authDomain: 'reader2-43b34.firebaseapp.com',
+        projectId: 'reader2-43b34',
+        storageBucket: 'reader2-43b34.firebasestorage.app',
+        appId: '1:909397198375:web:bd21eb8f3731b545af7002'
+      },
+      maxPosts: 50,
+      maxLogs: 300,
+      alarmGraceMs: 30 * 60 * 1000,
+      subjects: ['국어','수학','영어','한국사','과학','사회','경찰학','형사법','헌법','기타']
+    });
+
+    const State = {
+      firebaseReady: false,
+      firebaseError: null,
+      offlineIdentity: false,
+      user: null,
+      profile: null,
+      alarms: [],
+      logs: [],
+      posts: [],
+      activeSession: null,
+      currentView: 'home',
+      currentRing: null,
+      currentCommentsPostId: null,
+      comments: [],
+      unsubscribers: [],
+      commentsUnsub: null,
+      installPrompt: null,
+      themeMode: 'system',
+      wakeEnabled: true,
+      wakeLock: null,
+      audioCtx: null,
+      audioUnlocked: false,
+      ringInterval: null,
+      tickInterval: null,
+      alarmCheckInterval: null,
+      confirmResolver: null,
+      authMode: 'login',
+      mutedUsers: new Set(),
+      lastPostAt: 0
+    };
+
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+    const now = () => Date.now();
+    const uid = () => State.user?.uid || 'offline';
+    const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+    const pad = n => String(n).padStart(2, '0');
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const safeText = value => String(value ?? '').replace(/[<>]/g, '');
+    const escapeHTML = value => String(value ?? '').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+    const normalizeHandle = value => String(value || '').trim().toLowerCase().replace(/[^a-z0-9_.]/g, '').slice(0,20);
+    const defaultHandle = (email, userId) => `${(normalizeHandle(String(email || '').split('@')[0]) || 'focus').slice(0,11)}_${String(userId || '').slice(0,8).toLowerCase()}`.slice(0,20);
+    const initials = name => (String(name || 'F').trim().split(/\s+/).map(v => v[0]).join('').slice(0,2) || 'F').toUpperCase();
+    const dateKey = (ms = now()) => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+    const localDateTimeValue = ms => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+    const formatClock = ms => new Intl.DateTimeFormat('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(ms));
+    const formatDate = ms => new Intl.DateTimeFormat('ko-KR',{month:'short',day:'numeric',weekday:'short'}).format(new Date(ms));
+    const formatDateTime = ms => new Intl.DateTimeFormat('ko-KR',{month:'short',day:'numeric',weekday:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(ms));
+    const relativeTime = ms => {
+      const diff = now() - Number(ms || 0); if (!ms) return '방금 전';
+      const min = Math.floor(diff/60000); if (min < 1) return '방금 전'; if (min < 60) return `${min}분 전`;
+      const hr = Math.floor(min/60); if (hr < 24) return `${hr}시간 전`;
+      const day = Math.floor(hr/24); if (day < 7) return `${day}일 전`;
+      return formatDate(ms);
+    };
+    const formatDuration = sec => { const s = Math.max(0, Math.floor(Number(sec)||0)); const h = Math.floor(s/3600); const m = Math.floor((s%3600)/60); const r = s%60; return h ? `${pad(h)}:${pad(m)}:${pad(r)}` : `${pad(m)}:${pad(r)}`; };
+    const formatMinutes = sec => { const m = Math.round((Number(sec)||0)/60); return m >= 60 ? `${Math.floor(m/60)}시간 ${m%60 ? `${m%60}분` : ''}`.trim() : `${m}분`; };
+    const parseProblemRef = value => { const match=String(value||'').trim().match(/^(.*?)(\d+)$/); return match ? {prefix:match[1].replace(/\s+/g,'').toLowerCase(),number:Number(match[2])} : null; };
+    const calculateSolved = (start, end) => { const a=parseProblemRef(start), b=parseProblemRef(end); return a&&b&&a.prefix===b.prefix&&b.number>=a.number ? b.number-a.number+1 : null; };
+    const containsPrivateInfo = value => { const text=String(value||''); return /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i.test(text) || /(?:^|\D)01[016789][- .]?\d{3,4}[- .]?\d{4}(?:\D|$)/.test(text) || /(?:https?:\/\/|www\.)/i.test(text); };
+    const repeatLabel = days => {
+      if (!Array.isArray(days) || !days.length) return '한 번';
+      const sorted = [...days].sort();
+      if (sorted.join(',') === '1,2,3,4,5') return '평일';
+      if (sorted.join(',') === '0,6') return '주말';
+      return sorted.map(d => ['일','월','화','수','목','금','토'][d]).join('·');
+    };
+    const nextRepeatedAt = (timeOfDay, days, fromMs = now()) => {
+      const [h,m] = String(timeOfDay || '09:00').split(':').map(Number);
+      for (let offset=0; offset<8; offset++) {
+        const d = new Date(fromMs); d.setSeconds(0,0); d.setDate(d.getDate()+offset); d.setHours(h||0,m||0,0,0);
+        if (days.includes(d.getDay()) && d.getTime() > fromMs + 1000) return d.getTime();
+      }
+      return fromMs + 7*86400000;
+    };
+    const makeId = prefix => `${prefix}_${crypto.randomUUID ? crypto.randomUUID() : `${now()}_${Math.random().toString(36).slice(2)}`}`;
+
+    const Local = {
+      key(type, userId = uid()) { return `focusbell:${CONFIG.appId}:${userId}:${type}`; },
+      get(type, fallback = null, userId = uid()) {
+        try { const raw = localStorage.getItem(this.key(type,userId)); return raw == null ? fallback : JSON.parse(raw); } catch { return fallback; }
+      },
+      set(type, value, userId = uid()) { try { localStorage.setItem(this.key(type,userId), JSON.stringify(value)); } catch {} },
+      remove(type, userId = uid()) { try { localStorage.removeItem(this.key(type,userId)); } catch {} },
+      globalGet(type, fallback = null) { try { const raw = localStorage.getItem(`focusbell:${type}`); return raw == null ? fallback : JSON.parse(raw); } catch { return fallback; } },
+      globalSet(type, value) { try { localStorage.setItem(`focusbell:${type}`, JSON.stringify(value)); } catch {} }
+    };
+
+    const Firebase = {
+      mods: null, app: null, auth: null, db: null,
+      async init() {
+        const base = `https://www.gstatic.com/firebasejs/${CONFIG.firebaseSdk}`;
+        const [appM, authM, fsM] = await Promise.all([
+          import(`${base}/firebase-app.js`),
+          import(`${base}/firebase-auth.js`),
+          import(`${base}/firebase-firestore.js`)
+        ]);
+        this.mods = {...appM, ...authM, ...fsM};
+        this.app = appM.initializeApp(CONFIG.firebase);
+        this.auth = authM.getAuth(this.app);
+        try { await authM.setPersistence(this.auth, authM.browserLocalPersistence); } catch {}
+        try {
+          this.db = fsM.initializeFirestore(this.app, { localCache: fsM.persistentLocalCache({tabManager: fsM.persistentMultipleTabManager()}) });
+        } catch {
+          this.db = fsM.getFirestore(this.app);
+        }
+        State.firebaseReady = true;
+        return true;
+      },
+      appDoc() { return this.mods.doc(this.db,'apps',CONFIG.appId); },
+      userDoc(userId = uid()) { return this.mods.doc(this.db,'apps',CONFIG.appId,'users',userId); },
+      alarmsCol(userId = uid()) { return this.mods.collection(this.db,'apps',CONFIG.appId,'users',userId,'alarms'); },
+      alarmDoc(id,userId = uid()) { return this.mods.doc(this.db,'apps',CONFIG.appId,'users',userId,'alarms',id); },
+      logsCol(userId = uid()) { return this.mods.collection(this.db,'apps',CONFIG.appId,'users',userId,'logs'); },
+      logDoc(id,userId = uid()) { return this.mods.doc(this.db,'apps',CONFIG.appId,'users',userId,'logs',id); },
+      handlesCol() { return this.mods.collection(this.db,'apps',CONFIG.appId,'handles'); },
+      handleDoc(handle) { return this.mods.doc(this.db,'apps',CONFIG.appId,'handles',handle); },
+      postsCol() { return this.mods.collection(this.db,'apps',CONFIG.appId,'posts'); },
+      postDoc(id) { return this.mods.doc(this.db,'apps',CONFIG.appId,'posts',id); },
+      commentsCol(postId) { return this.mods.collection(this.db,'apps',CONFIG.appId,'posts',postId,'comments'); },
+      reportsCol() { return this.mods.collection(this.db,'apps',CONFIG.appId,'reports'); }
+    };
+
+    const UI = {
+      toast(message, type = '') {
+        const el = document.createElement('div'); el.className = `toast ${type}`; el.textContent = message; $('#toastHost').append(el);
+        setTimeout(() => el.remove(), 3200);
+      },
+      setBusy(button, busy, label = '처리 중…') {
+        if (!button) return; if (busy) { button.dataset.oldText = button.textContent; button.textContent = label; button.disabled = true; }
+        else { button.textContent = button.dataset.oldText || button.textContent; button.disabled = false; }
+      },
+      openModal(id) { const el = document.getElementById(id); if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; } },
+      closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('open'); if (!document.querySelector('.modal.open') && !$('#ringOverlay').classList.contains('open')) document.body.style.overflow = ''; if (id === 'commentsModal') Lounge.closeComments(); },
+      confirm(title, message, okText='확인') {
+        $('#confirmTitle').textContent = title; $('#confirmMessage').textContent = message; $('#confirmOk').textContent = okText; this.openModal('confirmModal');
+        return new Promise(resolve => State.confirmResolver = resolve);
+      },
+      showAuth() { $('#authScreen').hidden = false; $('#appShell').hidden = true; },
+      showApp() { $('#authScreen').hidden = true; $('#appShell').hidden = false; this.renderAll(); },
+      navigate(view) {
+        State.currentView = view;
+        $$('.view').forEach(v => v.classList.toggle('active', v.dataset.view === view));
+        $$('.nav-btn').forEach(v => v.classList.toggle('active', v.dataset.viewGo === view));
+        $('#topViewTitle').textContent = ({home:'FocusBell',alarms:'알람',logs:'학습 로그',lounge:'라운지',settings:'설정'})[view] || 'FocusBell';
+        window.scrollTo({top:0,behavior:'smooth'});
+        if (view === 'lounge') this.renderLounge();
+      },
+      renderAll() { this.renderHeader(); this.renderHome(); this.renderAlarms(); this.renderLogs(); this.renderLounge(); this.renderSettings(); this.renderSubjects(); },
+      renderHeader() {
+        const name = State.profile?.displayName || State.user?.displayName || '사용자';
+        $('#headerAvatar').textContent = initials(name); $('#heroAvatar').textContent = initials(name); $('#composerAvatar').textContent = initials(name); $('#settingsAvatar').textContent = initials(name); $('#profileModalAvatar').textContent = initials(name);
+        $('#onlineDot').classList.toggle('offline', !navigator.onLine || !State.firebaseReady);
+        $('#onlineDot').title = State.firebaseReady && navigator.onLine ? 'Firebase 연결됨' : '오프라인 또는 로컬 모드';
+        $('#syncLabel').textContent = State.offlineIdentity ? '로컬 기록 모드' : State.firebaseReady ? (navigator.onLine ? 'Firebase 동기화' : '오프라인 캐시') : '로컬 저장';
+      },
+      renderHome() {
+        const p = State.profile || {}; const name = p.displayName || State.user?.displayName || '사용자';
+        $('#todayLabel').textContent = new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'}).format(new Date());
+        $('#heroGreeting').textContent = `${name}님, 오늘도 시작해볼까요?`; $('#heroBio').textContent = p.bio || '오늘 한 세션이 내일의 실력이 됩니다.';
+        const stats = Stats.summary();
+        $('#heroStats').innerHTML = `<div class="stat-cell"><strong>${stats.todayMinutes}</strong><span>오늘 분</span></div><div class="stat-cell"><strong>${stats.todaySolved}</strong><span>오늘 문제</span></div><div class="stat-cell"><strong>${stats.streak}</strong><span>연속 일</span></div>`;
+        this.renderActiveSession(); this.renderUpcoming(); this.renderWeekBars();
+      },
+      renderActiveSession() {
+        const slot = $('#activeSessionSlot'); const s = State.activeSession;
+        if (!s) { slot.innerHTML = ''; return; }
+        const elapsed = Session.elapsedSec(s); const targetSec = Number(s.targetMinutes||0)*60; const progress = targetSec ? clamp(elapsed/targetSec*100,0,100) : 0;
+        slot.innerHTML = `<article class="card session-card"><div class="session-top"><div><div class="session-badge"><i class="pulse"></i>${s.pausedAtMs ? '일시정지' : '집중 중'}</div><div class="session-title">${escapeHTML(s.subject)}</div><div class="session-meta">${escapeHTML(s.startProblem)}번부터 · 목표 ${escapeHTML(s.targetMinutes)}분</div></div><div id="sessionClock" class="session-time">${formatDuration(elapsed)}</div></div><div class="progress"><i id="sessionProgress" style="width:${progress}%"></i></div><div class="session-actions"><button class="btn" data-action="toggle-pause">${s.pausedAtMs ? '다시 시작' : '일시정지'}</button><button class="btn primary" data-action="open-end">종료 기록</button></div></article>`;
+      },
+      updateSessionClock() {
+        const s = State.activeSession; if (!s) return;
+        const elapsed = Session.elapsedSec(s); const clock = $('#sessionClock'); if (clock) clock.textContent = formatDuration(elapsed);
+        const bar = $('#sessionProgress'); if (bar) bar.style.width = `${clamp(elapsed/(Number(s.targetMinutes||1)*60)*100,0,100)}%`;
+      },
+      renderUpcoming() {
+        const list = State.alarms.filter(a=>a.enabled).sort((a,b)=>a.scheduledAtMs-b.scheduledAtMs);
+        const home = $('#homeUpcoming');
+        if (!list.length) { home.innerHTML = `<div class="card empty">예약된 알람이 없습니다.<br>원하는 시각을 정해 첫 집중을 예약해 보세요.</div>`; return; }
+        home.innerHTML = this.alarmCard(list[0], true);
+      },
+      alarmCard(a, compact=false) {
+        const repeat = repeatLabel(a.repeatDays); const meta = `${formatDate(a.scheduledAtMs)} · ${repeat} · ${a.targetMinutes}분`;
+        return `<article class="card alarm-card" data-alarm-id="${escapeHTML(a.id)}"><div class="alarm-time">${formatClock(a.scheduledAtMs)}<small>${formatDate(a.scheduledAtMs)}</small></div><div class="alarm-main"><strong>${escapeHTML(a.label || '공부 시작')}</strong><span>${escapeHTML(a.defaultSubject || '과목은 시작할 때 입력')} · ${escapeHTML(meta)}</span></div><div class="alarm-actions">${compact ? `<button class="mini-btn" data-action="start-from-alarm" data-id="${escapeHTML(a.id)}" aria-label="지금 시작"><svg class="icon sm" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>` : `<button class="switch ${a.enabled?'on':''}" data-action="toggle-alarm" data-id="${escapeHTML(a.id)}" aria-label="알람 켜기/끄기"></button><button class="mini-btn" data-action="edit-alarm" data-id="${escapeHTML(a.id)}" aria-label="편집">•••</button>`}</div></article>`;
+      },
+      renderAlarms() {
+        const permission = 'Notification' in window ? Notification.permission : 'unsupported';
+        $('#notificationNotice').innerHTML = permission === 'granted' ? '알림 권한이 허용되어 있습니다. 앱이 열려 있거나 백그라운드에 살아 있을 때 시스템 알림을 표시합니다.' : `알림 권한이 ${permission === 'denied' ? '차단되어' : '아직 허용되지 않아'} 화면 내 알람만 울립니다. <button class="text-btn" data-action="request-notification">알림 허용</button>`;
+        const list = [...State.alarms].sort((a,b)=>a.scheduledAtMs-b.scheduledAtMs);
+        $('#alarmList').innerHTML = list.length ? list.map(a=>this.alarmCard(a)).join('') : `<div class="card empty">아직 알람이 없습니다.<br>오른쪽 위 + 버튼으로 추가하세요.</div>`;
+      },
+      renderWeekBars() {
+        const data = Stats.last7Days(); const max = Math.max(1,...data.map(d=>d.minutes));
+        $('#weekBars').innerHTML = data.map(d=>`<div class="bar-col"><span class="bar-min">${d.minutes}</span><div class="bar-track"><i class="bar-fill" style="height:${Math.max(4,d.minutes/max*100)}%"></i></div><span class="bar-day">${d.label}</span></div>`).join('');
+        $('#weekTotalLabel').textContent = `${data.reduce((s,d)=>s+d.minutes,0)}분`;
+      },
+      renderLogs() {
+        const subjects = [...new Set(State.logs.map(l=>l.subject).filter(Boolean))].sort();
+        const select = $('#logSubjectFilter'); const current = select.value;
+        select.innerHTML = `<option value="">전체 과목</option>${subjects.map(s=>`<option value="${escapeHTML(s)}">${escapeHTML(s)}</option>`).join('')}`; select.value = subjects.includes(current) ? current : '';
+        const q = $('#logSearch').value.trim().toLowerCase(); const subject = select.value;
+        const filtered = State.logs.filter(l => (!subject || l.subject===subject) && (!q || [l.subject,l.startProblem,l.endProblem,l.reflection,l.startNote].join(' ').toLowerCase().includes(q)));
+        const totalSec = filtered.reduce((s,l)=>s+Number(l.durationSec||0),0); const solved = filtered.reduce((s,l)=>s+Number(l.solvedCount||0),0); const scored=filtered.filter(l=>l.correctCount!==null&&l.correctCount!==undefined&&l.correctCount!==''&&Number.isFinite(Number(l.correctCount))); const accuracyBase=scored.reduce((s,l)=>s+Number(l.correctCount),0); const answerBase=scored.reduce((s,l)=>s+Number(l.solvedCount||0),0);
+        $('#logSummary').innerHTML = `<div class="summary-chip"><strong>${filtered.length}</strong><span>세션</span></div><div class="summary-chip"><strong>${Math.round(totalSec/60)}</strong><span>집중 분</span></div><div class="summary-chip"><strong>${answerBase?Math.round(accuracyBase/answerBase*100)+'%':solved}</strong><span>${answerBase?'정답률':'문제'}</span></div>`;
+        $('#logList').innerHTML = filtered.length ? filtered.map(l=>this.logCard(l)).join('') : `<div class="card empty">조건에 맞는 학습 로그가 없습니다.</div>`;
+      },
+      logCard(l) {
+        const range = `${escapeHTML(l.startProblem || '?')} → ${escapeHTML(l.endProblem || '?')}`;
+        return `<article class="card log-card"><div class="log-head"><div class="log-subject"><i class="subject-dot"></i>${escapeHTML(l.subject || '기타')}</div><div class="log-date">${formatDateTime(l.endedAtMs || l.startedAtMs)}</div></div><div class="log-range">${range}</div><div class="log-meta"><span class="pill">⏱ ${formatMinutes(l.durationSec)}</span>${Number(l.solvedCount)>=0?`<span class="pill">✓ ${Number(l.solvedCount)||0}문제</span>`:''}${l.correctCount!==null&&l.correctCount!==undefined&&l.correctCount!==''&&Number.isFinite(Number(l.correctCount))?`<span class="pill">◎ ${Number(l.correctCount)}개 정답</span>`:''}${l.targetMinutes?`<span class="pill">목표 ${escapeHTML(l.targetMinutes)}분</span>`:''}</div>${l.reflection?`<div class="log-note">${escapeHTML(l.reflection)}</div>`:''}<div style="display:flex;justify-content:flex-end;margin-top:7px"><button class="text-btn" data-action="delete-log" data-id="${escapeHTML(l.id)}" style="color:var(--danger);font-size:11px">삭제</button></div></article>`;
+      },
+      renderLounge() {
+        const ready = State.firebaseReady && !State.offlineIdentity;
+        $('#postForm').querySelectorAll('textarea,select,button').forEach(el=>el.disabled=!ready);
+        $('#loungeStatus').hidden = ready;
+        if (!ready) { $('#loungeStatus').textContent = '라운지는 Firebase 온라인 로그인 상태에서만 사용할 수 있습니다. 학습 알람과 로컬 로그는 계속 사용할 수 있습니다.'; }
+        const posts = State.posts.filter(p=>!State.mutedUsers.has(p.authorId));
+        $('#postFeed').innerHTML = ready ? (posts.length ? posts.map(p=>this.postCard(p)).join('') : `<div class="card empty">첫 공부 기록을 남겨보세요.</div>`) : `<div class="card empty">온라인 연결 후 공개 피드가 표시됩니다.</div>`;
+      },
+      postCard(p) {
+        const liked = Array.isArray(p.likedBy) && p.likedBy.includes(uid()); const mine = p.authorId===uid();
+        return `<article class="card post-card"><div class="post-head"><div class="avatar">${escapeHTML(initials(p.authorName))}</div><div class="post-author"><strong>${escapeHTML(p.authorName || '사용자')} <span style="font-weight:500;color:var(--muted)">@${escapeHTML(p.authorHandle || 'focus')}</span></strong><span>${relativeTime(p.createdAtMs)}</span></div><button class="post-menu" data-action="post-menu" data-id="${escapeHTML(p.id)}" aria-label="게시물 메뉴">•••</button></div>${p.subject?`<span class="post-tag">#${escapeHTML(p.subject)}</span>`:''}<div class="post-content">${escapeHTML(p.content)}</div><div class="post-actions"><button class="post-action ${liked?'liked':''}" data-action="toggle-like" data-id="${escapeHTML(p.id)}"><svg class="icon sm" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>${Number(p.likeCount||0)}</button><button class="post-action" data-action="open-comments" data-id="${escapeHTML(p.id)}"><svg class="icon sm" viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"/></svg>댓글</button>${mine?`<button class="post-action" data-action="delete-post" data-id="${escapeHTML(p.id)}" style="margin-left:auto;color:var(--danger)">삭제</button>`:''}</div></article>`;
+      },
+      renderSettings() {
+        const p = State.profile || {}; const name = p.displayName || State.user?.displayName || '사용자';
+        $('#settingsName').textContent = name; $('#settingsHandle').textContent = `@${p.handle || 'focus'}`; $('#settingsBio').textContent = p.bio || '소개를 입력해 보세요.';
+        const perm = 'Notification' in window ? Notification.permission : '지원 안 됨'; $('#settingNotifState').textContent = ({granted:'허용됨',denied:'차단됨',default:'아직 요청하지 않음'})[perm] || perm;
+        $('#installState').textContent = State.installPrompt ? '설치 가능' : (matchMedia('(display-mode: standalone)').matches ? '설치됨' : '브라우저 메뉴에서도 설치 가능');
+        $('#themeState').textContent = ({system:'시스템 설정',light:'라이트',dark:'다크'})[State.themeMode]; $('#wakeState').textContent = State.wakeEnabled ? '켜짐' : '꺼짐';
+        $('#runtimeState').textContent = `${State.firebaseReady?'Firebase 연결':'로컬 모드'} · ${navigator.onLine?'온라인':'오프라인'}`;
+      },
+      renderSubjects() {
+        const subjects = [...new Set([...CONFIG.subjects,...State.logs.map(l=>l.subject),...State.alarms.map(a=>a.defaultSubject)].filter(Boolean))];
+        $('#subjectDatalist').innerHTML = subjects.map(s=>`<option value="${escapeHTML(s)}"></option>`).join('');
+        const postSelect = $('#postSubject'); const current = postSelect.value;
+        postSelect.innerHTML = `<option value="">태그 없음</option>${subjects.map(s=>`<option value="${escapeHTML(s)}">#${escapeHTML(s)}</option>`).join('')}`; postSelect.value = subjects.includes(current)?current:'';
+      },
+      renderComments() {
+        $('#commentsList').innerHTML = State.comments.length ? State.comments.map(c=>`<div class="comment"><div class="avatar">${escapeHTML(initials(c.authorName))}</div><div class="comment-body"><strong>${escapeHTML(c.authorName)} <span style="color:var(--muted);font-weight:500">@${escapeHTML(c.authorHandle||'focus')}</span></strong><p>${escapeHTML(c.content)}</p><div class="comment-meta">${relativeTime(c.createdAtMs)}${c.authorId===uid()?` · <button class="text-btn" data-action="delete-comment" data-id="${escapeHTML(c.id)}" style="font-size:9px;padding:0;color:var(--danger)">삭제</button>`:''}</div></div></div>`).join('') : `<div class="empty">첫 댓글을 남겨보세요.</div>`;
+      }
+    };
+
+    const Stats = {
+      summary() {
+        const today = dateKey(); const todayLogs = State.logs.filter(l=>dateKey(l.endedAtMs||l.startedAtMs)===today);
+        return { todayMinutes: Math.round(todayLogs.reduce((s,l)=>s+Number(l.durationSec||0),0)/60), todaySolved: todayLogs.reduce((s,l)=>s+Number(l.solvedCount||0),0), streak: this.streak() };
+      },
+      streak() {
+        const days = new Set(State.logs.map(l=>dateKey(l.endedAtMs||l.startedAtMs))); let count=0; const d=new Date();
+        if (!days.has(dateKey(d.getTime()))) d.setDate(d.getDate()-1);
+        while (days.has(dateKey(d.getTime()))) { count++; d.setDate(d.getDate()-1); }
+        return count;
+      },
+      last7Days() {
+        const labels=['일','월','화','수','목','금','토']; const out=[];
+        for (let i=6;i>=0;i--) { const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()-i); const key=dateKey(d.getTime()); const sec=State.logs.filter(l=>dateKey(l.endedAtMs||l.startedAtMs)===key).reduce((s,l)=>s+Number(l.durationSec||0),0); out.push({key,label:labels[d.getDay()],minutes:Math.round(sec/60)}); }
+        return out;
+      }
+    };
+
+    const AudioAlarm = {
+      async unlock() {
+        try { if (!State.audioCtx) State.audioCtx = new (window.AudioContext||window.webkitAudioContext)(); if (State.audioCtx.state==='suspended') await State.audioCtx.resume(); State.audioUnlocked = true; } catch {}
+      },
+      beep(freq=880, start=0, duration=.16, volume=.16) {
+        const ctx=State.audioCtx; if(!ctx||ctx.state!=='running') return; const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=freq; g.gain.setValueAtTime(.001,ctx.currentTime+start); g.gain.exponentialRampToValueAtTime(volume,ctx.currentTime+start+.015); g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+start+duration); o.connect(g).connect(ctx.destination); o.start(ctx.currentTime+start); o.stop(ctx.currentTime+start+duration+.03);
+      },
+      async ring() { await this.unlock(); this.stop(); const pattern=()=>{ this.beep(880,0,.15,.2); this.beep(1175,.22,.15,.18); this.beep(880,.44,.22,.2); }; pattern(); State.ringInterval=setInterval(pattern,1200); },
+      stop() { if(State.ringInterval) clearInterval(State.ringInterval); State.ringInterval=null; }
+    };
+
+    const Notify = {
+      async request() {
+        if (!('Notification' in window)) { UI.toast('이 브라우저는 알림을 지원하지 않습니다.','error'); return false; }
+        const result = await Notification.requestPermission(); UI.renderAlarms(); UI.renderSettings(); UI.toast(result==='granted'?'알림이 허용되었습니다.':'알림 권한이 허용되지 않았습니다.',result==='granted'?'success':'error'); return result==='granted';
+      },
+      async show(title, body) {
+        if (!('Notification' in window) || Notification.permission!=='granted') return;
+        const options={body,icon:'./icon-192.png',badge:'./icon-192.png',tag:`focusbell-${now()}`,renotify:true,requireInteraction:true,timestamp:now(),data:{url:location.href},navigate:location.href};
+        try { const reg=await navigator.serviceWorker.ready; await reg.showNotification(title,options); }
+        catch { try { new Notification(title,options); } catch {} }
+      }
+    };
+
+    const Wake = {
+      async acquire() { if(!State.wakeEnabled||!State.activeSession||State.activeSession.pausedAtMs||document.visibilityState!=='visible'||!('wakeLock' in navigator)) return; try { if(State.wakeLock&&!State.wakeLock.released) return; State.wakeLock=await navigator.wakeLock.request('screen'); State.wakeLock.addEventListener('release',()=>State.wakeLock=null); } catch {} },
+      async release() { try { if(State.wakeLock&&!State.wakeLock.released) await State.wakeLock.release(); } catch {} State.wakeLock=null; }
+    };
+
+    const Repo = {
+      mirror() { Local.set('alarms',State.alarms); Local.set('logs',State.logs); Local.set('profile',State.profile); Local.set('activeSession',State.activeSession); },
+      loadMirror(userId=uid()) {
+        State.alarms=Local.get('alarms',[],userId)||[]; State.logs=Local.get('logs',[],userId)||[]; State.profile=Local.get('profile',null,userId); State.activeSession=Local.get('activeSession',null,userId); State.mutedUsers=new Set(Local.get('mutedUsers',[],userId)||[]);
+      },
+      upsert(listName,item) { const arr=State[listName]; const idx=arr.findIndex(x=>x.id===item.id); if(idx>=0) arr[idx]={...arr[idx],...item}; else arr.unshift(item); this.mirror(); UI.renderAll(); },
+      async saveProfile(patch) {
+        State.profile={...(State.profile||{}),...patch,uid:uid(),updatedAtMs:now()}; Local.set('profile',State.profile); UI.renderAll();
+        if(State.firebaseReady&&!State.offlineIdentity) await Firebase.mods.setDoc(Firebase.userDoc(),State.profile,{merge:true});
+      },
+      async saveAlarm(alarm) {
+        this.upsert('alarms',alarm); if(State.firebaseReady&&!State.offlineIdentity) await Firebase.mods.setDoc(Firebase.alarmDoc(alarm.id),alarm,{merge:true});
+      },
+      async deleteAlarm(id) {
+        State.alarms=State.alarms.filter(a=>a.id!==id); this.mirror(); UI.renderAll(); if(State.firebaseReady&&!State.offlineIdentity) await Firebase.mods.deleteDoc(Firebase.alarmDoc(id));
+      },
+      async saveActive(session) {
+        State.activeSession=session; Local.set('activeSession',session); UI.renderHome();
+        if(State.firebaseReady&&!State.offlineIdentity) await Firebase.mods.setDoc(Firebase.userDoc(),{activeSession:session,updatedAtMs:now()},{merge:true});
+      },
+      async clearActive() {
+        State.activeSession=null; Local.remove('activeSession'); UI.renderHome();
+        if(State.firebaseReady&&!State.offlineIdentity) await Firebase.mods.setDoc(Firebase.userDoc(),{activeSession:null,updatedAtMs:now()},{merge:true});
+      },
+      async addLog(log) { this.upsert('logs',log); if(State.firebaseReady&&!State.offlineIdentity) await Firebase.mods.setDoc(Firebase.logDoc(log.id),log); },
+      async deleteLog(id) { State.logs=State.logs.filter(l=>l.id!==id); this.mirror(); UI.renderAll(); if(State.firebaseReady&&!State.offlineIdentity) await Firebase.mods.deleteDoc(Firebase.logDoc(id)); },
+      async createPost(post) {
+        if(!State.firebaseReady||State.offlineIdentity) throw new Error('라운지는 온라인 로그인 상태에서만 사용할 수 있습니다.');
+        await Firebase.mods.setDoc(Firebase.postDoc(post.id),post);
+      },
+      async deletePost(id) {
+        if(!State.firebaseReady||State.offlineIdentity) return;
+        const M=Firebase.mods, comments=await M.getDocs(M.query(Firebase.commentsCol(id),M.limit(450))), batch=M.writeBatch(Firebase.db);
+        comments.docs.forEach(d=>batch.delete(d.ref)); batch.delete(Firebase.postDoc(id)); await batch.commit();
+      },
+      async toggleLike(post) {
+        if(!State.firebaseReady||State.offlineIdentity) throw new Error('온라인 연결이 필요합니다.');
+        const liked=Array.isArray(post.likedBy)&&post.likedBy.includes(uid());
+        await Firebase.mods.updateDoc(Firebase.postDoc(post.id),{likedBy:liked?Firebase.mods.arrayRemove(uid()):Firebase.mods.arrayUnion(uid()),likeCount:Firebase.mods.increment(liked?-1:1),updatedAtMs:now()});
+      },
+      async addComment(postId,comment) { if(!State.firebaseReady||State.offlineIdentity) throw new Error('온라인 연결이 필요합니다.'); await Firebase.mods.setDoc(Firebase.mods.doc(Firebase.commentsCol(postId),comment.id),comment); },
+      async deleteComment(postId,id) { if(State.firebaseReady&&!State.offlineIdentity) await Firebase.mods.deleteDoc(Firebase.mods.doc(Firebase.commentsCol(postId),id)); },
+      async reportPost(post,reason='부적절한 콘텐츠') {
+        if(!State.firebaseReady||State.offlineIdentity) throw new Error('온라인 연결이 필요합니다.');
+        const id=makeId('report'); await Firebase.mods.setDoc(Firebase.mods.doc(Firebase.reportsCol(),id),{id,postId:post.id,postAuthorId:post.authorId,reporterId:uid(),reason,createdAtMs:now(),status:'open'});
+      }
+    };
+
+    const Session = {
+      elapsedSec(s=State.activeSession) {
+        if(!s) return 0; const end=s.pausedAtMs||now(); return Math.max(0,Math.floor((end-s.startedAtMs-Number(s.pausedTotalMs||0))/1000));
+      },
+      async start(data) {
+        if(State.activeSession) throw new Error('이미 진행 중인 세션이 있습니다.');
+        const subject=safeText(data.subject).trim(), startProblem=safeText(data.startProblem).trim(), targetMinutes=Number(data.targetMinutes)||60, goalCount=data.goalCount?Number(data.goalCount):null;
+        if(!subject) throw new Error('과목을 입력해 주세요.'); if(!startProblem) throw new Error('시작 문제번호를 입력해 주세요.');
+        if(!Number.isInteger(targetMinutes)||targetMinutes<1||targetMinutes>240) throw new Error('목표 시간을 확인해 주세요.');
+        if(goalCount!==null&&(!Number.isInteger(goalCount)||goalCount<1||goalCount>9999)) throw new Error('목표 문제 수를 확인해 주세요.');
+        const session={id:makeId('session'),subject,startProblem,targetMinutes,goalCount,startNote:safeText(data.startNote).trim(),alarmId:data.alarmId||null,startedAtMs:now(),pausedAtMs:null,pausedTotalMs:0,targetNotified:false,createdAtMs:now()};
+        await Repo.saveActive(session); await Wake.acquire(); UI.toast('집중 세션을 시작했습니다.','success');
+      },
+      async togglePause() {
+        const s=State.activeSession; if(!s) return;
+        if(s.pausedAtMs) { s.pausedTotalMs=Number(s.pausedTotalMs||0)+(now()-s.pausedAtMs); s.pausedAtMs=null; await Repo.saveActive({...s}); await Wake.acquire(); UI.toast('세션을 다시 시작했습니다.'); }
+        else { s.pausedAtMs=now(); await Repo.saveActive({...s}); await Wake.release(); UI.toast('세션을 일시정지했습니다.'); }
+      },
+      async finish(data) {
+        const s=State.activeSession; if(!s) throw new Error('진행 중인 세션이 없습니다.');
+        const endProblem=safeText(data.endProblem).trim(); if(!endProblem) throw new Error('마지막 문제번호를 입력해 주세요.');
+        const durationSec=this.elapsedSec(s), autoSolved=calculateSolved(s.startProblem,endProblem);
+        const solved=data.solvedCount!==''&&data.solvedCount!=null?Number(data.solvedCount):autoSolved;
+        if(solved===null) throw new Error('문제번호 형식으로 자동 계산할 수 없습니다. 푼 문제 수를 입력해 주세요.');
+        if(!Number.isInteger(solved)||solved<0||solved>99999) throw new Error('푼 문제 수를 확인해 주세요.');
+        const correct=data.correctCount===''||data.correctCount==null?null:Number(data.correctCount);
+        if(correct!==null&&(!Number.isInteger(correct)||correct<0||correct>solved)) throw new Error('맞힌 문제 수는 푼 문제 수 이하로 입력해 주세요.');
+        const log={id:makeId('log'),subject:s.subject,startProblem:s.startProblem,endProblem,durationSec,targetMinutes:s.targetMinutes,goalCount:s.goalCount,solvedCount:solved,correctCount:correct,startNote:s.startNote,reflection:safeText(data.reflection).trim(),startedAtMs:s.startedAtMs,endedAtMs:now(),status:'completed',createdAtMs:now()};
+        await Repo.addLog(log); await Repo.clearActive(); await Wake.release(); AlarmEngine.stopRing(); UI.toast('학습 로그를 저장했습니다.','success');
+      },
+      async discard() { await Repo.clearActive(); await Wake.release(); AlarmEngine.stopRing(); UI.toast('세션을 취소했습니다.'); }
+    };
+
+    const AlarmEngine = {
+      triggerKeys: new Set(Local.globalGet('triggerKeys',[])||[]),
+      persistKeys() { const arr=[...this.triggerKeys].slice(-100); Local.globalSet('triggerKeys',arr); },
+      async check() {
+        const t=now();
+        for(const alarm of State.alarms.filter(a=>a.enabled)) {
+          if(alarm.scheduledAtMs<=t) {
+            const key=`${alarm.id}:${alarm.scheduledAtMs}`;
+            if(t-alarm.scheduledAtMs<=CONFIG.alarmGraceMs&&!this.triggerKeys.has(key)) { this.triggerKeys.add(key); this.persistKeys(); await this.triggerAlarm({...alarm}); break; }
+            if(t-alarm.scheduledAtMs>CONFIG.alarmGraceMs) await this.advanceMissed(alarm);
+          }
+        }
+        const s=State.activeSession;
+        if(s&&!s.pausedAtMs&&!s.targetNotified&&this.elapsedSecSafe(s)>=Number(s.targetMinutes||0)*60) {
+          s.targetNotified=true; await Repo.saveActive({...s}); this.showRing({type:'sessionTarget',session:{...s}}); await Notify.show('목표 집중 시간 완료',`${s.subject} 세션의 ${s.targetMinutes}분 목표가 끝났어요.`);
+        }
+      },
+      elapsedSecSafe(s) { return Session.elapsedSec(s); },
+      async advanceMissed(alarm) {
+        if(alarm.repeatDays?.length) { alarm.scheduledAtMs=nextRepeatedAt(alarm.timeOfDay,alarm.repeatDays,now()); alarm.updatedAtMs=now(); await Repo.saveAlarm({...alarm}); }
+        else { alarm.enabled=false; alarm.missedAtMs=now(); alarm.updatedAtMs=now(); await Repo.saveAlarm({...alarm}); }
+      },
+      async triggerAlarm(alarm) {
+        if(alarm.repeatDays?.length) alarm.scheduledAtMs=nextRepeatedAt(alarm.timeOfDay,alarm.repeatDays,now()); else alarm.enabled=false;
+        alarm.lastTriggeredAtMs=now(); alarm.updatedAtMs=now(); await Repo.saveAlarm({...alarm});
+        this.showRing({type:'alarm',alarm}); await Notify.show(alarm.label||'집중할 시간이에요',`${alarm.defaultSubject||'과목을 정하고'} 시작 문제를 입력해 보세요.`);
+      },
+      async showRing(payload) {
+        State.currentRing=payload; $('#ringOverlay').classList.add('open'); document.body.style.overflow='hidden';
+        if(navigator.vibrate) navigator.vibrate([300,150,300,150,500]); await AudioAlarm.ring();
+        if(payload.type==='alarm') {
+          const a=payload.alarm; $('#ringKicker').textContent='Study alarm'; $('#ringTitle').textContent=a.label||'집중할 시간이에요'; $('#ringBody').textContent=`${a.defaultSubject||'과목 미정'} · 목표 ${a.targetMinutes||60}분${a.defaultStartProblem?` · ${a.defaultStartProblem}번부터`:''}`;
+          $('#ringActions').innerHTML=`<button class="btn" data-action="ring-start">과목·문제 확인 후 시작</button><button class="btn secondary" data-action="ring-snooze">10분 미루기</button><button class="btn secondary" data-action="ring-dismiss">이번 알람 닫기</button>`;
+        } else {
+          const s=payload.session; $('#ringKicker').textContent='Target complete'; $('#ringTitle').textContent='목표 시간을 채웠어요'; $('#ringBody').textContent=`${s.subject} · ${s.targetMinutes}분 완료. 마지막 문제를 기록할까요?`;
+          $('#ringActions').innerHTML=`<button class="btn" data-action="ring-end-session">종료 문제 입력</button><button class="btn secondary" data-action="ring-continue">계속 집중하기</button>`;
+        }
+      },
+      stopRing() { AudioAlarm.stop(); if(navigator.vibrate) navigator.vibrate(0); $('#ringOverlay').classList.remove('open'); State.currentRing=null; if(!document.querySelector('.modal.open')) document.body.style.overflow=''; },
+      async snooze() {
+        const a=State.currentRing?.alarm; if(!a) return; const current=State.alarms.find(x=>x.id===a.id)||a; current.scheduledAtMs=now()+10*60000; current.enabled=true; current.updatedAtMs=now(); await Repo.saveAlarm({...current}); this.stopRing(); UI.toast('10분 뒤 다시 알려드릴게요.');
+      }
+    };
+
+    const Lounge = {
+      async openComments(postId) {
+        State.currentCommentsPostId=postId; State.comments=[]; UI.renderComments(); UI.openModal('commentsModal');
+        if(!State.firebaseReady||State.offlineIdentity) return;
+        if(State.commentsUnsub) State.commentsUnsub();
+        const q=Firebase.mods.query(Firebase.commentsCol(postId),Firebase.mods.orderBy('createdAtMs','asc'),Firebase.mods.limit(100));
+        State.commentsUnsub=Firebase.mods.onSnapshot(q,snap=>{ State.comments=snap.docs.map(d=>({id:d.id,...d.data()})); UI.renderComments(); },()=>{ UI.toast('댓글을 불러오지 못했습니다.','error'); });
+      },
+      closeComments() { if(State.commentsUnsub){State.commentsUnsub();State.commentsUnsub=null;} State.currentCommentsPostId=null; State.comments=[]; },
+      mute(authorId) { State.mutedUsers.add(authorId); Local.set('mutedUsers',[...State.mutedUsers]); UI.renderLounge(); UI.toast('이 기기에서 작성자를 숨겼습니다.'); }
+    };
+
+    const DataSync = {
+      clearSubs() { State.unsubscribers.forEach(fn=>{try{fn();}catch{}}); State.unsubscribers=[]; },
+      async enterUser(user,{offline=false}={}) {
+        this.clearSubs(); State.user={uid:user.uid,email:user.email||'',displayName:user.displayName||''}; State.offlineIdentity=offline; Local.globalSet('cachedUser',State.user); Repo.loadMirror(user.uid);
+        if(State.firebaseReady&&!offline) {
+          let remote={};
+          try { const snap=await Firebase.mods.getDoc(Firebase.userDoc(user.uid)); if(snap.exists()) remote=snap.data(); } catch {}
+          const createdAtMs=remote.createdAtMs||State.profile?.createdAtMs||now();
+          const base={uid:user.uid,email:user.email||remote.email||'',displayName:remote.displayName||user.displayName||user.email?.split('@')[0]||'사용자',handle:remote.handle||State.profile?.handle||defaultHandle(user.email,user.uid),bio:remote.bio??State.profile?.bio??'',createdAtMs,updatedAtMs:now(),activeSession:remote.activeSession??State.activeSession??null};
+          State.profile={...base}; State.activeSession=base.activeSession; Repo.mirror();
+          const batch=Firebase.mods.writeBatch(Firebase.db);
+          batch.set(Firebase.userDoc(user.uid),base,{merge:true});
+          batch.set(Firebase.handleDoc(base.handle),{handle:base.handle,uid:user.uid,createdAtMs,updatedAtMs:now()},{merge:true});
+          await batch.commit(); this.subscribe(user.uid);
+        }
+        UI.showApp(); Wake.acquire();
+        const route = location.hash;
+        if (route === '#alarms') UI.navigate('alarms');
+        if (route === '#quick-start') { UI.navigate('home'); setTimeout(() => openStartModal(), 180); }
+        if (route === '#alarms' || route === '#quick-start') history.replaceState(null, '', location.pathname + location.search);
+      },
+      subscribe(userId) {
+        const M=Firebase.mods;
+        State.unsubscribers.push(M.onSnapshot(Firebase.userDoc(userId),snap=>{ if(!snap.exists()) return; const data=snap.data(); State.profile={...data}; if(data.activeSession!==undefined&&JSON.stringify(data.activeSession)!==JSON.stringify(State.activeSession)) State.activeSession=data.activeSession; Repo.mirror(); UI.renderAll(); },err=>this.onError(err)));
+        const aq=M.query(Firebase.alarmsCol(userId),M.orderBy('scheduledAtMs','asc'),M.limit(100));
+        State.unsubscribers.push(M.onSnapshot(aq,snap=>{ State.alarms=snap.docs.map(d=>({id:d.id,...d.data()})); Repo.mirror(); UI.renderAll(); },err=>this.onError(err)));
+        const lq=M.query(Firebase.logsCol(userId),M.orderBy('endedAtMs','desc'),M.limit(CONFIG.maxLogs));
+        State.unsubscribers.push(M.onSnapshot(lq,snap=>{ State.logs=snap.docs.map(d=>({id:d.id,...d.data()})); Repo.mirror(); UI.renderAll(); },err=>this.onError(err)));
+        const pq=M.query(Firebase.postsCol(),M.orderBy('createdAtMs','desc'),M.limit(CONFIG.maxPosts));
+        State.unsubscribers.push(M.onSnapshot(pq,snap=>{ State.posts=snap.docs.map(d=>({id:d.id,...d.data()})); UI.renderLounge(); },err=>{ $('#loungeStatus').hidden=false; $('#loungeStatus').textContent='라운지 권한 또는 보안 규칙을 확인해 주세요.'; this.onError(err,false); }));
+      },
+      onError(err,toast=true) { console.error(err); if(toast) UI.toast(firebaseErrorMessage(err),'error'); }
+    };
+
+    function firebaseErrorMessage(error) {
+      const code=error?.code||'';
+      const map={'auth/invalid-credential':'이메일 또는 비밀번호를 확인해 주세요.','auth/email-already-in-use':'이미 가입된 이메일입니다.','auth/weak-password':'비밀번호를 더 길고 안전하게 설정해 주세요.','auth/invalid-email':'올바른 이메일 형식이 아닙니다.','auth/too-many-requests':'요청이 많습니다. 잠시 뒤 다시 시도해 주세요.','auth/network-request-failed':'네트워크 연결을 확인해 주세요.','permission-denied':'Firestore 보안 규칙에서 요청이 거부되었습니다.','failed-precondition':'Firebase 설정 또는 인덱스를 확인해 주세요.'};
+      return map[code]||error?.message||'요청을 처리하지 못했습니다.';
+    }
+
+    const Auth = {
+      async start() {
+        try {
+          await Promise.race([Firebase.init(), new Promise((_,reject)=>setTimeout(()=>reject(new Error('Firebase 연결 시간 초과')),8000))]);
+          await new Promise(resolve=>{ let first=true; Firebase.mods.onAuthStateChanged(Firebase.auth,async user=>{ try{if(user)await DataSync.enterUser(user);else{State.user=null;UI.showAuth();}}catch(err){console.error(err);State.firebaseError=err;if(user){await DataSync.enterUser(user,{offline:true});UI.toast('Firestore 규칙 또는 연결 문제로 로컬 기록 모드로 열었습니다.','error');}else UI.showAuth();}finally{if(first){first=false;resolve();}} },err=>{State.firebaseError=err;UI.showAuth();if(first){first=false;resolve();}}); });
+        } catch(err) {
+          console.error(err); State.firebaseError=err; State.firebaseReady=false; const cached=Local.globalGet('cachedUser'); $('#offlineAuthBox').hidden=!cached; UI.showAuth();
+        }
+      },
+      async submit() {
+        if(!State.firebaseReady) throw new Error('Firebase 연결이 필요합니다.');
+        const email=$('#authEmail').value.trim(), password=$('#authPassword').value, name=$('#authName').value.trim();
+        if(State.authMode==='signup') {
+          if(name.length<2) throw new Error('표시 이름을 2자 이상 입력해 주세요.');
+          const cred=await Firebase.mods.createUserWithEmailAndPassword(Firebase.auth,email,password); await Firebase.mods.updateProfile(cred.user,{displayName:name});
+          const handle=defaultHandle(email,cred.user.uid), createdAtMs=now(), batch=Firebase.mods.writeBatch(Firebase.db);
+          batch.set(Firebase.userDoc(cred.user.uid),{uid:cred.user.uid,email,displayName:name,handle,bio:'',createdAtMs,updatedAtMs:createdAtMs,activeSession:null});
+          batch.set(Firebase.handleDoc(handle),{handle,uid:cred.user.uid,createdAtMs,updatedAtMs:createdAtMs});
+          await batch.commit();
+        } else await Firebase.mods.signInWithEmailAndPassword(Firebase.auth,email,password);
+      },
+      async resetPassword() { if(!State.firebaseReady) throw new Error('Firebase 연결이 필요합니다.'); const email=$('#authEmail').value.trim(); if(!email) throw new Error('이메일을 먼저 입력해 주세요.'); await Firebase.mods.sendPasswordResetEmail(Firebase.auth,email); UI.toast('비밀번호 재설정 메일을 보냈습니다.','success'); },
+      async signOut() { DataSync.clearSubs(); if(State.firebaseReady&&Firebase.auth?.currentUser) await Firebase.mods.signOut(Firebase.auth); State.user=null;State.profile=null;State.alarms=[];State.logs=[];State.posts=[];State.activeSession=null;State.offlineIdentity=false;Local.globalSet('cachedUser',null);await Wake.release();UI.showAuth(); }
+    };
+
+    const PWA = {
+      async init() {
+        window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();State.installPrompt=e;UI.renderSettings();});
+        window.addEventListener('appinstalled',()=>{State.installPrompt=null;UI.toast('FocusBell을 홈 화면에 설치했습니다.','success');UI.renderSettings();});
+        if('serviceWorker' in navigator) {
+          try {
+            if(!Local.globalGet('pwaMigratedV1',false)&&'caches' in window) { const keys=await caches.keys(); await Promise.all(keys.filter(k=>k.startsWith('adv-life-assist')).map(k=>caches.delete(k))); Local.globalSet('pwaMigratedV1',true); }
+            const reg=await navigator.serviceWorker.register(`./sw.js?focusbell=${CONFIG.version}`,{scope:'./',updateViaCache:'none'}); reg.update().catch(()=>{});
+          } catch(err) { console.warn('Service worker registration failed',err); }
+        }
+      },
+      async install() {
+        if(State.installPrompt) { await State.installPrompt.prompt(); await State.installPrompt.userChoice.catch(()=>{}); State.installPrompt=null; UI.renderSettings(); return; }
+        if(/iphone|ipad|ipod/i.test(navigator.userAgent)) UI.toast('Safari 공유 버튼 → 홈 화면에 추가를 선택하세요.');
+        else UI.toast('브라우저 메뉴에서 “앱 설치” 또는 “홈 화면에 추가”를 선택하세요.');
+      },
+      async repair() {
+        if('caches' in window) { const keys=await caches.keys(); await Promise.all(keys.filter(k=>k.startsWith('focusbell-')||k.startsWith('adv-life-assist')).map(k=>caches.delete(k))); }
+        if('serviceWorker' in navigator) { const regs=await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r=>r.unregister().catch(()=>false))); }
+        UI.toast('캐시를 정리했습니다. 최신 화면을 다시 불러옵니다.','success'); setTimeout(()=>location.reload(),700);
+      }
+    };
+
+    const Theme = {
+      init() { State.themeMode=Local.globalGet('theme','system')||'system'; State.wakeEnabled=Local.globalGet('wakeEnabled',true)!==false; this.apply(); matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{if(State.themeMode==='system')this.apply();}); },
+      apply() { const dark=State.themeMode==='dark'||(State.themeMode==='system'&&matchMedia('(prefers-color-scheme: dark)').matches); document.documentElement.dataset.theme=dark?'dark':'light'; $('#themeColorMeta').content=dark?'#000000':'#ffffff'; UI.renderSettings(); },
+      cycle() { const order=['system','light','dark']; State.themeMode=order[(order.indexOf(State.themeMode)+1)%order.length]; Local.globalSet('theme',State.themeMode); this.apply(); UI.toast(`테마: ${{system:'시스템',light:'라이트',dark:'다크'}[State.themeMode]}`); }
+    };
+
+    const Exporter = {
+      csv() {
+        const rows=[['과목','시작 문제','종료 문제','집중 초','집중 분','푼 문제','맞힌 문제','시작 시각','종료 시각','메모'],...State.logs.map(l=>[l.subject,l.startProblem,l.endProblem,l.durationSec,Math.round(Number(l.durationSec||0)/60),l.solvedCount,l.correctCount??'',new Date(l.startedAtMs).toISOString(),new Date(l.endedAtMs).toISOString(),l.reflection||''])];
+        return rows.map(r=>r.map(v=>{const raw=String(v??''),safe=/^[=+\-@]/.test(raw)?`'${raw}`:raw;return `"${safe.replace(/"/g,'""')}"`;}).join(',')).join('\n');
+      },
+      download(name,content,type) { const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000); },
+      run() { const stamp=dateKey().replaceAll('-',''); this.download(`focusbell-logs-${stamp}.csv`,`\ufeff${this.csv()}`,'text/csv;charset=utf-8'); this.download(`focusbell-backup-${stamp}.json`,JSON.stringify({version:CONFIG.version,exportedAt:new Date().toISOString(),profile:State.profile,alarms:State.alarms,logs:State.logs},null,2),'application/json'); UI.toast('CSV와 JSON 내보내기를 시작했습니다.','success'); }
+    };
+
+    function openAlarmModal(id=null) {
+      const a=id?State.alarms.find(x=>x.id===id):null; $('#alarmModalTitle').textContent=a?'알람 편집':'새 알람'; $('#alarmId').value=a?.id||''; $('#alarmDateTime').value=localDateTimeValue(a?.scheduledAtMs||now()+30*60000); $('#alarmLabel').value=a?.label||'공부 시작'; $('#alarmSubject').value=a?.defaultSubject||''; $('#alarmStartProblem').value=a?.defaultStartProblem||''; $('#alarmTargetMinutes').value=String(a?.targetMinutes||60); $('#alarmNote').value=a?.note||''; $('#deleteAlarmBtn').hidden=!a; $$('input[name="repeatDay"]').forEach(el=>el.checked=(a?.repeatDays||[]).includes(Number(el.value))); UI.openModal('alarmModal');
+    }
+    function openStartModal(alarm=null) {
+      if(State.activeSession){UI.toast('이미 진행 중인 세션이 있습니다.','error');return;} $('#startAlarmId').value=alarm?.id||''; $('#startSubject').value=alarm?.defaultSubject||''; $('#startProblem').value=alarm?.defaultStartProblem||''; $('#startTargetMinutes').value=String(alarm?.targetMinutes||60); $('#startGoal').value=''; $('#startNote').value=alarm?.note||''; UI.openModal('startModal'); setTimeout(()=>$('#startSubject').focus(),100);
+    }
+    function openEndModal() {
+      const s=State.activeSession;if(!s)return;$('#endProblem').value='';$('#endSolved').value='';$('#endCorrect').value='';$('#endReflection').value='';$('#endSessionSummary').textContent=`${s.subject} · ${s.startProblem}번부터 · 현재 ${formatMinutes(Session.elapsedSec(s))}`;UI.openModal('endModal');setTimeout(()=>$('#endProblem').focus(),100);
+    }
+    function openProfileModal() { const p=State.profile||{};$('#profileName').value=p.displayName||State.user?.displayName||'';$('#profileHandle').value=p.handle||'';$('#profileBio').value=p.bio||'';UI.openModal('profileModal'); }
+
+    async function clearStudyData() {
+      const ok=await UI.confirm('학습 데이터 초기화','FocusBell 새 앱 영역의 내 알람과 학습 로그를 모두 삭제합니다. 라운지 게시물과 계정은 유지됩니다.','모두 삭제'); if(!ok)return;
+      if(State.firebaseReady&&!State.offlineIdentity) {
+        const M=Firebase.mods;
+        for(const col of [Firebase.alarmsCol(),Firebase.logsCol()]) { const snap=await M.getDocs(M.query(col,M.limit(450))); if(!snap.empty){const batch=M.writeBatch(Firebase.db);snap.docs.forEach(d=>batch.delete(d.ref));await batch.commit();} }
+        await M.setDoc(Firebase.userDoc(),{activeSession:null,updatedAtMs:now()},{merge:true});
+      }
+      State.alarms=[];State.logs=[];State.activeSession=null;Repo.mirror();await Wake.release();UI.renderAll();UI.toast('학습 데이터를 초기화했습니다.','success');
+    }
+
+    function runtimeInfo() {
+      const lines=[`Firebase: ${State.firebaseReady?'연결됨':'연결 안 됨'}`,`현재 네트워크: ${navigator.onLine?'온라인':'오프라인'}`,`알림 권한: ${'Notification'in window?Notification.permission:'미지원'}`,`서비스 워커: ${'serviceWorker'in navigator?'지원':'미지원'}`,`PWA 실행: ${matchMedia('(display-mode: standalone)').matches?'설치 앱':'브라우저'}`,`화면 켜두기: ${'wakeLock'in navigator?'지원':'미지원'}`];
+      UI.confirm('연결·알람 동작 안내',`${lines.join(' · ')}\n\n브라우저 알람은 앱이 열려 있거나 백그라운드에서 살아 있을 때 가장 안정적입니다. 앱을 완전히 종료한 상태의 정확한 예약 알람은 서버 푸시가 추가로 필요합니다.`,'확인');
+    }
+
+    async function handlePostMenu(post) {
+      if(!post)return;
+      if(post.authorId===uid()) { const ok=await UI.confirm('게시물 삭제','이 게시물을 라운지에서 삭제할까요?','삭제');if(ok)await Repo.deletePost(post.id);return; }
+      const report=await UI.confirm('게시물 관리','확인을 누르면 이 게시물을 신고하고 작성자를 이 기기에서 숨깁니다.','신고·숨김');
+      if(report){try{await Repo.reportPost(post);Lounge.mute(post.authorId);UI.toast('신고를 접수했습니다.','success');}catch(e){UI.toast(firebaseErrorMessage(e),'error');}}
+    }
+
+    function bindEvents() {
+      document.addEventListener('pointerdown',()=>AudioAlarm.unlock(),{once:true});
+      document.addEventListener('click',async e=>{
+        const close=e.target.closest('[data-close-modal]'); if(close){UI.closeModal(close.dataset.closeModal);return;}
+        const go=e.target.closest('[data-view-go]'); if(go){UI.navigate(go.dataset.viewGo);return;}
+        const authMode=e.target.closest('[data-auth-mode]'); if(authMode){State.authMode=authMode.dataset.authMode;$$('[data-auth-mode]').forEach(b=>{const on=b===authMode;b.classList.toggle('active',on);b.setAttribute('aria-selected',String(on));});$('#authNameField').hidden=State.authMode!=='signup';$('#authSubmit').textContent=State.authMode==='signup'?'계정 만들기':'로그인';$('#authPassword').autocomplete=State.authMode==='signup'?'new-password':'current-password';return;}
+        const action=e.target.closest('[data-action]')?.dataset.action; if(!action)return;
+        try {
+          switch(action){
+            case 'open-alarm':openAlarmModal();break; case 'edit-alarm':openAlarmModal(e.target.closest('[data-id]').dataset.id);break;
+            case 'delete-alarm-from-modal':{const id=$('#alarmId').value;if(id&&await UI.confirm('알람 삭제','이 알람을 삭제할까요?','삭제')){await Repo.deleteAlarm(id);UI.closeModal('alarmModal');UI.toast('알람을 삭제했습니다.');}}break;
+            case 'quick-start':openStartModal();break; case 'start-from-alarm':openStartModal(State.alarms.find(a=>a.id===e.target.closest('[data-id]').dataset.id));break;
+            case 'toggle-alarm':{const a=State.alarms.find(x=>x.id===e.target.closest('[data-id]').dataset.id);if(a){a.enabled=!a.enabled;if(a.enabled&&a.scheduledAtMs<now()){a.scheduledAtMs=a.repeatDays?.length?nextRepeatedAt(a.timeOfDay,a.repeatDays):now()+5*60000;}await Repo.saveAlarm({...a,updatedAtMs:now()});}}break;
+            case 'toggle-pause':await Session.togglePause();break; case 'open-end':openEndModal();break;
+            case 'discard-session':if(await UI.confirm('세션 취소','현재 세션을 로그 없이 취소할까요?','취소하기')){await Session.discard();UI.closeModal('endModal');}break;
+            case 'request-notification':await Notify.request();break; case 'install-pwa':await PWA.install();break; case 'cycle-theme':Theme.cycle();break;
+            case 'toggle-wakelock':State.wakeEnabled=!State.wakeEnabled;Local.globalSet('wakeEnabled',State.wakeEnabled);if(State.wakeEnabled)await Wake.acquire();else await Wake.release();UI.renderSettings();break;
+            case 'export-logs':Exporter.run();break; case 'clear-study-data':await clearStudyData();break; case 'repair-cache':if(await UI.confirm('PWA 캐시 새로고침','이전 캐시를 지우고 페이지를 다시 불러옵니다.','새로고침'))await PWA.repair();break;
+            case 'open-patchnotes':UI.openModal('patchModal');break; case 'show-runtime-info':runtimeInfo();break; case 'open-profile':openProfileModal();break; case 'signout':if(await UI.confirm('로그아웃','현재 계정에서 로그아웃할까요?','로그아웃'))await Auth.signOut();break;
+            case 'delete-log':if(await UI.confirm('로그 삭제','이 학습 로그를 삭제할까요?','삭제'))await Repo.deleteLog(e.target.closest('[data-id]').dataset.id);break;
+            case 'toggle-like':{const p=State.posts.find(x=>x.id===e.target.closest('[data-id]').dataset.id);if(p)await Repo.toggleLike(p);}break;
+            case 'open-comments':await Lounge.openComments(e.target.closest('[data-id]').dataset.id);break;
+            case 'post-menu':await handlePostMenu(State.posts.find(x=>x.id===e.target.closest('[data-id]').dataset.id));break;
+            case 'delete-post':{const id=e.target.closest('[data-id]').dataset.id;if(await UI.confirm('게시물 삭제','이 게시물을 삭제할까요?','삭제'))await Repo.deletePost(id);}break;
+            case 'delete-comment':if(State.currentCommentsPostId)await Repo.deleteComment(State.currentCommentsPostId,e.target.closest('[data-id]').dataset.id);break;
+            case 'refresh-lounge':UI.renderLounge();UI.toast('라운지 피드를 확인했습니다.');break;
+            case 'ring-start':{const a=State.currentRing?.alarm;AlarmEngine.stopRing();openStartModal(a);}break; case 'ring-snooze':await AlarmEngine.snooze();break; case 'ring-dismiss':AlarmEngine.stopRing();break;
+            case 'ring-end-session':AlarmEngine.stopRing();openEndModal();break; case 'ring-continue':AlarmEngine.stopRing();UI.toast('세션을 계속 진행합니다.');break;
+          }
+        } catch(err){console.error(err);UI.toast(firebaseErrorMessage(err),'error');}
+      });
+      $$('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m&&m.id!=='confirmModal')UI.closeModal(m.id);}));
+      $('#confirmCancel').addEventListener('click',()=>{UI.closeModal('confirmModal');State.confirmResolver?.(false);State.confirmResolver=null;});
+      $('#confirmOk').addEventListener('click',()=>{UI.closeModal('confirmModal');State.confirmResolver?.(true);State.confirmResolver=null;});
+
+      $('#authForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('#authSubmit');UI.setBusy(btn,true,State.authMode==='signup'?'계정 만드는 중…':'로그인 중…');try{await Auth.submit();}catch(err){UI.toast(firebaseErrorMessage(err),'error');}finally{UI.setBusy(btn,false);}});
+      $('#resetPasswordBtn').addEventListener('click',async()=>{try{await Auth.resetPassword();}catch(err){UI.toast(firebaseErrorMessage(err),'error');}});
+      $('#offlineEnterBtn').addEventListener('click',async()=>{const cached=Local.globalGet('cachedUser');if(cached)await DataSync.enterUser(cached,{offline:true});});
+
+      $('#alarmForm').addEventListener('submit',async e=>{e.preventDefault();const baseMs=new Date($('#alarmDateTime').value).getTime();if(!Number.isFinite(baseMs))return UI.toast('알림 시각을 확인해 주세요.','error');const repeatDays=$$('input[name="repeatDay"]:checked').map(x=>Number(x.value));const timeOfDay=$('#alarmDateTime').value.slice(11,16);let scheduledAtMs=repeatDays.length?nextRepeatedAt(timeOfDay,repeatDays,Math.max(now(),baseMs-1000)):baseMs;if(!repeatDays.length&&scheduledAtMs<=now()+5000)return UI.toast('현재보다 뒤의 시각을 선택해 주세요.','error');const id=$('#alarmId').value||makeId('alarm');const existing=State.alarms.find(a=>a.id===id);const alarm={...existing,id,label:safeText($('#alarmLabel').value).trim()||'공부 시작',defaultSubject:safeText($('#alarmSubject').value).trim(),defaultStartProblem:safeText($('#alarmStartProblem').value).trim(),targetMinutes:Number($('#alarmTargetMinutes').value)||60,note:safeText($('#alarmNote').value).trim(),repeatDays,timeOfDay,scheduledAtMs,enabled:existing?.enabled??true,createdAtMs:existing?.createdAtMs||now(),updatedAtMs:now()};try{await Repo.saveAlarm(alarm);UI.closeModal('alarmModal');UI.toast('알람을 저장했습니다.','success');}catch(err){UI.toast(firebaseErrorMessage(err),'error');}});
+      $('#startForm').addEventListener('submit',async e=>{e.preventDefault();try{await Session.start({alarmId:$('#startAlarmId').value||null,subject:$('#startSubject').value,startProblem:$('#startProblem').value,targetMinutes:$('#startTargetMinutes').value,goalCount:$('#startGoal').value,startNote:$('#startNote').value});UI.closeModal('startModal');UI.navigate('home');}catch(err){UI.toast(firebaseErrorMessage(err),'error');}});
+      $('#endForm').addEventListener('submit',async e=>{e.preventDefault();try{await Session.finish({endProblem:$('#endProblem').value,solvedCount:$('#endSolved').value,correctCount:$('#endCorrect').value,reflection:$('#endReflection').value});UI.closeModal('endModal');UI.navigate('logs');}catch(err){UI.toast(firebaseErrorMessage(err),'error');}});
+      $('#profileForm').addEventListener('submit',async e=>{e.preventDefault();const displayName=safeText($('#profileName').value).trim();const handle=normalizeHandle($('#profileHandle').value);const bio=safeText($('#profileBio').value).trim();if(displayName.length<2)return UI.toast('표시 이름을 2자 이상 입력해 주세요.','error');if(!/^[a-z0-9_.]{3,20}$/.test(handle))return UI.toast('아이디는 영문 소문자·숫자·_·. 조합 3~20자로 입력해 주세요.','error');try{if(State.firebaseReady&&!State.offlineIdentity){const previous=State.profile?.handle||'';await Firebase.mods.runTransaction(Firebase.db,async tx=>{const target=Firebase.handleDoc(handle),snap=await tx.get(target);let oldRef=null,oldSnap=null;if(previous&&previous!==handle){oldRef=Firebase.handleDoc(previous);oldSnap=await tx.get(oldRef);}if(snap.exists()&&snap.data().uid!==uid())throw new Error('이미 사용 중인 아이디입니다.');tx.set(target,{handle,uid:uid(),createdAtMs:snap.exists()?snap.data().createdAtMs:now(),updatedAtMs:now()},{merge:true});tx.set(Firebase.userDoc(),{uid:uid(),displayName,handle,bio,updatedAtMs:now()},{merge:true});if(oldRef&&oldSnap?.exists()&&oldSnap.data().uid===uid())tx.delete(oldRef);});await Firebase.mods.updateProfile(Firebase.auth.currentUser,{displayName});State.profile={...(State.profile||{}),uid:uid(),displayName,handle,bio,updatedAtMs:now()};Local.set('profile',State.profile);UI.renderAll();}else await Repo.saveProfile({displayName,handle,bio});UI.closeModal('profileModal');UI.toast('프로필을 저장했습니다.','success');}catch(err){UI.toast(firebaseErrorMessage(err),'error');}});
+      $('#postForm').addEventListener('submit',async e=>{e.preventDefault();const content=safeText($('#postContent').value).trim();if(!content)return;if(containsPrivateInfo(content))return UI.toast('공개 라운지에는 연락처·이메일·링크를 올릴 수 없습니다.','error');if(now()-State.lastPostAt<5000)return UI.toast('게시물은 잠시 간격을 두고 올려주세요.','error');const p=State.profile||{};const post={id:makeId('post'),authorId:uid(),authorName:p.displayName||State.user?.displayName||'사용자',authorHandle:p.handle||'focus',content,subject:$('#postSubject').value,likedBy:[],likeCount:0,createdAtMs:now(),updatedAtMs:now()};try{await Repo.createPost(post);State.lastPostAt=now();$('#postContent').value='';$('#postCharCount').textContent='0/500';UI.toast('라운지에 게시했습니다.','success');}catch(err){UI.toast(firebaseErrorMessage(err),'error');}});
+      $('#commentForm').addEventListener('submit',async e=>{e.preventDefault();const content=safeText($('#commentInput').value).trim();if(!content||!State.currentCommentsPostId)return;if(containsPrivateInfo(content))return UI.toast('댓글에는 연락처·이메일·링크를 올릴 수 없습니다.','error');const p=State.profile||{};const c={id:makeId('comment'),authorId:uid(),authorName:p.displayName||State.user?.displayName||'사용자',authorHandle:p.handle||'focus',content,createdAtMs:now()};try{await Repo.addComment(State.currentCommentsPostId,c);$('#commentInput').value='';}catch(err){UI.toast(firebaseErrorMessage(err),'error');}});
+      $('#postContent').addEventListener('input',e=>$('#postCharCount').textContent=`${e.target.value.length}/500`);
+      $('#logSearch').addEventListener('input',()=>UI.renderLogs()); $('#logSubjectFilter').addEventListener('change',()=>UI.renderLogs());
+      window.addEventListener('online',()=>{UI.renderAll();UI.toast('온라인 연결이 복구되었습니다.','success');}); window.addEventListener('offline',()=>{UI.renderAll();UI.toast('오프라인입니다. 최근 데이터는 기기에 저장됩니다.');});
+      document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){AlarmEngine.check();Wake.acquire();}});
+    }
+
+    async function boot() {
+      Theme.init(); bindEvents(); await PWA.init();
+      State.tickInterval=setInterval(()=>UI.updateSessionClock(),1000); State.alarmCheckInterval=setInterval(()=>AlarmEngine.check(),1000);
+      await Auth.start(); await AlarmEngine.check(); $('#splash').classList.add('done'); setTimeout(()=>$('#splash').remove(),350);
+    }
+
+    boot().catch(err=>{console.error(err);$('#splash').classList.add('done');UI.showAuth();UI.toast('앱 초기화 중 오류가 발생했습니다.','error');});
+  </script>
+</body>
+</html>
