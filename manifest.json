@@ -1,21 +1,55 @@
 {
-  "name": "Adventure Life Assist",
-  "short_name": "AdvLife",
-  "start_url": "/AdventureLifeAssist/index.html",
-  "scope": "/AdventureLifeAssist/",
+  "id": "./",
+  "name": "FocusBell - Study Alarm & Log",
+  "short_name": "FocusBell",
+  "description": "알람으로 시작하고 학습 기록으로 끝나는 공부 루틴 PWA",
+  "lang": "ko-KR",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f5f7",
+  "theme_color": "#ffffff",
+  "categories": [
+    "education",
+    "productivity"
+  ],
   "icons": [
     {
-      "src": "/AdventureLifeAssist/icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/AdventureLifeAssist/icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "바로 집중 시작",
+      "short_name": "집중 시작",
+      "url": "./index.html#quick-start",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "알람 보기",
+      "short_name": "알람",
+      "url": "./index.html#alarms",
+      "icons": [
+        {
+          "src": "./icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

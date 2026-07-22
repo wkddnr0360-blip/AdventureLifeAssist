@@ -1,0 +1,336 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function validHandle(value) {
+      return value is string
+        && value.size() >= 3
+        && value.size() <= 20
+        && value.matches('^[a-z0-9_.]+$');
+    }
+
+    function validActiveSession(session) {
+      return session == null || (
+        session is map
+        && session.keys().hasOnly([
+          'id', 'subject', 'startProblem', 'targetMinutes', 'goalCount',
+          'startNote', 'alarmId', 'startedAtMs', 'pausedAtMs',
+          'pausedTotalMs', 'targetNotified', 'createdAtMs'
+        ])
+        && session.id is string
+        && session.id.size() >= 1
+        && session.id.size() <= 100
+        && session.subject is string
+        && session.subject.size() >= 1
+        && session.subject.size() <= 30
+        && session.startProblem is string
+        && session.startProblem.size() >= 1
+        && session.startProblem.size() <= 30
+        && session.targetMinutes is int
+        && session.targetMinutes >= 1
+        && session.targetMinutes <= 240
+        && (session.goalCount == null || (
+          session.goalCount is int
+          && session.goalCount >= 1
+          && session.goalCount <= 9999
+        ))
+        && session.startNote is string
+        && session.startNote.size() <= 160
+        && (session.alarmId == null || (
+          session.alarmId is string
+          && session.alarmId.size() <= 100
+        ))
+        && session.startedAtMs is int
+        && session.startedAtMs > 0
+        && (session.pausedAtMs == null || session.pausedAtMs is int)
+        && session.pausedTotalMs is int
+        && session.pausedTotalMs >= 0
+        && session.targetNotified is bool
+        && session.createdAtMs is int
+        && session.createdAtMs > 0
+      );
+    }
+
+    function validUser(userId) {
+      return request.resource.data.keys().hasOnly([
+          'uid', 'email', 'displayName', 'handle', 'bio',
+          'createdAtMs', 'updatedAtMs', 'activeSession'
+        ])
+        && request.resource.data.uid == userId
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 320
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() >= 1
+        && request.resource.data.displayName.size() <= 80
+        && validHandle(request.resource.data.handle)
+        && request.resource.data.bio is string
+        && request.resource.data.bio.size() <= 100
+        && request.resource.data.createdAtMs is int
+        && request.resource.data.createdAtMs > 0
+        && request.resource.data.updatedAtMs is int
+        && request.resource.data.updatedAtMs > 0
+        && validActiveSession(request.resource.data.activeSession)
+        && getAfter(/databases/$(database)/documents/apps/focusbell_v1/handles/$(request.resource.data.handle)).data.uid == userId;
+    }
+
+    function validAlarm(alarmId) {
+      return request.resource.data.keys().hasOnly([
+          'id', 'label', 'defaultSubject', 'defaultStartProblem',
+          'targetMinutes', 'note', 'repeatDays', 'timeOfDay',
+          'scheduledAtMs', 'enabled', 'createdAtMs', 'updatedAtMs',
+          'lastTriggeredAtMs', 'missedAtMs'
+        ])
+        && request.resource.data.id == alarmId
+        && request.resource.data.label is string
+        && request.resource.data.label.size() >= 1
+        && request.resource.data.label.size() <= 40
+        && request.resource.data.defaultSubject is string
+        && request.resource.data.defaultSubject.size() <= 30
+        && request.resource.data.defaultStartProblem is string
+        && request.resource.data.defaultStartProblem.size() <= 30
+        && request.resource.data.targetMinutes is int
+        && request.resource.data.targetMinutes >= 1
+        && request.resource.data.targetMinutes <= 240
+        && request.resource.data.note is string
+        && request.resource.data.note.size() <= 160
+        && request.resource.data.repeatDays is list
+        && request.resource.data.repeatDays.size() <= 7
+        && request.resource.data.repeatDays.toSet().size() == request.resource.data.repeatDays.size()
+        && request.resource.data.repeatDays.hasOnly([0, 1, 2, 3, 4, 5, 6])
+        && request.resource.data.timeOfDay is string
+        && request.resource.data.timeOfDay.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')
+        && request.resource.data.scheduledAtMs is int
+        && request.resource.data.scheduledAtMs > 0
+        && request.resource.data.enabled is bool
+        && request.resource.data.createdAtMs is int
+        && request.resource.data.createdAtMs > 0
+        && request.resource.data.updatedAtMs is int
+        && request.resource.data.updatedAtMs > 0
+        && (!('lastTriggeredAtMs' in request.resource.data)
+          || request.resource.data.lastTriggeredAtMs is int)
+        && (!('missedAtMs' in request.resource.data)
+          || request.resource.data.missedAtMs is int);
+    }
+
+    function validLog(logId) {
+      return request.resource.data.keys().hasOnly([
+          'id', 'subject', 'startProblem', 'endProblem', 'durationSec',
+          'targetMinutes', 'goalCount', 'solvedCount', 'correctCount',
+          'startNote', 'reflection', 'startedAtMs', 'endedAtMs',
+          'status', 'createdAtMs'
+        ])
+        && request.resource.data.id == logId
+        && request.resource.data.subject is string
+        && request.resource.data.subject.size() >= 1
+        && request.resource.data.subject.size() <= 30
+        && request.resource.data.startProblem is string
+        && request.resource.data.startProblem.size() >= 1
+        && request.resource.data.startProblem.size() <= 30
+        && request.resource.data.endProblem is string
+        && request.resource.data.endProblem.size() >= 1
+        && request.resource.data.endProblem.size() <= 30
+        && request.resource.data.durationSec is int
+        && request.resource.data.durationSec >= 0
+        && request.resource.data.durationSec <= 2678400
+        && request.resource.data.targetMinutes is int
+        && request.resource.data.targetMinutes >= 1
+        && request.resource.data.targetMinutes <= 240
+        && (request.resource.data.goalCount == null || (
+          request.resource.data.goalCount is int
+          && request.resource.data.goalCount >= 1
+          && request.resource.data.goalCount <= 9999
+        ))
+        && request.resource.data.solvedCount is int
+        && request.resource.data.solvedCount >= 0
+        && request.resource.data.solvedCount <= 99999
+        && (request.resource.data.correctCount == null || (
+          request.resource.data.correctCount is int
+          && request.resource.data.correctCount >= 0
+          && request.resource.data.correctCount <= request.resource.data.solvedCount
+        ))
+        && request.resource.data.startNote is string
+        && request.resource.data.startNote.size() <= 160
+        && request.resource.data.reflection is string
+        && request.resource.data.reflection.size() <= 500
+        && request.resource.data.startedAtMs is int
+        && request.resource.data.startedAtMs > 0
+        && request.resource.data.endedAtMs is int
+        && request.resource.data.endedAtMs >= request.resource.data.startedAtMs
+        && request.resource.data.status == 'completed'
+        && request.resource.data.createdAtMs is int
+        && request.resource.data.createdAtMs > 0;
+    }
+
+    function currentProfile() {
+      return get(/databases/$(database)/documents/apps/focusbell_v1/users/$(request.auth.uid)).data;
+    }
+
+    function validPublicAuthor(data) {
+      return data.authorId == request.auth.uid
+        && data.authorName == currentProfile().displayName
+        && data.authorHandle == currentProfile().handle;
+    }
+
+    function validPostCreate(postId) {
+      return request.resource.data.keys().hasOnly([
+          'id', 'authorId', 'authorName', 'authorHandle', 'content',
+          'subject', 'likedBy', 'likeCount', 'createdAtMs', 'updatedAtMs'
+        ])
+        && request.resource.data.id == postId
+        && validPublicAuthor(request.resource.data)
+        && request.resource.data.authorName is string
+        && request.resource.data.authorName.size() >= 1
+        && request.resource.data.authorName.size() <= 80
+        && validHandle(request.resource.data.authorHandle)
+        && request.resource.data.content is string
+        && request.resource.data.content.size() >= 1
+        && request.resource.data.content.size() <= 500
+        && request.resource.data.subject is string
+        && request.resource.data.subject.size() <= 30
+        && request.resource.data.likedBy is list
+        && request.resource.data.likedBy.size() == 0
+        && request.resource.data.likeCount == 0
+        && request.resource.data.createdAtMs is int
+        && request.resource.data.createdAtMs > 0
+        && request.resource.data.updatedAtMs is int
+        && request.resource.data.updatedAtMs > 0;
+    }
+
+    function validLikeUpdate() {
+      let before = resource.data.likedBy;
+      let after = request.resource.data.likedBy;
+      let adding = !(request.auth.uid in before)
+        && request.auth.uid in after
+        && after.size() == before.size() + 1
+        && after.hasAll(before);
+      let removing = request.auth.uid in before
+        && !(request.auth.uid in after)
+        && before.size() == after.size() + 1
+        && before.hasAll(after);
+      return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['likedBy', 'likeCount', 'updatedAtMs'])
+        && after is list
+        && after.size() <= 500
+        && after.toSet().size() == after.size()
+        && request.resource.data.likeCount is int
+        && request.resource.data.likeCount == after.size()
+        && request.resource.data.updatedAtMs is int
+        && request.resource.data.updatedAtMs >= resource.data.updatedAtMs
+        && (adding || removing);
+    }
+
+    function validCommentCreate(commentId) {
+      return request.resource.data.keys().hasOnly([
+          'id', 'authorId', 'authorName', 'authorHandle',
+          'content', 'createdAtMs'
+        ])
+        && request.resource.data.id == commentId
+        && validPublicAuthor(request.resource.data)
+        && request.resource.data.authorName is string
+        && request.resource.data.authorName.size() >= 1
+        && request.resource.data.authorName.size() <= 80
+        && validHandle(request.resource.data.authorHandle)
+        && request.resource.data.content is string
+        && request.resource.data.content.size() >= 1
+        && request.resource.data.content.size() <= 300
+        && request.resource.data.createdAtMs is int
+        && request.resource.data.createdAtMs > 0;
+    }
+
+    match /apps/focusbell_v1 {
+      allow read, write: if false;
+
+      match /handles/{handleId} {
+        allow read: if signedIn();
+        allow create, update: if signedIn()
+          && validHandle(handleId)
+          && request.resource.data.keys().hasOnly([
+            'handle', 'uid', 'createdAtMs', 'updatedAtMs'
+          ])
+          && request.resource.data.handle == handleId
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.createdAtMs is int
+          && request.resource.data.createdAtMs > 0
+          && request.resource.data.updatedAtMs is int
+          && request.resource.data.updatedAtMs > 0
+          && getAfter(/databases/$(database)/documents/apps/focusbell_v1/users/$(request.auth.uid)).data.handle == handleId
+          && (!exists(/databases/$(database)/documents/apps/focusbell_v1/handles/$(handleId))
+            || resource.data.uid == request.auth.uid);
+        allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      }
+
+      match /users/{userId} {
+        allow read: if isSelf(userId);
+        allow create, update: if isSelf(userId) && validUser(userId);
+        allow delete: if isSelf(userId);
+
+        match /alarms/{alarmId} {
+          allow read, delete: if isSelf(userId);
+          allow create, update: if isSelf(userId) && validAlarm(alarmId);
+        }
+
+        match /logs/{logId} {
+          allow read, delete: if isSelf(userId);
+          allow create: if isSelf(userId) && validLog(logId);
+          allow update: if false;
+        }
+      }
+
+      match /posts/{postId} {
+        allow read: if signedIn();
+        allow create: if signedIn() && validPostCreate(postId);
+        allow update: if signedIn() && validLikeUpdate();
+        allow delete: if signedIn() && resource.data.authorId == request.auth.uid;
+
+        match /comments/{commentId} {
+          allow read: if signedIn();
+          allow create: if signedIn()
+            && exists(/databases/$(database)/documents/apps/focusbell_v1/posts/$(postId))
+            && validCommentCreate(commentId);
+          allow update: if false;
+          allow delete: if signedIn() && (
+            resource.data.authorId == request.auth.uid
+            || get(/databases/$(database)/documents/apps/focusbell_v1/posts/$(postId)).data.authorId == request.auth.uid
+          );
+        }
+      }
+
+      match /reports/{reportId} {
+        allow create: if signedIn()
+          && request.resource.data.keys().hasOnly([
+            'id', 'postId', 'postAuthorId', 'reporterId',
+            'reason', 'createdAtMs', 'status'
+          ])
+          && request.resource.data.id == reportId
+          && request.resource.data.reporterId == request.auth.uid
+          && request.resource.data.postId is string
+          && request.resource.data.postId.size() >= 1
+          && request.resource.data.postAuthorId is string
+          && request.resource.data.postAuthorId == get(
+            /databases/$(database)/documents/apps/focusbell_v1/posts/$(request.resource.data.postId)
+          ).data.authorId
+          && request.resource.data.reason is string
+          && request.resource.data.reason.size() >= 1
+          && request.resource.data.reason.size() <= 100
+          && request.resource.data.createdAtMs is int
+          && request.resource.data.createdAtMs > 0
+          && request.resource.data.status == 'open';
+        allow read, update, delete: if false;
+      }
+    }
+
+    // 새 앱 영역 외의 데이터는 이 규칙 파일만 단독 배포할 경우 차단됩니다.
+    // 같은 Firebase 프로젝트에서 다른 앱을 운영 중이면 해당 앱 규칙과 병합하세요.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,60 +1,85 @@
-const CACHE_NAME = 'adv-life-assist-v2';
-
-// 사진의 구조에 맞춘 캐싱할 파일 목록 (GitHub Pages 경로 적용)
-const urlsToCache = [
-  '/AdventureLifeAssist/',
-  '/AdventureLifeAssist/index.html',
-  '/AdventureLifeAssist/styles/main.css',
-  '/AdventureLifeAssist/js/appState.js',
-  '/AdventureLifeAssist/js/authCtrl.js',
-  '/AdventureLifeAssist/js/dataCtrl.js',
-  '/AdventureLifeAssist/js/firebaseConfig.js',
-  '/AdventureLifeAssist/js/main.js',
-  '/AdventureLifeAssist/js/mapCtrl.js',
-  '/AdventureLifeAssist/js/tavernCtrl.js',
-  '/AdventureLifeAssist/js/uiCtrl.js',
-  '/AdventureLifeAssist/js/utils.js',
-  '/AdventureLifeAssist/icon-192.png',
-  '/AdventureLifeAssist/icon-512.png',
-  '/AdventureLifeAssist/manifest.json'
+const VERSION = 'focusbell-v1.0.0';
+const SHELL_CACHE = `${VERSION}-shell`;
+const RUNTIME_CACHE = `${VERSION}-runtime`;
+const APP_SCOPE = new URL('./', self.location.href).pathname;
+const SHELL = [
+  APP_SCOPE,
+  `${APP_SCOPE}index.html`,
+  `${APP_SCOPE}manifest.json`,
+  `${APP_SCOPE}icon-192.png`,
+  `${APP_SCOPE}icon-512.png`
 ];
 
-// 서비스 워커 설치 및 파일 캐싱
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(SHELL_CACHE)
+      .then(cache => cache.addAll(SHELL))
+      .then(() => self.skipWaiting())
   );
 });
 
-// 네트워크 요청 가로채기 (캐시에 있으면 캐시 반환, 없으면 네트워크 요청)
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
-  );
-});
-
-// 새로운 버전 업데이트 시 이전 캐시 삭제
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            return caches.delete(cacheName);
-          }
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(key => (key.startsWith('focusbell-') || key.startsWith('adv-life-assist')) && ![SHELL_CACHE, RUNTIME_CACHE].includes(key)).map(key => caches.delete(key))))
+      .then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          const copy = response.clone();
+          caches.open(SHELL_CACHE).then(cache => cache.put(`${APP_SCOPE}index.html`, copy));
+          return response;
         })
-      );
+        .catch(() => caches.match(`${APP_SCOPE}index.html`))
+    );
+    return;
+  }
+
+  if (url.origin === self.location.origin) {
+    event.respondWith(
+      caches.match(request).then(cached => cached || fetch(request).then(response => {
+        if (response.ok) caches.open(RUNTIME_CACHE).then(cache => cache.put(request, response.clone()));
+        return response;
+      }))
+    );
+    return;
+  }
+
+  if (url.hostname === 'www.gstatic.com' && url.pathname.includes('/firebasejs/')) {
+    event.respondWith(
+      caches.open(RUNTIME_CACHE).then(async cache => {
+        const cached = await cache.match(request);
+        const network = fetch(request).then(response => {
+          if (response.ok || response.type === 'opaque') cache.put(request, response.clone());
+          return response;
+        }).catch(() => cached);
+        return cached || network;
+      })
+    );
+  }
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const target = event.notification.data?.url || `${APP_SCOPE}index.html`;
+  event.waitUntil(
+    clients.matchAll({type: 'window', includeUncontrolled: true}).then(windowClients => {
+      for (const client of windowClients) {
+        if ('focus' in client) {
+          client.navigate(target).catch(() => {});
+          return client.focus();
+        }
+      }
+      return clients.openWindow ? clients.openWindow(target) : undefined;
     })
   );
 });
