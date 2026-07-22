@@ -1,0 +1,15 @@
+{
+  "app_visible": true,
+  "calendar_visible": true,
+  "selected_day": "할 일\n추가\n이 날짜의 할 일이 없습니다.\n메모\n추가\n이 날짜의 메모가 없습니다.\n학습 로그\n1세션\n수학 · 1 → 20\n1시간 · 20문제 · 21:21",
+  "community_visible": true,
+  "game_visible": true,
+  "game_tiles": 16,
+  "errors": [],
+  "console": [
+    [
+      "error",
+      "Error: Firebase 연결 시간 초과\n    at <anonymous>:491:94"
+    ]
+  ]
+}

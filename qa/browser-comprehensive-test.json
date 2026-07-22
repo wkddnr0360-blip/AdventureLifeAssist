@@ -1,0 +1,23 @@
+{
+  "checks": {
+    "app_visible": true,
+    "no_horizontal_overflow_initial": true,
+    "goals_saved": true,
+    "plan_saved": true,
+    "memo_saved": true,
+    "plan_toggle": true,
+    "session_started": true,
+    "session_finished": true,
+    "range_autocalculated": true,
+    "tutorial_open": true,
+    "tutorial_completed": true,
+    "game_completed": true,
+    "game_result": true,
+    "no_horizontal_overflow_final": true,
+    "desktop_no_horizontal_overflow": true
+  },
+  "all_checks_passed": true,
+  "page_errors": [],
+  "unexpected_console_errors": [],
+  "console_tail": []
+}

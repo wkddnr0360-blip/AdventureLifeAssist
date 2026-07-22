@@ -1,0 +1,12 @@
+{
+  "live_has_student": true,
+  "ranking_has_users": true,
+  "friend_request_visible": true,
+  "friend_visible": true,
+  "conversation_visible": true,
+  "admin_row_visible": true,
+  "admin_kpis": true,
+  "admin_user_data": true,
+  "errors": [],
+  "all_checks_passed": true
+}
